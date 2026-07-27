@@ -1,0 +1,31 @@
+import { z } from "zod";
+
+export const appointmentRequestSchema = z.object({
+  categorySlug: z.string().min(1, "La catégorie est requise."),
+  firstName: z.string().trim().min(2, "Le prénom est requis."),
+  lastName: z.string().trim().min(2, "Le nom est requis."),
+  email: z.string().trim().email("Veuillez saisir un email valide."),
+  phone: z.string().trim().min(8, "Le téléphone est requis."),
+  message: z.string().trim().max(800, "Le message est trop long.").optional().or(z.literal("")),
+  startsAt: z.string().trim().min(10, "Le créneau sélectionné est invalide."),
+});
+
+export const loginSchema = z.object({
+  email: z.string().trim().email("Veuillez saisir un email valide."),
+  password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères."),
+});
+
+export const categoryAdminSchema = z.object({
+  title: z.string().trim().min(3, "Le titre est requis."),
+  slug: z.string().trim().min(3, "Le lien est requis."),
+  durationMinutes: z.coerce.number().int().positive("La durée doit être positive."),
+  appointmentMode: z.enum(["telephone", "physique", "visioconference"]),
+  description: z.string().trim().min(10, "La description est requise."),
+  isOnline: z.boolean(),
+  customMessage: z.string().trim().max(500).optional().or(z.literal("")),
+});
+
+export const settingsSchema = z.object({
+  maintenanceMode: z.boolean(),
+  maintenanceMessage: z.string().trim().min(8, "Le message de maintenance est requis."),
+});
