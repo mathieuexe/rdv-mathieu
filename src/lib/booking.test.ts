@@ -1,14 +1,54 @@
 import { describe, expect, it } from "vitest";
 
 import { buildBookingSlots, groupSlotsByDay } from "./booking";
-import { demoAppointments, demoCategories, demoSiteSettings } from "./demo-data";
+import type { AppointmentCategory, AppointmentRecord, SiteSettings } from "@/types/domain";
+
+const testSiteSettings: SiteSettings = {
+  maintenanceMode: false,
+  maintenanceMessage: "",
+  globalBlackoutPeriods: [],
+};
+
+const testCategories: AppointmentCategory[] = [
+  {
+    id: "cat-consultation",
+    slug: "consultation",
+    title: "Consultation",
+    description: "Consultation standard",
+    durationMinutes: 30,
+    appointmentMode: "visioconference",
+    isOnline: true,
+    customMessage: "",
+    availabilityRules: [
+      { weekday: "lundi", windows: [{ start: "09:00", end: "12:00" }] },
+      { weekday: "mardi", windows: [{ start: "09:00", end: "12:00" }] },
+    ],
+    blackoutPeriods: [],
+  },
+];
+
+const testAppointments: AppointmentRecord[] = [
+  {
+    id: "app-1",
+    categoryId: "cat-consultation",
+    firstName: "Marie",
+    lastName: "Dupont",
+    email: "marie@example.com",
+    phone: "0600000000",
+    startsAt: new Date("2026-08-03T09:00:00.000Z").toISOString(),
+    endsAt: new Date("2026-08-03T09:30:00.000Z").toISOString(),
+    status: "en_attente",
+    origin: "utilisateur",
+    createdAt: new Date("2026-08-01T09:00:00.000Z").toISOString(),
+  },
+];
 
 describe("buildBookingSlots", () => {
   it("retourne des créneaux pour une catégorie en ligne", () => {
     const slots = buildBookingSlots({
-      category: demoCategories[0],
-      siteSettings: demoSiteSettings,
-      appointments: demoAppointments,
+      category: testCategories[0],
+      siteSettings: testSiteSettings,
+      appointments: testAppointments,
       daysToShow: 10,
     });
 
@@ -17,9 +57,9 @@ describe("buildBookingSlots", () => {
 
   it("bloque les créneaux qui entrent en conflit avec une demande existante", () => {
     const slots = buildBookingSlots({
-      category: demoCategories[0],
-      siteSettings: demoSiteSettings,
-      appointments: demoAppointments,
+      category: testCategories[0],
+      siteSettings: testSiteSettings,
+      appointments: testAppointments,
       daysToShow: 10,
     });
 
@@ -28,9 +68,9 @@ describe("buildBookingSlots", () => {
 
   it("regroupe les créneaux par jour ISO", () => {
     const slots = buildBookingSlots({
-      category: demoCategories[0],
-      siteSettings: demoSiteSettings,
-      appointments: demoAppointments,
+      category: testCategories[0],
+      siteSettings: testSiteSettings,
+      appointments: testAppointments,
       daysToShow: 5,
     });
 

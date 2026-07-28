@@ -32,11 +32,6 @@ export default function CookiePolicyPage() {
               reconnaitre un utilisateur connecte, de conserver sa session apres actualisation de page et d&apos;eviter de se
               reconnecter a chaque visite tant que la session est valide.
             </p>
-            <p>
-              En environnement de demonstration administrateur, un cookie technique temporaire peut egalement etre utilise
-              pour maintenir l&apos;acces au back-office de demonstration. Ce cookie sert uniquement au fonctionnement de cette
-              fonctionnalite.
-            </p>
           </section>
 
           <section className="space-y-3">

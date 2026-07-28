@@ -14,5 +14,5 @@ export default async function AdminDashboardLayout({
     redirect("/admin/login");
   }
 
-  return <AdminShell isDemoMode={session.isDemoMode}>{children}</AdminShell>;
+  return <AdminShell>{children}</AdminShell>;
 }

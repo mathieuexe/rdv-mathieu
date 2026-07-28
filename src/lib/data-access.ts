@@ -2,7 +2,6 @@ import { randomUUID } from "node:crypto";
 
 import { addMinutes, parseISO } from "date-fns";
 
-import { demoAppointments, demoCategories, demoSiteSettings } from "@/lib/demo-data";
 import { buildBookingSlots } from "@/lib/booking";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import type {
@@ -13,6 +12,12 @@ import type {
   DashboardMetrics,
   SiteSettings,
 } from "@/types/domain";
+
+const defaultSiteSettings: SiteSettings = {
+  maintenanceMode: false,
+  maintenanceMessage: "",
+  globalBlackoutPeriods: [],
+};
 
 function mapBlackoutPeriod(row: Record<string, unknown>): BlackoutPeriod {
   return {
@@ -102,7 +107,7 @@ export async function getSiteSettings() {
         maintenanceMessage:
           typeof settingsRow.maintenance_message === "string"
             ? settingsRow.maintenance_message
-            : demoSiteSettings.maintenanceMessage,
+            : "",
         globalBlackoutPeriods: (blackoutRows ?? []).map((row) => mapBlackoutPeriod(row as Record<string, unknown>)),
       };
 
@@ -110,7 +115,7 @@ export async function getSiteSettings() {
     }
   }
 
-  return demoSiteSettings;
+  return defaultSiteSettings;
 }
 
 export async function getCategories() {
@@ -134,7 +139,7 @@ export async function getCategories() {
     }
   }
 
-  return demoCategories;
+  return [];
 }
 
 export async function getPublicCategoryBySlug(slug: string) {
@@ -156,7 +161,7 @@ export async function getPublicCategoryBySlug(slug: string) {
     }
   }
 
-  return demoCategories.find((category) => category.slug === slug) ?? null;
+  return null;
 }
 
 export async function getCategoryById(categoryId: string) {
@@ -178,7 +183,7 @@ export async function getCategoryById(categoryId: string) {
     }
   }
 
-  return demoCategories.find((category) => category.id === categoryId) ?? null;
+  return null;
 }
 
 export async function getAppointments() {
@@ -192,7 +197,7 @@ export async function getAppointments() {
     }
   }
 
-  return demoAppointments;
+  return [];
 }
 
 export async function getAppointmentById(appointmentId: string) {
@@ -206,7 +211,7 @@ export async function getAppointmentById(appointmentId: string) {
     }
   }
 
-  return demoAppointments.find((appointment) => appointment.id === appointmentId) ?? null;
+  return null;
 }
 
 export async function getDashboardMetrics(): Promise<DashboardMetrics> {
@@ -298,10 +303,7 @@ export async function createAppointmentRequest(payload: AppointmentRequestPayloa
     }
   }
 
-  return {
-    appointment: record,
-    category,
-  };
+  throw new Error("L'enregistrement du rendez-vous est indisponible tant que Supabase n'est pas configure.");
 }
 
 export async function getAppointmentsView() {
@@ -335,12 +337,7 @@ export async function getUserAppointmentsByEmail(email: string) {
     });
   }
 
-  return demoAppointments
-    .filter((appointment) => appointment.email.trim().toLowerCase() === normalizedEmail)
-    .map((appointment) => ({
-      ...appointment,
-      category: categories.find((item) => item.id === appointment.categoryId) as AppointmentCategory | undefined,
-    }));
+  return [];
 }
 
 export async function cancelUserAppointmentById(appointmentId: string, email: string, cancelReason: string) {
@@ -368,19 +365,7 @@ export async function cancelUserAppointmentById(appointmentId: string, email: st
     return null;
   }
 
-  const appointment = demoAppointments.find(
-    (item) => item.id === appointmentId && item.email.trim().toLowerCase() === normalizedEmail,
-  );
-
-  if (!appointment || !["en_attente", "accepte"].includes(appointment.status)) {
-    return null;
-  }
-
-  return {
-    ...appointment,
-    status: "annule_client" as const,
-    cancelReason,
-  };
+  return null;
 }
 
 export async function getPendingAppointmentsView() {
@@ -560,7 +545,7 @@ export async function createAdminAppointment(input: {
     }
   }
 
-  return record;
+  throw new Error("La creation administrateur est indisponible tant que Supabase n'est pas configure.");
 }
 
 export async function updateAppointmentStatus(
@@ -587,15 +572,5 @@ export async function updateAppointmentStatus(
     }
   }
 
-  const appointment = await getAppointmentById(appointmentId);
-
-  if (!appointment) {
-    return null;
-  }
-
-  return {
-    ...appointment,
-    status,
-    rejectionReason,
-  };
+  return null;
 }

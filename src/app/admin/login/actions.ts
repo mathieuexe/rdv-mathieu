@@ -2,8 +2,8 @@
 
 import { redirect } from "next/navigation";
 
-import { clearDemoAdminCookie, isUserAdmin, setDemoAdminCookie } from "@/lib/auth";
-import { getAdminEmail, isSupabaseConfigured } from "@/lib/env";
+import { isUserAdmin } from "@/lib/auth";
+import { isSupabaseConfigured } from "@/lib/env";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { loginSchema } from "@/lib/validators";
 
@@ -26,18 +26,12 @@ export async function loginAction(_state: LoginActionState, formData: FormData):
   }
 
   const { email, password } = parsed.data;
-  const adminEmail = getAdminEmail();
 
   if (!isSupabaseConfigured()) {
-    if (email.toLowerCase() !== adminEmail || password !== "demo-admin") {
-      return {
-        status: "error",
-        message: "Utilisez l'email admin et le mot de passe de démonstration `demo-admin`.",
-      };
-    }
-
-    await setDemoAdminCookie();
-    redirect("/admin");
+    return {
+      status: "error",
+      message: "L'administration est indisponible tant que Supabase n'est pas configure.",
+    };
   }
 
   const supabase = await getSupabaseServerClient();
@@ -57,8 +51,6 @@ export async function loginAction(_state: LoginActionState, formData: FormData):
   const isAdmin = data.user ? await isUserAdmin(data.user.id) : false;
 
   if (error || !isAdmin) {
-    await clearDemoAdminCookie();
-
     return {
       status: "error",
       message: "Accès refusé. Ce compte n'est pas autorisé à accéder à l'administration.",
@@ -74,6 +66,5 @@ export async function logoutAction() {
     await supabase?.auth.signOut();
   }
 
-  await clearDemoAdminCookie();
   redirect("/admin/login");
 }

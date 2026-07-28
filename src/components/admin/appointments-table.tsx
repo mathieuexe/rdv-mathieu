@@ -22,10 +22,18 @@ function formatOriginLabel(appointment: AppointmentWithCategory) {
 }
 
 export function AppointmentsTable({ appointments }: AppointmentsTableProps) {
+  if (appointments.length === 0) {
+    return (
+      <div className="rounded-[16px] border border-dashed border-slate-300 px-5 py-10 text-sm text-slate-500">
+        Aucun rendez-vous a afficher.
+      </div>
+    );
+  }
+
   return (
-    <div className="overflow-hidden rounded-[26px] border border-slate-200 bg-white shadow-[0_18px_45px_rgba(15,23,42,0.06)]">
+    <div className="overflow-hidden rounded-[20px] border border-slate-200 bg-white">
       <table className="min-w-full divide-y divide-slate-200 text-left text-sm">
-        <thead className="bg-[#f8fafc] text-slate-500">
+        <thead className="bg-slate-50 text-slate-500">
           <tr>
             <th className="px-5 py-4 font-medium">Client</th>
             <th className="px-5 py-4 font-medium">Categorie</th>
@@ -37,7 +45,7 @@ export function AppointmentsTable({ appointments }: AppointmentsTableProps) {
         </thead>
         <tbody className="divide-y divide-slate-200 bg-white text-slate-700">
           {appointments.map((appointment) => (
-            <tr key={appointment.id} className="transition hover:bg-slate-50/80">
+            <tr key={appointment.id} className="transition hover:bg-slate-50">
               <td className="px-5 py-4">
                 <p className="font-semibold text-slate-950">
                   {appointment.firstName} {appointment.lastName}
@@ -52,12 +60,12 @@ export function AppointmentsTable({ appointments }: AppointmentsTableProps) {
                 })}
               </td>
               <td className="px-5 py-4">
-                <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                <span className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700">
                   {formatOriginLabel(appointment)}
                 </span>
               </td>
               <td className="px-5 py-4">
-                <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
+                <span className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700">
                   {formatAppointmentStatus(appointment.status)}
                 </span>
               </td>
