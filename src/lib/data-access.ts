@@ -4,6 +4,7 @@ import { addMinutes, parseISO } from "date-fns";
 
 import { buildBookingSlots } from "@/lib/booking";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
+import { getSupabaseServerClient } from "@/lib/supabase/server";
 import type {
   AppointmentCategory,
   AppointmentRecord,
@@ -18,6 +19,23 @@ const defaultSiteSettings: SiteSettings = {
   maintenanceMessage: "",
   globalBlackoutPeriods: [],
 };
+
+async function getPublicReadClient() {
+  const publicClient = await getSupabaseServerClient();
+  return publicClient ?? getSupabaseAdminClient();
+}
+
+function getAppointmentWriteErrorMessage(error: { code?: string; message?: string } | null | undefined) {
+  if (!error) {
+    return "Impossible d'enregistrer le rendez-vous.";
+  }
+
+  if (error.code === "23505" || error.code === "23P01") {
+    return "Ce créneau est déjà occupé par un autre rendez-vous.";
+  }
+
+  return error.message;
+}
 
 function mapBlackoutPeriod(row: Record<string, unknown>): BlackoutPeriod {
   return {
@@ -93,7 +111,7 @@ function mapAppointmentRow(row: Record<string, unknown>): AppointmentRecord {
 }
 
 export async function getSiteSettings() {
-  const supabase = getSupabaseAdminClient();
+  const supabase = await getPublicReadClient();
 
   if (supabase) {
     const [{ data: settingsRow }, { data: blackoutRows }] = await Promise.all([
@@ -116,6 +134,30 @@ export async function getSiteSettings() {
   }
 
   return defaultSiteSettings;
+}
+
+export async function getPublicCategories() {
+  const supabase = await getPublicReadClient();
+
+  if (supabase) {
+    const [{ data: categoryRows }, { data: ruleRows }, { data: blackoutRows }] = await Promise.all([
+      supabase.from("categories").select("*").eq("is_online", true).order("created_at"),
+      supabase.from("category_availability_rules").select("*").order("weekday"),
+      supabase.from("category_blackout_periods").select("*").order("start_date"),
+    ]);
+
+    if (categoryRows?.length) {
+      return categoryRows.map((row) =>
+        mapCategoryRow(
+          row as Record<string, unknown>,
+          (ruleRows ?? []) as Array<Record<string, unknown>>,
+          (blackoutRows ?? []) as Array<Record<string, unknown>>,
+        ),
+      );
+    }
+  }
+
+  return [];
 }
 
 export async function getCategories() {
@@ -143,11 +185,11 @@ export async function getCategories() {
 }
 
 export async function getPublicCategoryBySlug(slug: string) {
-  const supabase = getSupabaseAdminClient();
+  const supabase = await getPublicReadClient();
 
   if (supabase) {
     const [{ data: categoryRow }, { data: ruleRows }, { data: blackoutRows }] = await Promise.all([
-      supabase.from("categories").select("*").eq("slug", slug).maybeSingle(),
+      supabase.from("categories").select("*").eq("slug", slug).eq("is_online", true).maybeSingle(),
       supabase.from("category_availability_rules").select("*").order("weekday"),
       supabase.from("category_blackout_periods").select("*").order("start_date"),
     ]);
@@ -275,7 +317,7 @@ export async function createAppointmentRequest(payload: AppointmentRequestPayloa
   const supabase = getSupabaseAdminClient();
 
   if (supabase) {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("appointments")
       .insert({
         category_id: record.categoryId,
@@ -294,6 +336,10 @@ export async function createAppointmentRequest(payload: AppointmentRequestPayloa
       })
       .select("*")
       .single();
+
+    if (error) {
+      throw new Error(getAppointmentWriteErrorMessage(error));
+    }
 
     if (data) {
       return {
@@ -549,7 +595,7 @@ export async function createAdminAppointment(input: {
   };
 
   if (supabase) {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("appointments")
       .insert({
         category_id: record.categoryId,
@@ -569,6 +615,10 @@ export async function createAdminAppointment(input: {
       })
       .select("*")
       .single();
+
+    if (error) {
+      throw new Error(getAppointmentWriteErrorMessage(error));
+    }
 
     if (data) {
       return mapAppointmentRow(data as Record<string, unknown>);

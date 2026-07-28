@@ -62,8 +62,8 @@ export default async function CategoriesPage() {
                   </p>
                 </div>
                 <div className="rounded-xl border border-slate-200 px-4 py-3">
-                  <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Lien</p>
-                  <p className="mt-2 text-sm font-semibold text-slate-900">/{category.slug}</p>
+                  <p className="text-xs uppercase tracking-[0.18em] text-slate-500">URL</p>
+                  <p className="mt-2 text-sm font-semibold text-slate-900">/rdv/{category.slug}</p>
                 </div>
               </div>
 
@@ -74,7 +74,7 @@ export default async function CategoriesPage() {
 
               <div className="mt-6 flex items-center justify-between border-t border-slate-200 pt-4">
                 <Link href={`/rdv/${category.slug}`} className="text-sm font-semibold text-blue-700">
-                  Ouvrir la page publique
+                  Ouvrir l'URL directe
                 </Link>
                 <Link href={`/admin/categories/${category.id}`} className="text-sm font-semibold text-slate-950">
                   Modifier

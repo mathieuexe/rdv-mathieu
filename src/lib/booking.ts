@@ -87,7 +87,6 @@ export function buildBookingSlots({
           const isPast = slotStart <= now;
           const busyAppointment = appointments.find(
             (appointment) =>
-              appointment.categoryId === category.id &&
               (appointment.status === "en_attente" || appointment.status === "accepte") &&
               overlaps(slotStart, slotEnd, appointment),
           );
@@ -103,7 +102,7 @@ export function buildBookingSlots({
             dayLabel: format(slotStart, "EEEE d MMMM"),
             reason:
               blackoutReason ??
-              (busyAppointment ? "Créneau déjà demandé ou confirmé." : undefined) ??
+              (busyAppointment ? "Créneau déjà occupé par un autre rendez-vous." : undefined) ??
               (isPast ? "Créneau déjà passé." : undefined),
           });
 

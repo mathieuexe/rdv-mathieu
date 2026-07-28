@@ -3,6 +3,23 @@ import { describe, expect, it } from "vitest";
 import { buildBookingSlots, groupSlotsByDay } from "./booking";
 import type { AppointmentCategory, AppointmentRecord, SiteSettings } from "@/types/domain";
 
+function getNextWeekdayAtTime(weekday: number, hour: number, minute: number) {
+  const date = new Date();
+  date.setHours(hour, minute, 0, 0);
+
+  let diff = (weekday - date.getDay() + 7) % 7;
+
+  if (diff === 0 && date <= new Date()) {
+    diff = 7;
+  }
+
+  date.setDate(date.getDate() + diff);
+  return date;
+}
+
+const nextMondayStart = getNextWeekdayAtTime(1, 9, 0);
+const nextMondayEnd = getNextWeekdayAtTime(1, 9, 30);
+
 const testSiteSettings: SiteSettings = {
   maintenanceMode: false,
   maintenanceMessage: "",
@@ -35,11 +52,11 @@ const testAppointments: AppointmentRecord[] = [
     lastName: "Dupont",
     email: "marie@example.com",
     phone: "0600000000",
-    startsAt: new Date("2026-08-03T09:00:00.000Z").toISOString(),
-    endsAt: new Date("2026-08-03T09:30:00.000Z").toISOString(),
+    startsAt: nextMondayStart.toISOString(),
+    endsAt: nextMondayEnd.toISOString(),
     status: "en_attente",
     origin: "utilisateur",
-    createdAt: new Date("2026-08-01T09:00:00.000Z").toISOString(),
+    createdAt: new Date().toISOString(),
   },
 ];
 
@@ -63,7 +80,23 @@ describe("buildBookingSlots", () => {
       daysToShow: 10,
     });
 
-    expect(slots.some((slot) => slot.isBlocked && slot.reason?.includes("Créneau déjà demandé"))).toBe(true);
+    expect(slots.some((slot) => slot.isBlocked && slot.reason?.includes("Créneau déjà occupé"))).toBe(true);
+  });
+
+  it("bloque aussi un créneau pris dans une autre catégorie", () => {
+    const slots = buildBookingSlots({
+      category: {
+        ...testCategories[0],
+        id: "cat-bilan",
+        slug: "bilan",
+        title: "Bilan",
+      },
+      siteSettings: testSiteSettings,
+      appointments: testAppointments,
+      daysToShow: 10,
+    });
+
+    expect(slots.some((slot) => slot.isBlocked && slot.reason?.includes("Créneau déjà occupé"))).toBe(true);
   });
 
   it("regroupe les créneaux par jour ISO", () => {
@@ -71,7 +104,7 @@ describe("buildBookingSlots", () => {
       category: testCategories[0],
       siteSettings: testSiteSettings,
       appointments: testAppointments,
-      daysToShow: 5,
+      daysToShow: 10,
     });
 
     const grouped = groupSlotsByDay(slots);

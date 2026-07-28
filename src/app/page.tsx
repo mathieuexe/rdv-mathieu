@@ -2,19 +2,10 @@ import Link from "next/link";
 
 import { PublicFooter } from "@/components/public/public-footer";
 import { PublicHeader } from "@/components/public/public-header";
-import { getSupabaseAdminClient } from "@/lib/supabase/admin";
+import { getPublicCategories } from "@/lib/data-access";
 
 export default async function Home() {
-  const supabase = getSupabaseAdminClient();
-  const categories =
-    supabase
-      ? (
-          await supabase
-            .from("categories")
-            .select("id, slug, title")
-            .order("created_at", { ascending: true })
-        ).data ?? []
-      : [];
+  const categories = await getPublicCategories();
 
   return (
     <div className="flex min-h-screen flex-col bg-white text-black">
@@ -34,9 +25,11 @@ export default async function Home() {
           ) : (
             <ul className="mt-8 space-y-3">
               {categories.map((category) => (
-                <li key={String(category.id)}>
-                  <Link href={`/rdv/${String(category.slug)}`} className="underline underline-offset-4">
-                    {String(category.title)}
+                <li key={category.id} className="rounded-2xl border border-neutral-200 px-4 py-4">
+                  <p className="text-base font-semibold">{category.title}</p>
+                  <p className="mt-1 text-sm text-neutral-600">URL directe : /rdv/{category.slug}</p>
+                  <Link href={`/rdv/${category.slug}`} className="mt-3 inline-flex underline underline-offset-4">
+                    Accéder à cette catégorie
                   </Link>
                 </li>
               ))}
