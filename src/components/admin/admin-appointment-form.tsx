@@ -56,7 +56,7 @@ export function AdminAppointmentForm({ categories, action }: AdminAppointmentFor
   const groupedSlots = useMemo(() => groupSlots(slots.filter((slot) => !slot.isBlocked)), [slots]);
 
   return (
-    <section className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-[0_24px_60px_rgba(15,23,42,0.08)]">
+    <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_18px_45px_rgba(15,23,42,0.06)]">
       <div>
         <p className="text-sm uppercase tracking-[0.2em] text-slate-500">Creation</p>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">Creer un rendez-vous</h1>
@@ -73,7 +73,7 @@ export function AdminAppointmentForm({ categories, action }: AdminAppointmentFor
               name="categorySlug"
               value={categorySlug}
               onChange={(event) => setCategorySlug(event.target.value)}
-              className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-cyan-600 focus:bg-white"
+              className="w-full rounded-2xl border border-slate-200 bg-[#f8fafc] px-4 py-3 outline-none transition focus:border-blue-500 focus:bg-white"
             >
               {categories.map((category) => (
                 <option key={category.id} value={category.slug}>
@@ -89,7 +89,7 @@ export function AdminAppointmentForm({ categories, action }: AdminAppointmentFor
               <input
                 name="firstName"
                 required
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-cyan-600 focus:bg-white"
+                className="w-full rounded-2xl border border-slate-200 bg-[#f8fafc] px-4 py-3 outline-none transition focus:border-blue-500 focus:bg-white"
               />
             </label>
 
@@ -98,7 +98,7 @@ export function AdminAppointmentForm({ categories, action }: AdminAppointmentFor
               <input
                 name="lastName"
                 required
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-cyan-600 focus:bg-white"
+                className="w-full rounded-2xl border border-slate-200 bg-[#f8fafc] px-4 py-3 outline-none transition focus:border-blue-500 focus:bg-white"
               />
             </label>
           </div>
@@ -109,7 +109,7 @@ export function AdminAppointmentForm({ categories, action }: AdminAppointmentFor
               name="email"
               type="email"
               required
-              className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-cyan-600 focus:bg-white"
+              className="w-full rounded-2xl border border-slate-200 bg-[#f8fafc] px-4 py-3 outline-none transition focus:border-blue-500 focus:bg-white"
             />
           </label>
 
@@ -119,7 +119,7 @@ export function AdminAppointmentForm({ categories, action }: AdminAppointmentFor
               name="phone"
               type="tel"
               required
-              className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-cyan-600 focus:bg-white"
+              className="w-full rounded-2xl border border-slate-200 bg-[#f8fafc] px-4 py-3 outline-none transition focus:border-blue-500 focus:bg-white"
             />
           </label>
 
@@ -128,7 +128,7 @@ export function AdminAppointmentForm({ categories, action }: AdminAppointmentFor
             <textarea
               name="message"
               rows={4}
-              className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-cyan-600 focus:bg-white"
+              className="w-full rounded-2xl border border-slate-200 bg-[#f8fafc] px-4 py-3 outline-none transition focus:border-blue-500 focus:bg-white"
             />
           </label>
         </div>
@@ -136,7 +136,7 @@ export function AdminAppointmentForm({ categories, action }: AdminAppointmentFor
         <div className="space-y-5">
           <input type="hidden" name="startsAt" value={selectedSlot} />
 
-          <div className="rounded-[28px] border border-slate-200 bg-slate-50 p-5">
+          <div className="rounded-[24px] border border-slate-200 bg-[#f8fafc] p-5">
             <p className="text-sm font-semibold text-slate-900">Creneaux disponibles</p>
             {loading ? <p className="mt-3 text-sm text-slate-600">Chargement...</p> : null}
             {error ? <p className="mt-3 text-sm text-red-600">{error}</p> : null}
@@ -153,7 +153,7 @@ export function AdminAppointmentForm({ categories, action }: AdminAppointmentFor
                         onClick={() => setSelectedSlot(slot.start)}
                         className={`rounded-full border px-4 py-2 text-sm ${
                           selectedSlot === slot.start
-                            ? "border-cyan-700 bg-cyan-700 text-white"
+                            ? "border-blue-700 bg-blue-700 text-white"
                             : "border-slate-300 bg-white text-slate-700"
                         }`}
                       >
@@ -173,7 +173,7 @@ export function AdminAppointmentForm({ categories, action }: AdminAppointmentFor
           <button
             type="submit"
             disabled={!selectedSlot}
-            className="inline-flex w-full items-center justify-center rounded-full bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition hover:bg-cyan-950 disabled:cursor-not-allowed disabled:bg-slate-300"
+            className="inline-flex w-full items-center justify-center rounded-2xl bg-[linear-gradient(135deg,#4f46e5_0%,#2563eb_55%,#06b6d4_100%)] px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_40px_rgba(37,99,235,0.2)] transition hover:opacity-95 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
           >
             Creer le rendez-vous
           </button>
