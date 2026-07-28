@@ -1,13 +1,26 @@
-const publicSupabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const publicSupabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const publicSupabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+const publicSupabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+
+function isValidHttpUrl(value?: string) {
+  if (!value) {
+    return false;
+  }
+
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
 
 export function isSupabaseConfigured() {
-  return Boolean(publicSupabaseUrl && publicSupabaseAnonKey);
+  return isValidHttpUrl(publicSupabaseUrl) && Boolean(publicSupabaseAnonKey);
 }
 
 export function isAdminSupabaseConfigured() {
-  return Boolean(publicSupabaseUrl && serviceRoleKey);
+  return isValidHttpUrl(publicSupabaseUrl) && Boolean(serviceRoleKey);
 }
 
 export function getPublicSupabaseEnv() {
