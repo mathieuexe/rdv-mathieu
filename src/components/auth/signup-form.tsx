@@ -62,111 +62,98 @@ export function SignUpForm({ action }: SignUpFormProps) {
   const passwordsMatch = confirmPassword.length > 0 && password === confirmPassword;
 
   return (
-    <form action={formAction} className="border border-black p-8">
-      <h1 className="text-2xl font-semibold">S&apos;inscrire</h1>
-      <p className="mt-2 text-sm">Créez votre compte pour enregistrer vos informations avec le rôle Prospect.</p>
-
-      <div className="mt-6 grid gap-4 sm:grid-cols-2">
-        <label className="block space-y-2 text-sm font-medium">
-          <span>Prénom</span>
+    <div>
+      <form
+        action={formAction}
+        className="rounded-[32px] border border-[#d7e0ea] bg-[#f8fafc] p-8 shadow-[0_14px_32px_rgba(120,145,173,0.12)] sm:p-10"
+      >
+        <div className="grid gap-4 sm:grid-cols-2">
           <input
             name="firstName"
             type="text"
             required
-            className="w-full border border-black bg-white px-4 py-3 text-black outline-none"
+            placeholder="Votre prenom"
+            className="w-full rounded-2xl border border-[#a8bfd8] bg-[#f8fafc] px-5 py-4 text-lg text-[#557296] outline-none placeholder:text-[#557296]"
           />
-        </label>
-
-        <label className="block space-y-2 text-sm font-medium">
-          <span>Nom</span>
           <input
             name="lastName"
             type="text"
             required
-            className="w-full border border-black bg-white px-4 py-3 text-black outline-none"
+            placeholder="Votre nom"
+            className="w-full rounded-2xl border border-[#a8bfd8] bg-[#f8fafc] px-5 py-4 text-lg text-[#557296] outline-none placeholder:text-[#557296]"
           />
-        </label>
-      </div>
+        </div>
 
-      <div className="mt-4 space-y-4">
-        <label className="block space-y-2 text-sm font-medium">
-          <span>Adresse mail</span>
+        <div className="mt-4 space-y-4">
           <input
             name="email"
             type="email"
             required
-            className="w-full border border-black bg-white px-4 py-3 text-black outline-none"
+            placeholder="Entrez votre e-mail"
+            className="w-full rounded-2xl border border-[#a8bfd8] bg-[#f8fafc] px-5 py-4 text-lg text-[#557296] outline-none placeholder:text-[#557296]"
           />
-        </label>
 
-        <label className="block space-y-2 text-sm font-medium">
-          <span>Mot de passe</span>
           <input
             name="password"
             type="password"
             required
             value={password}
             onChange={(event) => setPassword(event.target.value)}
-            className="w-full border border-black bg-white px-4 py-3 text-black outline-none"
+            placeholder="Choisissez votre mot de passe"
+            className="w-full rounded-2xl border border-[#a8bfd8] bg-[#f8fafc] px-5 py-4 text-lg text-[#557296] outline-none placeholder:text-[#557296]"
           />
-        </label>
 
-        <label className="block space-y-2 text-sm font-medium">
-          <span>Confirmer le mot de passe</span>
           <input
             name="confirmPassword"
             type="password"
             required
             value={confirmPassword}
             onChange={(event) => setConfirmPassword(event.target.value)}
-            className="w-full border border-black bg-white px-4 py-3 text-black outline-none"
+            placeholder="Confirmez votre mot de passe"
+            className="w-full rounded-2xl border border-[#a8bfd8] bg-[#f8fafc] px-5 py-4 text-lg text-[#557296] outline-none placeholder:text-[#557296]"
           />
-        </label>
-      </div>
-
-      <div className="mt-6 border border-black p-4">
-        <p className="text-sm font-medium">Robustesse du mot de passe : {strengthLabel}</p>
-        <div className="mt-3 h-2 border border-black">
-          <div className="h-full bg-black transition-all" style={{ width: strengthWidth }} />
         </div>
 
-        <ul className="mt-4 space-y-2 text-sm">
-          {checks.map((check) => (
-            <li key={check.key} className={check.passed ? "text-black" : "text-neutral-500"}>
-              {check.passed ? "OK" : "KO"} - {check.label}
+        <div className="mt-6 rounded-2xl border border-[#d7e0ea] bg-white/70 p-5">
+          <p className="text-sm font-medium text-[#113b67]">Robustesse du mot de passe : {strengthLabel}</p>
+          <div className="mt-3 h-2 overflow-hidden rounded-full bg-[#dfe7f0]">
+            <div className="h-full rounded-full bg-[#1473f6] transition-all" style={{ width: strengthWidth }} />
+          </div>
+
+          <ul className="mt-4 space-y-2 text-sm text-[#557296]">
+            {checks.map((check) => (
+              <li key={check.key} className={check.passed ? "text-[#113b67]" : "text-[#7c94b0]"}>
+                {check.passed ? "OK" : "KO"} - {check.label}
+              </li>
+            ))}
+            <li className={passwordsMatch ? "text-[#113b67]" : "text-[#7c94b0]"}>
+              {passwordsMatch ? "OK" : "KO"} - Confirmation du mot de passe identique
             </li>
-          ))}
-          <li className={passwordsMatch ? "text-black" : "text-neutral-500"}>
-            {passwordsMatch ? "OK" : "KO"} - Confirmation du mot de passe identique
-          </li>
-        </ul>
-      </div>
+          </ul>
+        </div>
 
-      {state.message ? (
-        <p
-          className={`mt-4 text-sm ${
-            state.status === "error" ? "text-red-600" : "text-black"
-          }`}
+        {state.message ? (
+          <p className={`mt-4 text-sm ${state.status === "error" ? "text-red-600" : "text-[#557296]"}`}>{state.message}</p>
+        ) : null}
+
+        <button
+          type="submit"
+          disabled={pending}
+          className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#1473f6] px-6 py-4 text-lg font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {state.message}
-        </p>
-      ) : null}
+          {pending ? <LoaderCircle className="size-5 animate-spin" /> : null}
+          <span>{pending ? "Inscription..." : "Creer mon compte"}</span>
+        </button>
+      </form>
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="mt-6 inline-flex w-full items-center justify-center gap-2 border border-black bg-black px-6 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
-      >
-        {pending ? <LoaderCircle className="size-4 animate-spin" /> : null}
-        <span>{pending ? "Inscription..." : "Créer mon compte"}</span>
-      </button>
-
-      <p className="mt-4 text-sm">
-        Déjà inscrit ?{" "}
-        <Link href="/connexion" className="underline underline-offset-4">
+      <p className="mt-10 text-center text-xl text-[#113b67]">
+        Vous avez deja un compte ?
+      </p>
+      <p className="mt-2 text-center text-xl font-semibold">
+        <Link href="/connexion" className="text-[#1473f6] underline underline-offset-4">
           Se connecter
         </Link>
       </p>
-    </form>
+    </div>
   );
 }

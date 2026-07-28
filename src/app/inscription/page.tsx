@@ -1,28 +1,29 @@
-import Link from "next/link";
-
 import { SignUpForm } from "@/components/auth/signup-form";
+import { PublicFooter } from "@/components/public/public-footer";
+import { PublicHeader } from "@/components/public/public-header";
 
 import { signUpAction } from "./actions";
 
 export default function SignUpPage() {
   return (
-    <main className="min-h-screen bg-white px-6 py-10 text-black">
-      <div className="mx-auto max-w-5xl">
-        <header className="flex items-center justify-between">
-          <Link href="/" className="text-sm underline underline-offset-4">
-            Retour
-          </Link>
-          <Link href="/connexion" className="text-sm underline underline-offset-4">
-            Se connecter
-          </Link>
-        </header>
+    <div className="flex min-h-screen flex-col bg-[#f3f5f9] text-[#103b67]">
+      <PublicHeader currentPath="/inscription" />
 
-        <div className="mt-16 flex justify-center">
-          <div className="w-full max-w-xl">
-            <SignUpForm action={signUpAction} />
+      <main className="flex-1 px-6 py-10">
+        <div className="mx-auto max-w-5xl">
+          <div className="mt-10 flex flex-col items-center">
+            <h1 className="max-w-3xl text-center text-5xl font-semibold leading-tight tracking-tight text-[#113b67] sm:text-6xl">
+              Creez votre compte
+            </h1>
+
+            <div className="mt-12 w-full max-w-xl">
+              <SignUpForm action={signUpAction} />
+            </div>
           </div>
         </div>
-      </div>
-    </main>
+      </main>
+
+      <PublicFooter />
+    </div>
   );
 }
