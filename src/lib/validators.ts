@@ -15,6 +15,27 @@ export const loginSchema = z.object({
   password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères."),
 });
 
+export const passwordSchema = z
+  .string()
+  .min(12, "Le mot de passe doit contenir au moins 12 caractères.")
+  .regex(/[0-9]/, "Le mot de passe doit contenir au moins un chiffre.")
+  .regex(/[A-Z]/, "Le mot de passe doit contenir au moins une majuscule.")
+  .regex(/[a-z]/, "Le mot de passe doit contenir au moins une minuscule.")
+  .regex(/[^A-Za-z0-9]/, "Le mot de passe doit contenir au moins un caractère spécial.");
+
+export const signUpSchema = z
+  .object({
+    firstName: z.string().trim().min(2, "Le prénom est requis."),
+    lastName: z.string().trim().min(2, "Le nom est requis."),
+    email: z.string().trim().email("Veuillez saisir un email valide."),
+    password: passwordSchema,
+    confirmPassword: z.string().min(1, "Veuillez confirmer votre mot de passe."),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Les mots de passe ne correspondent pas.",
+  });
+
 export const categoryAdminSchema = z.object({
   title: z.string().trim().min(3, "Le titre est requis."),
   slug: z.string().trim().min(3, "Le lien est requis."),
