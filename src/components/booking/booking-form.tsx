@@ -322,22 +322,7 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, init
           </section>
 
           <section className="p-6">
-            <div>
-              <p className="text-xs uppercase tracking-[0.14em] text-neutral-400">Étapes</p>
-              <div className="mt-3 flex items-center gap-2 text-xs font-medium">
-                <span className={cn("rounded-full px-3 py-1", currentStep === 1 ? "bg-neutral-950 text-white" : "bg-neutral-100 text-neutral-600")}>
-                  1. Date et heure
-                </span>
-                <span className={cn("rounded-full px-3 py-1", currentStep === 2 ? "bg-neutral-950 text-white" : "bg-neutral-100 text-neutral-600")}>
-                  2. Informations
-                </span>
-                <span className={cn("rounded-full px-3 py-1", currentStep === 3 ? "bg-neutral-950 text-white" : "bg-neutral-100 text-neutral-600")}>
-                  3. Récapitulatif
-                </span>
-              </div>
-            </div>
-
-            <div className="mt-4 max-h-[460px] space-y-3 overflow-y-auto pr-1">
+            <div className="max-h-[460px] space-y-3 overflow-y-auto pr-1">
               {currentStep === 1 ? (
                 selectedDay ? (
                   selectedDay.dateSlots.map((slot) => {
