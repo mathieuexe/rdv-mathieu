@@ -355,13 +355,12 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, init
                 )
               ) : currentStep === 2 ? (
                 <div className="space-y-4">
-                  <div className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-4 text-sm text-neutral-800">
-                    <div className="flex items-center gap-2 font-medium">
-                      <CheckCircle2 className="size-4 text-neutral-700" />
-                      <span>Créneau sélectionné</span>
-                    </div>
-                    <p className="mt-2 text-neutral-600">
-                      {selectedSlot ? formatDateTimeFr(selectedSlot, { dateStyle: "full", timeStyle: "short" }) : "Aucun créneau sélectionné."}
+                  <div className="space-y-1">
+                    <p className="text-sm font-semibold text-neutral-950">Vos informations</p>
+                    <p className="text-sm text-neutral-500">
+                      {selectedSlot
+                        ? `Créneau choisi : ${formatDateTimeFr(selectedSlot, { dateStyle: "full", timeStyle: "short" })}`
+                        : "Complétez vos informations pour continuer."}
                     </p>
                   </div>
 
@@ -391,13 +390,14 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, init
                       type="email"
                       value={email}
                       onChange={(event) => setEmail(event.target.value)}
-                      readOnly={Boolean(initialUser?.email)}
                       className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 outline-none transition focus:border-neutral-900 focus:bg-white"
                     />
                   </label>
 
                   {initialUser?.email ? (
-                    <p className="text-xs text-neutral-500">L'email du compte connecté est utilisé pour rattacher vos rendez-vous.</p>
+                    <p className="text-xs text-neutral-500">
+                      Les champs préremplis peuvent être corrigés avant la confirmation du rendez-vous.
+                    </p>
                   ) : null}
 
                   <label className="space-y-2 text-sm font-medium text-neutral-700">
