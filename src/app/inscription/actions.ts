@@ -1,6 +1,6 @@
 "use server";
 
-import { getAppUrl, isSupabaseConfigured } from "@/lib/env";
+import { getAppUrl, getSupabaseConfigError, isSupabaseConfigured } from "@/lib/env";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { signUpSchema } from "@/lib/validators";
 
@@ -31,7 +31,7 @@ export async function signUpAction(
   if (!isSupabaseConfigured()) {
     return {
       status: "error",
-      message: "L'inscription est indisponible tant que Supabase n'est pas configuré.",
+      message: getSupabaseConfigError() ?? "L'inscription est indisponible tant que Supabase n'est pas configuré.",
     };
   }
 

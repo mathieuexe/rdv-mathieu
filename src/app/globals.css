@@ -11,8 +11,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-manrope);
-  --font-serif: var(--font-cormorant);
+  --font-sans: var(--font-gilroy);
+  --font-serif: var(--font-gilroy);
 }
 
 * {
@@ -26,7 +26,7 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-manrope), sans-serif;
+  font-family: var(--font-gilroy), "Avenir Next", Arial, sans-serif;
   text-rendering: optimizeLegibility;
 }
 
@@ -49,5 +49,5 @@ select {
 }
 
 .font-serif {
-  font-family: var(--font-cormorant), serif;
+  font-family: var(--font-gilroy), "Avenir Next", Arial, sans-serif;
 }

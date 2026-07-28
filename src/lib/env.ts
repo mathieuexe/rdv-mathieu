@@ -1,5 +1,6 @@
-const publicSupabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
-const publicSupabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
+const publicSupabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || process.env.SUPABASE_URL?.trim();
+const publicSupabaseAnonKey =
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim() || process.env.SUPABASE_ANON_KEY?.trim();
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
 
 function isValidHttpUrl(value?: string) {
@@ -28,6 +29,22 @@ export function getPublicSupabaseEnv() {
     url: publicSupabaseUrl ?? "",
     anonKey: publicSupabaseAnonKey ?? "",
   };
+}
+
+export function getSupabaseConfigError() {
+  if (!publicSupabaseUrl) {
+    return "URL Supabase manquante.";
+  }
+
+  if (!isValidHttpUrl(publicSupabaseUrl)) {
+    return "URL Supabase invalide.";
+  }
+
+  if (!publicSupabaseAnonKey) {
+    return "Clé publique Supabase manquante.";
+  }
+
+  return null;
 }
 
 export function getServiceRoleEnv() {
