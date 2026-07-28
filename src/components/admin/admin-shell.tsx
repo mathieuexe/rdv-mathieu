@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarPlus2, CalendarRange, Clock3, LayoutDashboard, Settings2, Shapes } from "lucide-react";
+import { CalendarPlus2, CalendarRange, Clock3, LayoutDashboard, Search, Settings2, Shapes } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -12,6 +12,7 @@ const navigation = [
   { href: "/admin/rendez-vous/agenda", label: "Agenda", icon: CalendarRange },
   { href: "/admin/rendez-vous/nouveau", label: "Creer un RDV", icon: CalendarPlus2 },
   { href: "/admin/categories", label: "Catégories", icon: Shapes },
+  { href: "/admin/checker-ref-mail", label: "Checker ref mail", icon: Search },
   { href: "/admin/parametres", label: "Paramètres", icon: Settings2 },
 ];
 

@@ -1,6 +1,6 @@
 import { getAdminSession } from "@/lib/auth";
 import { getAppointmentById, getCategoryById, updateAppointmentStatus } from "@/lib/data-access";
-import { sendTransactionalEmail } from "@/lib/email";
+import { sendValidatedAppointmentEmail } from "@/lib/email";
 import { formatDateTimeFr } from "@/lib/utils";
 
 export async function POST(_request: Request, context: { params: Promise<{ id: string }> }) {
@@ -20,15 +20,12 @@ export async function POST(_request: Request, context: { params: Promise<{ id: s
   const category = await getCategoryById(appointment.categoryId);
   const updated = await updateAppointmentStatus(id, "accepte");
 
-  await sendTransactionalEmail({
+  await sendValidatedAppointmentEmail({
     to: appointment.email,
-    subject: "Votre rendez-vous est confirmé",
-    html: `
-      <h1>Rendez-vous confirmé</h1>
-      <p>Bonjour ${appointment.firstName},</p>
-      <p>Votre demande pour <strong>${category?.title ?? "votre rendez-vous"}</strong> a été acceptée.</p>
-      <p>Date : ${formatDateTimeFr(appointment.startsAt, { dateStyle: "full", timeStyle: "short" })}</p>
-    `,
+    firstName: appointment.firstName,
+    categoryTitle: category?.title ?? "Votre rendez-vous",
+    startsAtLabel: formatDateTimeFr(appointment.startsAt, { dateStyle: "full", timeStyle: "short" }),
+    appointmentId: appointment.id,
   });
 
   return Response.json({

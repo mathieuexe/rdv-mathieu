@@ -92,3 +92,20 @@ export interface DashboardMetrics {
   refusedAppointments: number;
   onlineCategories: number;
 }
+
+export type EmailDeliveryStatus = "sent" | "not_configured" | "failed";
+
+export interface EmailLogRecord {
+  id: string;
+  reference: string;
+  templateKey: string;
+  sourceType: string;
+  sourceLabel: string;
+  recipientEmail: string;
+  subject: string;
+  appointmentId?: string;
+  resendEmailId?: string;
+  deliveryStatus: EmailDeliveryStatus;
+  metadata: Record<string, unknown>;
+  createdAt: string;
+}

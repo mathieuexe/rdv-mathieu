@@ -11,6 +11,7 @@ import type {
   AppointmentRequestPayload,
   BlackoutPeriod,
   DashboardMetrics,
+  EmailLogRecord,
   SiteSettings,
 } from "@/types/domain";
 
@@ -106,6 +107,24 @@ function mapAppointmentRow(row: Record<string, unknown>): AppointmentRecord {
     origin: row.origin === "administrateur" ? "administrateur" : "utilisateur",
     createdByAdminUserId: typeof row.created_by_admin_user_id === "string" ? row.created_by_admin_user_id : undefined,
     createdByAdminEmail: typeof row.created_by_admin_email === "string" ? row.created_by_admin_email : undefined,
+    createdAt: String(row.created_at ?? new Date().toISOString()),
+  };
+}
+
+function mapEmailLogRow(row: Record<string, unknown>): EmailLogRecord {
+  return {
+    id: String(row.id),
+    reference: String(row.reference),
+    templateKey: String(row.template_key),
+    sourceType: String(row.source_type),
+    sourceLabel: String(row.source_label),
+    recipientEmail: String(row.recipient_email),
+    subject: String(row.subject),
+    appointmentId: typeof row.appointment_id === "string" ? row.appointment_id : undefined,
+    resendEmailId: typeof row.resend_email_id === "string" ? row.resend_email_id : undefined,
+    deliveryStatus:
+      row.delivery_status === "not_configured" || row.delivery_status === "failed" ? row.delivery_status : "sent",
+    metadata: row.metadata && typeof row.metadata === "object" ? (row.metadata as Record<string, unknown>) : {},
     createdAt: String(row.created_at ?? new Date().toISOString()),
   };
 }
@@ -653,4 +672,41 @@ export async function updateAppointmentStatus(
   }
 
   return null;
+}
+
+export async function getEmailLogByReference(reference: string) {
+  const normalizedReference = reference.trim().toUpperCase();
+  const supabase = getSupabaseAdminClient();
+
+  if (!supabase || !normalizedReference) {
+    return null;
+  }
+
+  const { data } = await supabase
+    .from("email_logs")
+    .select("*")
+    .eq("reference", normalizedReference)
+    .maybeSingle();
+
+  if (!data) {
+    return null;
+  }
+
+  return mapEmailLogRow(data as Record<string, unknown>);
+}
+
+export async function getRecentEmailLogs(limit = 20) {
+  const supabase = getSupabaseAdminClient();
+
+  if (!supabase) {
+    return [];
+  }
+
+  const { data } = await supabase
+    .from("email_logs")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  return (data ?? []).map((row) => mapEmailLogRow(row as Record<string, unknown>));
 }

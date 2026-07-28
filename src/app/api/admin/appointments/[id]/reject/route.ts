@@ -1,6 +1,7 @@
 import { getAdminSession } from "@/lib/auth";
 import { getAppointmentById, getCategoryById, updateAppointmentStatus } from "@/lib/data-access";
-import { sendTransactionalEmail } from "@/lib/email";
+import { sendRefusedAppointmentEmail } from "@/lib/email";
+import { formatDateTimeFr } from "@/lib/utils";
 
 export async function POST(request: Request, context: { params: Promise<{ id: string }> }) {
   const session = await getAdminSession();
@@ -26,15 +27,13 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
   const category = await getCategoryById(appointment.categoryId);
   const updated = await updateAppointmentStatus(id, "refuse", reason);
 
-  await sendTransactionalEmail({
+  await sendRefusedAppointmentEmail({
     to: appointment.email,
-    subject: "Votre demande de rendez-vous a été refusée",
-    html: `
-      <h1>Demande refusée</h1>
-      <p>Bonjour ${appointment.firstName},</p>
-      <p>Votre demande pour <strong>${category?.title ?? "votre rendez-vous"}</strong> n'a pas pu être validée.</p>
-      <p>Motif : ${reason}</p>
-    `,
+    firstName: appointment.firstName,
+    categoryTitle: category?.title ?? "Votre rendez-vous",
+    startsAtLabel: formatDateTimeFr(appointment.startsAt, { dateStyle: "full", timeStyle: "short" }),
+    reason,
+    appointmentId: appointment.id,
   });
 
   return Response.json({

@@ -1,6 +1,7 @@
 "use server";
 
 import { getAppUrl, getSupabaseConfigError, isSupabaseConfigured } from "@/lib/env";
+import { sendSignupConfirmationEmail } from "@/lib/email";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { signUpSchema } from "@/lib/validators";
 
@@ -65,11 +66,21 @@ export async function signUpAction(
   }
 
   if (!data.session) {
+    await sendSignupConfirmationEmail({
+      to: email,
+      firstName,
+    });
+
     return {
       status: "success",
       message: "Compte créé. Vérifiez votre email pour confirmer votre inscription.",
     };
   }
+
+  await sendSignupConfirmationEmail({
+    to: email,
+    firstName,
+  });
 
   return {
     status: "success",
