@@ -120,13 +120,13 @@ export function SignUpForm({ action }: SignUpFormProps) {
             <div className="h-full rounded-full bg-[#1473f6] transition-all" style={{ width: strengthWidth }} />
           </div>
 
-          <ul className="mt-4 space-y-2 text-sm text-[#557296]">
+          <ul className="mt-4 space-y-2 text-sm">
             {checks.map((check) => (
-              <li key={check.key} className={check.passed ? "text-[#113b67]" : "text-[#7c94b0]"}>
+              <li key={check.key} className={check.passed ? "text-green-600" : "text-red-600"}>
                 {check.passed ? "OK" : "KO"} - {check.label}
               </li>
             ))}
-            <li className={passwordsMatch ? "text-[#113b67]" : "text-[#7c94b0]"}>
+            <li className={passwordsMatch ? "text-green-600" : "text-red-600"}>
               {passwordsMatch ? "OK" : "KO"} - Confirmation du mot de passe identique
             </li>
           </ul>
