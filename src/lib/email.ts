@@ -71,6 +71,9 @@ async function createEmailLog(input: {
 }) {
   const supabase = getSupabaseAdminClient();
 
+  // #region debug-point B:email-log-entry
+  fetch("http://127.0.0.1:7781/event",{method:"POST",body:JSON.stringify({sessionId:"appointment-api-500",runId:"pre-fix",hypothesisId:"B",location:"src/lib/email.ts:57",msg:"[DEBUG] createEmailLog entry",data:{templateKey:input.templateKey,recipientEmail:input.recipientEmail,deliveryStatus:input.deliveryStatus,hasSupabase:Boolean(supabase)},ts:Date.now()})}).catch(()=>{});
+  // #endregion
   if (!supabase) {
     return null;
   }
@@ -91,6 +94,9 @@ async function createEmailLog(input: {
     .select("id")
     .maybeSingle();
 
+  // #region debug-point B:email-log-after-insert
+  fetch("http://127.0.0.1:7781/event",{method:"POST",body:JSON.stringify({sessionId:"appointment-api-500",runId:"pre-fix",hypothesisId:"B",location:"src/lib/email.ts:79",msg:"[DEBUG] createEmailLog after insert",data:{emailLogId:typeof data?.id==="string"?data.id:null},ts:Date.now()})}).catch(()=>{});
+  // #endregion
   return typeof data?.id === "string" ? data.id : null;
 }
 
@@ -136,6 +142,9 @@ export async function sendTransactionalEmail({
   const apiKey = process.env.RESEND_API_KEY?.trim();
   const from = getResendFromValue();
 
+  // #region debug-point A:email-send-entry
+  fetch("http://127.0.0.1:7781/event",{method:"POST",body:JSON.stringify({sessionId:"appointment-api-500",runId:"pre-fix",hypothesisId:"A",location:"src/lib/email.ts:153",msg:"[DEBUG] sendTransactionalEmail entry",data:{templateKey,sourceType,appointmentId:appointmentId??null,hasApiKey:Boolean(apiKey),from},ts:Date.now()})}).catch(()=>{});
+  // #endregion
   const emailLogId = await createEmailLog({
     reference,
     templateKey,
@@ -160,6 +169,9 @@ export async function sendTransactionalEmail({
   }
 
   const resend = new Resend(apiKey);
+  // #region debug-point C:before-resend-send
+  fetch("http://127.0.0.1:7781/event",{method:"POST",body:JSON.stringify({sessionId:"appointment-api-500",runId:"pre-fix",hypothesisId:"C",location:"src/lib/email.ts:179",msg:"[DEBUG] before resend.emails.send",data:{templateKey,to,subject,from},ts:Date.now()})}).catch(()=>{});
+  // #endregion
   const { data, error } = await resend.emails.send({
     from,
     to,
@@ -168,6 +180,9 @@ export async function sendTransactionalEmail({
   });
 
   if (error) {
+    // #region debug-point A:resend-error
+    fetch("http://127.0.0.1:7781/event",{method:"POST",body:JSON.stringify({sessionId:"appointment-api-500",runId:"pre-fix",hypothesisId:"A",location:"src/lib/email.ts:189",msg:"[DEBUG] resend returned error",data:{templateKey,error:error.message},ts:Date.now()})}).catch(()=>{});
+    // #endregion
     await updateEmailLog(emailLogId, {
       deliveryStatus: "failed",
       metadata: {
@@ -184,6 +199,9 @@ export async function sendTransactionalEmail({
     };
   }
 
+  // #region debug-point C:resend-success
+  fetch("http://127.0.0.1:7781/event",{method:"POST",body:JSON.stringify({sessionId:"appointment-api-500",runId:"pre-fix",hypothesisId:"C",location:"src/lib/email.ts:207",msg:"[DEBUG] resend send success",data:{templateKey,resendEmailId:data?.id??null},ts:Date.now()})}).catch(()=>{});
+  // #endregion
   await updateEmailLog(emailLogId, {
     deliveryStatus: "sent",
     resendEmailId: data?.id,
