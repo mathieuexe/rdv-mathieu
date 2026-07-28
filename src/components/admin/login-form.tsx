@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { LockKeyhole, LoaderCircle } from "lucide-react";
+import { LoaderCircle } from "lucide-react";
 
 import type { LoginActionState } from "@/app/admin/login/actions";
 
@@ -17,39 +17,33 @@ export function LoginForm({ action }: LoginFormProps) {
   const [state, formAction, pending] = useActionState(action, initialState);
 
   return (
-    <form action={formAction} className="rounded-[32px] border border-white/15 bg-slate-950/70 p-8 shadow-[0_30px_80px_rgba(8,15,33,0.45)] backdrop-blur">
-      <div className="flex items-center gap-3 text-slate-100">
-        <LockKeyhole className="size-5 text-cyan-300" />
-        <div>
-          <p className="text-sm uppercase tracking-[0.3em] text-slate-400">Connexion admin</p>
-          <h2 className="text-xl font-semibold">Accéder au back-office</h2>
-        </div>
-      </div>
+    <form action={formAction} className="border border-black p-8">
+      <h1 className="text-xl font-semibold text-black">Connexion</h1>
 
       <div className="mt-6 space-y-4">
-        <label className="block space-y-2 text-sm font-medium text-slate-200">
+        <label className="block space-y-2 text-sm font-medium text-black">
           <span>Email</span>
           <input
             name="email"
             type="email"
             required
-            className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none transition focus:border-cyan-300"
+            className="w-full border border-black bg-white px-4 py-3 text-black outline-none"
           />
         </label>
 
-        <label className="block space-y-2 text-sm font-medium text-slate-200">
+        <label className="block space-y-2 text-sm font-medium text-black">
           <span>Mot de passe</span>
           <input
             name="password"
             type="password"
             required
-            className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none transition focus:border-cyan-300"
+            className="w-full border border-black bg-white px-4 py-3 text-black outline-none"
           />
         </label>
       </div>
 
       {state.message ? (
-        <p className={`mt-4 text-sm ${state.status === "error" ? "text-rose-300" : "text-emerald-300"}`}>
+        <p className={`mt-4 text-sm ${state.status === "error" ? "text-red-600" : "text-black"}`}>
           {state.message}
         </p>
       ) : null}
@@ -57,7 +51,7 @@ export function LoginForm({ action }: LoginFormProps) {
       <button
         type="submit"
         disabled={pending}
-        className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-cyan-300 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-200 disabled:cursor-not-allowed disabled:bg-slate-400"
+        className="mt-6 inline-flex w-full items-center justify-center gap-2 border border-black bg-black px-6 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
       >
         {pending ? <LoaderCircle className="size-4 animate-spin" /> : null}
         <span>{pending ? "Connexion..." : "Se connecter"}</span>
