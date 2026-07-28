@@ -243,88 +243,254 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, init
             </div>
           </aside>
 
-          <section className="border-b border-neutral-200 p-6 lg:border-b-0 lg:border-r">
-            <div className="flex items-center gap-3">
-              <CalendarDays className="size-5 text-neutral-700" />
-              <div>
-                <p className="text-lg font-semibold text-neutral-950">Sélectionnez la date et l'heure</p>
-                <p className="text-sm text-neutral-500">Choisissez d'abord un jour, puis un créneau disponible.</p>
-              </div>
-            </div>
+          <section
+            className={cn(
+              "border-b border-neutral-200 p-6 lg:border-b-0",
+              currentStep === 1 ? "lg:border-r" : "lg:col-span-2",
+            )}
+          >
+            {currentStep === 1 ? (
+              <>
+                <div className="flex items-center gap-3">
+                  <CalendarDays className="size-5 text-neutral-700" />
+                  <div>
+                    <p className="text-lg font-semibold text-neutral-950">Sélectionnez la date et l'heure</p>
+                    <p className="text-sm text-neutral-500">Choisissez d'abord un jour, puis un créneau disponible.</p>
+                  </div>
+                </div>
 
-            <div className="mt-6">
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-medium uppercase tracking-[0.14em] text-neutral-500">
-                  {formatMonthLabel(monthKeys[visibleMonthIndex] ?? visibleMonthKey)}
-                </p>
-                <div className="flex items-center gap-2">
+                <div className="mt-6">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium uppercase tracking-[0.14em] text-neutral-500">
+                      {formatMonthLabel(monthKeys[visibleMonthIndex] ?? visibleMonthKey)}
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setVisibleMonthKey(monthKeys[Math.max(0, visibleMonthIndex - 1)] ?? visibleMonthKey)}
+                        disabled={visibleMonthIndex === 0}
+                        className="flex size-8 items-center justify-center rounded-full border border-neutral-200 text-neutral-600 disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        ‹
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setVisibleMonthKey(monthKeys[Math.min(monthKeys.length - 1, visibleMonthIndex + 1)] ?? visibleMonthKey)
+                        }
+                        disabled={visibleMonthIndex >= monthKeys.length - 1}
+                        className="flex size-8 items-center justify-center rounded-full border border-neutral-200 text-neutral-600 disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        ›
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 grid grid-cols-7 gap-y-4 text-center text-xs uppercase tracking-[0.12em] text-neutral-400">
+                    {weekdayHeaders.map((label) => (
+                      <div key={label}>{label}</div>
+                    ))}
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-7 gap-y-3 text-center">
+                    {calendarCells.map((cell) => {
+                      if (cell.dayNumber === null) {
+                        return <div key={cell.key} className="h-10" />;
+                      }
+
+                      const entry = dayEntries.find((item) => item.dateKey === cell.key);
+                      const isSelected = selectedDateKey === cell.key;
+                      const isDisabled = !entry || entry.availableCount === 0;
+
+                      return (
+                        <div key={cell.key} className="flex justify-center">
+                          <button
+                            type="button"
+                            disabled={isDisabled}
+                            onClick={() => setSelectedDateKey(cell.key)}
+                            className={cn(
+                              "flex size-10 items-center justify-center rounded-full text-sm transition",
+                              isDisabled && "cursor-not-allowed text-neutral-300",
+                              !isDisabled && !isSelected && "text-neutral-700 hover:bg-neutral-100",
+                              isSelected && "bg-sky-500 text-white",
+                            )}
+                          >
+                            {cell.dayNumber}
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="mt-8 text-sm text-neutral-500">Heure d'Europe, Paris (24h)</div>
+                </div>
+              </>
+            ) : currentStep === 2 ? (
+              <div className="mx-auto max-w-2xl space-y-4">
+                <div className="space-y-1">
+                  <p className="text-lg font-semibold text-neutral-950">Vos informations</p>
+                  <p className="text-sm text-neutral-500">
+                    {selectedSlot
+                      ? `Créneau choisi : ${formatDateTimeFr(selectedSlot, { dateStyle: "full", timeStyle: "short" })}`
+                      : "Complétez vos informations pour continuer."}
+                  </p>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <label className="space-y-2 text-sm font-medium text-neutral-700">
+                    <span>Prénom</span>
+                    <input
+                      value={firstName}
+                      onChange={(event) => setFirstName(event.target.value)}
+                      className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 outline-none transition focus:border-neutral-900 focus:bg-white"
+                    />
+                  </label>
+
+                  <label className="space-y-2 text-sm font-medium text-neutral-700">
+                    <span>Nom</span>
+                    <input
+                      value={lastName}
+                      onChange={(event) => setLastName(event.target.value)}
+                      className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 outline-none transition focus:border-neutral-900 focus:bg-white"
+                    />
+                  </label>
+                </div>
+
+                <label className="space-y-2 text-sm font-medium text-neutral-700">
+                  <span>Email</span>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 outline-none transition focus:border-neutral-900 focus:bg-white"
+                  />
+                </label>
+
+                {initialUser?.email ? (
+                  <p className="text-xs text-neutral-500">
+                    Les champs préremplis peuvent être corrigés avant la confirmation du rendez-vous.
+                  </p>
+                ) : null}
+
+                <label className="space-y-2 text-sm font-medium text-neutral-700">
+                  <span>Téléphone</span>
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={(event) => setPhone(event.target.value)}
+                    className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 outline-none transition focus:border-neutral-900 focus:bg-white"
+                  />
+                </label>
+
+                <label className="space-y-2 text-sm font-medium text-neutral-700">
+                  <span>Message optionnel</span>
+                  <textarea
+                    rows={4}
+                    value={message}
+                    onChange={(event) => setMessage(event.target.value)}
+                    className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 outline-none transition focus:border-neutral-900 focus:bg-white"
+                  />
+                </label>
+
+                {error ? <p className="text-sm font-medium text-rose-600">{error}</p> : null}
+
+                <div className="flex gap-3">
                   <button
                     type="button"
-                    onClick={() => setVisibleMonthKey(monthKeys[Math.max(0, visibleMonthIndex - 1)] ?? visibleMonthKey)}
-                    disabled={visibleMonthIndex === 0}
-                    className="flex size-8 items-center justify-center rounded-full border border-neutral-200 text-neutral-600 disabled:cursor-not-allowed disabled:opacity-40"
+                    onClick={() => {
+                      setCurrentStep(1);
+                      setError("");
+                    }}
+                    className="inline-flex flex-1 items-center justify-center rounded-full border border-neutral-200 px-5 py-3 text-sm font-semibold text-neutral-700 transition hover:bg-neutral-50"
                   >
-                    ‹
+                    Modifier le créneau
                   </button>
                   <button
                     type="button"
-                    onClick={() =>
-                      setVisibleMonthKey(monthKeys[Math.min(monthKeys.length - 1, visibleMonthIndex + 1)] ?? visibleMonthKey)
-                    }
-                    disabled={visibleMonthIndex >= monthKeys.length - 1}
-                    className="flex size-8 items-center justify-center rounded-full border border-neutral-200 text-neutral-600 disabled:cursor-not-allowed disabled:opacity-40"
+                    onClick={handleContinueToRecap}
+                    className="inline-flex flex-1 items-center justify-center rounded-full bg-neutral-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-neutral-800"
                   >
-                    ›
+                    Continuer
                   </button>
                 </div>
               </div>
-
-              <div className="mt-6 grid grid-cols-7 gap-y-4 text-center text-xs uppercase tracking-[0.12em] text-neutral-400">
-                {weekdayHeaders.map((label) => (
-                  <div key={label}>{label}</div>
-                ))}
-              </div>
-
-              <div className="mt-4 grid grid-cols-7 gap-y-3 text-center">
-                {calendarCells.map((cell) => {
-                  if (cell.dayNumber === null) {
-                    return <div key={cell.key} className="h-10" />;
-                  }
-
-                  const entry = dayEntries.find((item) => item.dateKey === cell.key);
-                  const isSelected = selectedDateKey === cell.key;
-                  const isDisabled = !entry || entry.availableCount === 0;
-
-                  return (
-                    <div key={cell.key} className="flex justify-center">
-                      <button
-                        type="button"
-                        disabled={isDisabled}
-                        onClick={() => setSelectedDateKey(cell.key)}
-                        className={cn(
-                          "flex size-10 items-center justify-center rounded-full text-sm transition",
-                          isDisabled && "cursor-not-allowed text-neutral-300",
-                          !isDisabled && !isSelected && "text-neutral-700 hover:bg-neutral-100",
-                          isSelected && "bg-sky-500 text-white",
-                        )}
-                      >
-                        {cell.dayNumber}
-                      </button>
+            ) : (
+              <div className="mx-auto max-w-2xl space-y-4">
+                <div className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-4">
+                  <p className="text-sm font-semibold text-neutral-900">Récapitulatif</p>
+                  <dl className="mt-4 space-y-3 text-sm text-neutral-600">
+                    <div>
+                      <dt className="font-medium text-neutral-900">Catégorie</dt>
+                      <dd>{category.title}</dd>
                     </div>
-                  );
-                })}
-              </div>
+                    <div>
+                      <dt className="font-medium text-neutral-900">Date et heure</dt>
+                      <dd>
+                        {selectedSlotDetails
+                          ? formatDateTimeFr(selectedSlotDetails.start, { dateStyle: "full", timeStyle: "short" })
+                          : "Aucun créneau sélectionné"}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="font-medium text-neutral-900">Nom</dt>
+                      <dd>{firstName} {lastName}</dd>
+                    </div>
+                    <div>
+                      <dt className="font-medium text-neutral-900">Email</dt>
+                      <dd>{email}</dd>
+                    </div>
+                    <div>
+                      <dt className="font-medium text-neutral-900">Téléphone</dt>
+                      <dd>{phone}</dd>
+                    </div>
+                    <div>
+                      <dt className="font-medium text-neutral-900">Message</dt>
+                      <dd>{message.trim() || "Aucun message"}</dd>
+                    </div>
+                  </dl>
+                </div>
 
-              <div className="mt-8 text-sm text-neutral-500">
-                Heure d'Europe, Paris (24h)
+                <div className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-4 text-sm text-neutral-800">
+                  <div className="flex items-center gap-2 font-medium">
+                    <CheckCircle2 className="size-4 text-neutral-700" />
+                    <span>Confirmation</span>
+                  </div>
+                  <p className="mt-2 text-neutral-600">
+                    En confirmant, votre demande sera enregistrée puis transmise pour validation.
+                  </p>
+                </div>
+
+                {error ? <p className="text-sm font-medium text-rose-600">{error}</p> : null}
+
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCurrentStep(2);
+                      setError("");
+                    }}
+                    className="inline-flex flex-1 items-center justify-center rounded-full border border-neutral-200 px-5 py-3 text-sm font-semibold text-neutral-700 transition hover:bg-neutral-50"
+                  >
+                    Modifier les informations
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSubmit}
+                    disabled={isSubmitting}
+                    className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-neutral-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:bg-neutral-300"
+                  >
+                    {isSubmitting ? <LoaderCircle className="size-4 animate-spin" /> : null}
+                    <span>{isSubmitting ? "Confirmation..." : "Confirmer la demande"}</span>
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
           </section>
 
-          <section className="p-6">
-            <div className="max-h-[460px] space-y-3 overflow-y-auto pr-1">
-              {currentStep === 1 ? (
-                selectedDay ? (
+          {currentStep === 1 ? (
+            <section className="p-6">
+              <div className="max-h-[460px] space-y-3 overflow-y-auto pr-1">
+                {selectedDay ? (
                   selectedDay.dateSlots.map((slot) => {
                     const active = selectedSlot === slot.start;
 
@@ -352,169 +518,10 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, init
                       ? "Sélectionnez une date dans le calendrier."
                       : "Aucun créneau n'est disponible pour le moment."}
                   </div>
-                )
-              ) : currentStep === 2 ? (
-                <div className="space-y-4">
-                  <div className="space-y-1">
-                    <p className="text-sm font-semibold text-neutral-950">Vos informations</p>
-                    <p className="text-sm text-neutral-500">
-                      {selectedSlot
-                        ? `Créneau choisi : ${formatDateTimeFr(selectedSlot, { dateStyle: "full", timeStyle: "short" })}`
-                        : "Complétez vos informations pour continuer."}
-                    </p>
-                  </div>
-
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <label className="space-y-2 text-sm font-medium text-neutral-700">
-                      <span>Prénom</span>
-                      <input
-                        value={firstName}
-                        onChange={(event) => setFirstName(event.target.value)}
-                        className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 outline-none transition focus:border-neutral-900 focus:bg-white"
-                      />
-                    </label>
-
-                    <label className="space-y-2 text-sm font-medium text-neutral-700">
-                      <span>Nom</span>
-                      <input
-                        value={lastName}
-                        onChange={(event) => setLastName(event.target.value)}
-                        className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 outline-none transition focus:border-neutral-900 focus:bg-white"
-                      />
-                    </label>
-                  </div>
-
-                  <label className="space-y-2 text-sm font-medium text-neutral-700">
-                    <span>Email</span>
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(event) => setEmail(event.target.value)}
-                      className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 outline-none transition focus:border-neutral-900 focus:bg-white"
-                    />
-                  </label>
-
-                  {initialUser?.email ? (
-                    <p className="text-xs text-neutral-500">
-                      Les champs préremplis peuvent être corrigés avant la confirmation du rendez-vous.
-                    </p>
-                  ) : null}
-
-                  <label className="space-y-2 text-sm font-medium text-neutral-700">
-                    <span>Téléphone</span>
-                    <input
-                      type="tel"
-                      value={phone}
-                      onChange={(event) => setPhone(event.target.value)}
-                      className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 outline-none transition focus:border-neutral-900 focus:bg-white"
-                    />
-                  </label>
-
-                  <label className="space-y-2 text-sm font-medium text-neutral-700">
-                    <span>Message optionnel</span>
-                    <textarea
-                      rows={4}
-                      value={message}
-                      onChange={(event) => setMessage(event.target.value)}
-                      className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 outline-none transition focus:border-neutral-900 focus:bg-white"
-                    />
-                  </label>
-
-                  {error ? <p className="text-sm font-medium text-rose-600">{error}</p> : null}
-
-                  <div className="flex gap-3">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setCurrentStep(1);
-                        setError("");
-                      }}
-                      className="inline-flex flex-1 items-center justify-center rounded-full border border-neutral-200 px-5 py-3 text-sm font-semibold text-neutral-700 transition hover:bg-neutral-50"
-                    >
-                      Modifier le créneau
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleContinueToRecap}
-                      className="inline-flex flex-1 items-center justify-center rounded-full bg-neutral-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-neutral-800"
-                    >
-                      Continuer
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <div className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-4">
-                    <p className="text-sm font-semibold text-neutral-900">Récapitulatif</p>
-                    <dl className="mt-4 space-y-3 text-sm text-neutral-600">
-                      <div>
-                        <dt className="font-medium text-neutral-900">Catégorie</dt>
-                        <dd>{category.title}</dd>
-                      </div>
-                      <div>
-                        <dt className="font-medium text-neutral-900">Date et heure</dt>
-                        <dd>
-                          {selectedSlotDetails
-                            ? formatDateTimeFr(selectedSlotDetails.start, { dateStyle: "full", timeStyle: "short" })
-                            : "Aucun créneau sélectionné"}
-                        </dd>
-                      </div>
-                      <div>
-                        <dt className="font-medium text-neutral-900">Nom</dt>
-                        <dd>{firstName} {lastName}</dd>
-                      </div>
-                      <div>
-                        <dt className="font-medium text-neutral-900">Email</dt>
-                        <dd>{email}</dd>
-                      </div>
-                      <div>
-                        <dt className="font-medium text-neutral-900">Téléphone</dt>
-                        <dd>{phone}</dd>
-                      </div>
-                      <div>
-                        <dt className="font-medium text-neutral-900">Message</dt>
-                        <dd>{message.trim() || "Aucun message"}</dd>
-                      </div>
-                    </dl>
-                  </div>
-
-                  <div className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-4 text-sm text-neutral-800">
-                    <div className="flex items-center gap-2 font-medium">
-                      <CheckCircle2 className="size-4 text-neutral-700" />
-                      <span>Confirmation</span>
-                    </div>
-                    <p className="mt-2 text-neutral-600">
-                      En confirmant, votre demande sera enregistrée puis transmise pour validation.
-                    </p>
-                  </div>
-
-                  {error ? <p className="text-sm font-medium text-rose-600">{error}</p> : null}
-
-                  <div className="flex gap-3">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setCurrentStep(2);
-                        setError("");
-                      }}
-                      className="inline-flex flex-1 items-center justify-center rounded-full border border-neutral-200 px-5 py-3 text-sm font-semibold text-neutral-700 transition hover:bg-neutral-50"
-                    >
-                      Modifier les informations
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleSubmit}
-                      disabled={isSubmitting}
-                      className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-neutral-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:bg-neutral-300"
-                    >
-                      {isSubmitting ? <LoaderCircle className="size-4 animate-spin" /> : null}
-                      <span>{isSubmitting ? "Confirmation..." : "Confirmer la demande"}</span>
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </section>
+                )}
+              </div>
+            </section>
+          ) : null}
         </div>
       </section>
     </div>
