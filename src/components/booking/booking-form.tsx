@@ -182,15 +182,29 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, init
       startsAt: selectedSlot,
     };
 
-    const response = await fetch("/api/public/appointments", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
+    let response: Response;
 
-    const data = (await response.json()) as { success?: boolean; error?: string };
+    try {
+      response = await fetch("/api/public/appointments", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+    } catch {
+      setError("Impossible de contacter le serveur pour le moment.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    let data: { success?: boolean; error?: string } = {};
+
+    try {
+      data = (await response.json()) as { success?: boolean; error?: string };
+    } catch {
+      data = {};
+    }
 
     if (!response.ok) {
       setError(data.error ?? "Une erreur est survenue lors de l'envoi.");

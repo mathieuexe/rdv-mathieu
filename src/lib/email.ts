@@ -78,26 +78,30 @@ async function createEmailLog(input: {
     return null;
   }
 
-  const { data } = await supabase
-    .from("email_logs")
-    .insert({
-      reference: input.reference,
-      template_key: input.templateKey,
-      source_type: input.sourceType,
-      source_label: input.sourceLabel,
-      recipient_email: input.recipientEmail,
-      subject: input.subject,
-      appointment_id: input.appointmentId ?? null,
-      delivery_status: input.deliveryStatus,
-      metadata: input.metadata ?? {},
-    })
-    .select("id")
-    .maybeSingle();
+  try {
+    const { data } = await supabase
+      .from("email_logs")
+      .insert({
+        reference: input.reference,
+        template_key: input.templateKey,
+        source_type: input.sourceType,
+        source_label: input.sourceLabel,
+        recipient_email: input.recipientEmail,
+        subject: input.subject,
+        appointment_id: input.appointmentId ?? null,
+        delivery_status: input.deliveryStatus,
+        metadata: input.metadata ?? {},
+      })
+      .select("id")
+      .maybeSingle();
 
-  // #region debug-point B:email-log-after-insert
-  fetch("http://127.0.0.1:7781/event",{method:"POST",body:JSON.stringify({sessionId:"appointment-api-500",runId:"pre-fix",hypothesisId:"B",location:"src/lib/email.ts:79",msg:"[DEBUG] createEmailLog after insert",data:{emailLogId:typeof data?.id==="string"?data.id:null},ts:Date.now()})}).catch(()=>{});
-  // #endregion
-  return typeof data?.id === "string" ? data.id : null;
+    // #region debug-point B:email-log-after-insert
+    fetch("http://127.0.0.1:7781/event",{method:"POST",body:JSON.stringify({sessionId:"appointment-api-500",runId:"pre-fix",hypothesisId:"B",location:"src/lib/email.ts:79",msg:"[DEBUG] createEmailLog after insert",data:{emailLogId:typeof data?.id==="string"?data.id:null},ts:Date.now()})}).catch(()=>{});
+    // #endregion
+    return typeof data?.id === "string" ? data.id : null;
+  } catch {
+    return null;
+  }
 }
 
 async function updateEmailLog(
@@ -118,14 +122,16 @@ async function updateEmailLog(
     return;
   }
 
-  await supabase
-    .from("email_logs")
-    .update({
-      delivery_status: input.deliveryStatus,
-      resend_email_id: input.resendEmailId ?? null,
-      metadata: input.metadata ?? {},
-    })
-    .eq("id", emailLogId);
+  try {
+    await supabase
+      .from("email_logs")
+      .update({
+        delivery_status: input.deliveryStatus,
+        resend_email_id: input.resendEmailId ?? null,
+        metadata: input.metadata ?? {},
+      })
+      .eq("id", emailLogId);
+  } catch {}
 }
 
 export async function sendTransactionalEmail({
@@ -169,26 +175,60 @@ export async function sendTransactionalEmail({
   }
 
   const resend = new Resend(apiKey);
-  // #region debug-point C:before-resend-send
-  fetch("http://127.0.0.1:7781/event",{method:"POST",body:JSON.stringify({sessionId:"appointment-api-500",runId:"pre-fix",hypothesisId:"C",location:"src/lib/email.ts:179",msg:"[DEBUG] before resend.emails.send",data:{templateKey,to,subject,from},ts:Date.now()})}).catch(()=>{});
-  // #endregion
-  const { data, error } = await resend.emails.send({
-    from,
-    to,
-    subject,
-    react: buildTemplate(reference),
-  });
-
-  if (error) {
-    // #region debug-point A:resend-error
-    fetch("http://127.0.0.1:7781/event",{method:"POST",body:JSON.stringify({sessionId:"appointment-api-500",runId:"pre-fix",hypothesisId:"A",location:"src/lib/email.ts:189",msg:"[DEBUG] resend returned error",data:{templateKey,error:error.message},ts:Date.now()})}).catch(()=>{});
+  try {
+    // #region debug-point C:before-resend-send
+    fetch("http://127.0.0.1:7781/event",{method:"POST",body:JSON.stringify({sessionId:"appointment-api-500",runId:"pre-fix",hypothesisId:"C",location:"src/lib/email.ts:179",msg:"[DEBUG] before resend.emails.send",data:{templateKey,to,subject,from},ts:Date.now()})}).catch(()=>{});
     // #endregion
+    const { data, error } = await resend.emails.send({
+      from,
+      to,
+      subject,
+      react: buildTemplate(reference),
+    });
+
+    if (error) {
+      // #region debug-point A:resend-error
+      fetch("http://127.0.0.1:7781/event",{method:"POST",body:JSON.stringify({sessionId:"appointment-api-500",runId:"pre-fix",hypothesisId:"A",location:"src/lib/email.ts:189",msg:"[DEBUG] resend returned error",data:{templateKey,error:error.message},ts:Date.now()})}).catch(()=>{});
+      // #endregion
+      await updateEmailLog(emailLogId, {
+        deliveryStatus: "failed",
+        metadata: {
+          ...(metadata ?? {}),
+          from,
+          resendError: error.message,
+        },
+      });
+
+      return {
+        delivered: false,
+        reference,
+        reason: "email_request_failed",
+      };
+    }
+
+    // #region debug-point C:resend-success
+    fetch("http://127.0.0.1:7781/event",{method:"POST",body:JSON.stringify({sessionId:"appointment-api-500",runId:"pre-fix",hypothesisId:"C",location:"src/lib/email.ts:207",msg:"[DEBUG] resend send success",data:{templateKey,resendEmailId:data?.id??null},ts:Date.now()})}).catch(()=>{});
+    // #endregion
+    await updateEmailLog(emailLogId, {
+      deliveryStatus: "sent",
+      resendEmailId: data?.id,
+      metadata: {
+        ...(metadata ?? {}),
+        from,
+      },
+    });
+
+    return {
+      delivered: true,
+      reference,
+    };
+  } catch (error) {
     await updateEmailLog(emailLogId, {
       deliveryStatus: "failed",
       metadata: {
         ...(metadata ?? {}),
         from,
-        resendError: error.message,
+        resendError: error instanceof Error ? error.message : "Erreur inconnue",
       },
     });
 
@@ -198,23 +238,6 @@ export async function sendTransactionalEmail({
       reason: "email_request_failed",
     };
   }
-
-  // #region debug-point C:resend-success
-  fetch("http://127.0.0.1:7781/event",{method:"POST",body:JSON.stringify({sessionId:"appointment-api-500",runId:"pre-fix",hypothesisId:"C",location:"src/lib/email.ts:207",msg:"[DEBUG] resend send success",data:{templateKey,resendEmailId:data?.id??null},ts:Date.now()})}).catch(()=>{});
-  // #endregion
-  await updateEmailLog(emailLogId, {
-    deliveryStatus: "sent",
-    resendEmailId: data?.id,
-    metadata: {
-      ...(metadata ?? {}),
-      from,
-    },
-  });
-
-  return {
-    delivered: true,
-    reference,
-  };
 }
 
 export async function sendSignupConfirmationEmail(input: {
