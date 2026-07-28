@@ -2,7 +2,7 @@ import Link from "next/link";
 import { CheckCircle2, Inbox, LogOut } from "lucide-react";
 
 import { getAppointmentsView, getCategories, getDashboardMetrics, getSiteSettings } from "@/lib/data-access";
-import { formatAppointmentStatus } from "@/lib/utils";
+import { formatAppointmentStatus, formatDateTimeFr } from "@/lib/utils";
 
 import { logoutAction } from "../login/actions";
 
@@ -88,12 +88,7 @@ export default async function AdminDashboardPage() {
                         {appointment.firstName} {appointment.lastName}
                       </p>
                       <p className="mt-1 text-sm text-slate-500">{appointment.category?.title ?? "Categorie supprimee"}</p>
-                      <p className="mt-2 text-sm text-slate-600">
-                        {new Date(appointment.startsAt).toLocaleString("fr-FR", {
-                          dateStyle: "medium",
-                          timeStyle: "short",
-                        })}
-                      </p>
+                      <p className="mt-2 text-sm text-slate-600">{formatDateTimeFr(appointment.startsAt)}</p>
                     </div>
 
                     <span className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">

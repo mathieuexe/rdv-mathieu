@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { formatAppointmentStatus } from "@/lib/utils";
+import { formatAppointmentStatus, formatDateTimeFr } from "@/lib/utils";
 import type { AppointmentCategory, AppointmentRecord } from "@/types/domain";
 
 interface AppointmentWithCategory extends AppointmentRecord {
@@ -54,10 +54,7 @@ export function AppointmentsTable({ appointments }: AppointmentsTableProps) {
               </td>
               <td className="px-5 py-4">{appointment.category?.title ?? "Categorie supprimee"}</td>
               <td className="px-5 py-4">
-                {new Date(appointment.startsAt).toLocaleString("fr-FR", {
-                  dateStyle: "medium",
-                  timeStyle: "short",
-                })}
+                {formatDateTimeFr(appointment.startsAt)}
               </td>
               <td className="px-5 py-4">
                 <span className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700">

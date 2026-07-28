@@ -36,23 +36,33 @@ export const signUpSchema = z
     message: "Les mots de passe ne correspondent pas.",
   });
 
-export const categoryAdminSchema = z.object({
-  categoryId: z.string().trim().optional().or(z.literal("")),
-  title: z.string().trim().min(3, "Le titre est requis."),
-  slug: z.string().trim().min(3, "Le lien est requis."),
-  durationMinutes: z.coerce.number().int().positive("La durée doit être positive."),
-  appointmentMode: z.enum(["telephone", "physique", "visioconference"]),
-  description: z.string().trim().min(10, "La description est requise."),
-  isOnline: z.boolean(),
-  customMessage: z.string().trim().max(500).optional().or(z.literal("")),
-  startTime: z.string().trim().regex(/^\d{2}:\d{2}$/, "L'heure de debut est requise."),
-  endTime: z.string().trim().regex(/^\d{2}:\d{2}$/, "L'heure de fin est requise."),
-});
+export const categoryAdminSchema = z
+  .object({
+    categoryId: z.string().trim().optional().or(z.literal("")),
+    title: z.string().trim().min(3, "Le titre est requis."),
+    slug: z.string().trim().min(3, "Le lien est requis."),
+    durationMinutes: z.coerce.number().int().positive("La durée doit être positive."),
+    appointmentMode: z.enum(["telephone", "physique", "visioconference"]),
+    description: z.string().trim().min(10, "La description est requise."),
+    isOnline: z.boolean(),
+    customMessage: z.string().trim().max(500).optional().or(z.literal("")),
+    startTime: z.string().trim().regex(/^\d{2}:\d{2}$/, "L'heure de debut est requise."),
+    endTime: z.string().trim().regex(/^\d{2}:\d{2}$/, "L'heure de fin est requise."),
+  })
+  .refine((data) => data.startTime < data.endTime, {
+    path: ["endTime"],
+    message: "L'heure de fin doit etre posterieure a l'heure de debut.",
+  });
 
-export const settingsSchema = z.object({
-  maintenanceMode: z.boolean(),
-  maintenanceMessage: z.string().trim().min(8, "Le message de maintenance est requis."),
-});
+export const settingsSchema = z
+  .object({
+    maintenanceMode: z.boolean(),
+    maintenanceMessage: z.string().trim(),
+  })
+  .refine((data) => !data.maintenanceMode || data.maintenanceMessage.length >= 8, {
+    path: ["maintenanceMessage"],
+    message: "Le message de maintenance est requis.",
+  });
 
 export const adminAppointmentSchema = appointmentRequestSchema.extend({
   categorySlug: z.string().trim().min(1, "La categorie est requise."),

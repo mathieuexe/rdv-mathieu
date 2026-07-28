@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 
 import { AppointmentDecisionPanel } from "@/components/admin/appointment-decision-panel";
 import { getAppointmentById, getCategoryById } from "@/lib/data-access";
-import { formatAppointmentMode, formatAppointmentStatus } from "@/lib/utils";
+import { formatAppointmentMode, formatAppointmentStatus, formatDateTimeFr } from "@/lib/utils";
 
 export default async function AppointmentDetailPage({
   params,
@@ -41,12 +41,7 @@ export default async function AppointmentDetailPage({
           <div className="rounded-[22px] border border-slate-200 bg-[#f8fafc] p-5">
             <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Statut</p>
             <p className="mt-2 font-semibold text-slate-950">{formatAppointmentStatus(appointment.status)}</p>
-            <p className="mt-2 text-sm text-slate-600">
-              {new Date(appointment.startsAt).toLocaleString("fr-FR", {
-                dateStyle: "full",
-                timeStyle: "short",
-              })}
-            </p>
+            <p className="mt-2 text-sm text-slate-600">{formatDateTimeFr(appointment.startsAt, { dateStyle: "full", timeStyle: "short" })}</p>
           </div>
         </div>
 

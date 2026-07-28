@@ -4,9 +4,12 @@ interface CategoryEditorFormProps {
   action: (formData: FormData) => Promise<void>;
   category?: AppointmentCategory | null;
   title: string;
+  returnPath: string;
+  saved?: boolean;
+  error?: string;
 }
 
-export function CategoryEditorForm({ action, category, title }: CategoryEditorFormProps) {
+export function CategoryEditorForm({ action, category, title, returnPath, saved, error }: CategoryEditorFormProps) {
   const defaultWindow = category?.availabilityRules[0]?.windows[0];
 
   return (
@@ -21,6 +24,19 @@ export function CategoryEditorForm({ action, category, title }: CategoryEditorFo
 
       <form action={action} className="mt-8 grid gap-6 xl:grid-cols-[1fr_0.9fr]">
         <input type="hidden" name="categoryId" value={category?.id ?? ""} />
+        <input type="hidden" name="returnPath" value={returnPath} />
+
+        {saved ? (
+          <div className="xl:col-span-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+            La categorie a bien ete enregistree.
+          </div>
+        ) : null}
+
+        {error ? (
+          <div className="xl:col-span-2 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+            {error}
+          </div>
+        ) : null}
 
         <div className="space-y-5">
           <label className="block space-y-2 text-sm font-medium text-slate-700">

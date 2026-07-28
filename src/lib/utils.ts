@@ -1,6 +1,8 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
+const PARIS_TIME_ZONE = "Europe/Paris";
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -31,4 +33,18 @@ export function formatAppointmentStatus(status: "en_attente" | "accepte" | "refu
   }
 
   return "Refusé";
+}
+
+export function formatDateTimeFr(
+  value: string | Date,
+  options: Intl.DateTimeFormatOptions = {
+    dateStyle: "medium",
+    timeStyle: "short",
+  },
+) {
+  return new Intl.DateTimeFormat("fr-FR", {
+    timeZone: PARIS_TIME_ZONE,
+    hour12: false,
+    ...options,
+  }).format(typeof value === "string" ? new Date(value) : value);
 }

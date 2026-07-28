@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { CheckCheck, MailCheck } from "lucide-react";
 
+import { formatDateTimeFr } from "@/lib/utils";
+
 export default async function BookingConfirmationPage({
   searchParams,
 }: {
@@ -33,12 +35,7 @@ export default async function BookingConfirmationPage({
             <MailCheck className="size-5 text-emerald-300" />
             <p className="mt-4 text-sm font-semibold text-white">Email envoyé</p>
             <p className="mt-2 text-sm leading-7 text-slate-300">
-              {slot
-                ? `Demande enregistrée pour le ${new Date(slot).toLocaleString("fr-FR", {
-                    dateStyle: "full",
-                    timeStyle: "short",
-                  })}.`
-                : "Le récapitulatif vous a été envoyé par email."}
+              {slot ? `Demande enregistrée pour le ${formatDateTimeFr(slot, { dateStyle: "full", timeStyle: "short" })}.` : "Le récapitulatif vous a été envoyé par email."}
             </p>
           </div>
         </div>

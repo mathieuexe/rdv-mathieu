@@ -8,6 +8,13 @@ import { createAdminAppointment, saveCategory, saveSiteSettings } from "@/lib/da
 import { adminAppointmentSchema, categoryAdminSchema, settingsSchema } from "@/lib/validators";
 
 export async function saveCategoryAction(formData: FormData) {
+  const session = await getAdminSession();
+
+  if (!session.isAuthenticated) {
+    redirect("/admin/login");
+  }
+
+  const returnPath = String(formData.get("returnPath") || "/admin/categories");
   const parsed = categoryAdminSchema.safeParse({
     categoryId: formData.get("categoryId"),
     title: formData.get("title"),
@@ -22,43 +29,63 @@ export async function saveCategoryAction(formData: FormData) {
   });
 
   if (!parsed.success) {
-    redirect("/admin/categories?error=1");
+    const message = encodeURIComponent(parsed.error.issues[0]?.message ?? "Le formulaire contient au moins une erreur.");
+    redirect(`${returnPath}?error=${message}`);
   }
 
-  await saveCategory({
-    categoryId: parsed.data.categoryId || undefined,
-    title: parsed.data.title,
-    slug: parsed.data.slug,
-    durationMinutes: parsed.data.durationMinutes,
-    appointmentMode: parsed.data.appointmentMode,
-    description: parsed.data.description,
-    isOnline: parsed.data.isOnline,
-    customMessage: parsed.data.customMessage || undefined,
-    startTime: parsed.data.startTime,
-    endTime: parsed.data.endTime,
-  });
+  try {
+    const category = await saveCategory({
+      categoryId: parsed.data.categoryId || undefined,
+      title: parsed.data.title,
+      slug: parsed.data.slug,
+      durationMinutes: parsed.data.durationMinutes,
+      appointmentMode: parsed.data.appointmentMode,
+      description: parsed.data.description,
+      isOnline: parsed.data.isOnline,
+      customMessage: parsed.data.customMessage || undefined,
+      startTime: parsed.data.startTime,
+      endTime: parsed.data.endTime,
+    });
 
-  revalidatePath("/admin");
-  revalidatePath("/admin/categories");
-  revalidatePath("/");
-  redirect("/admin/categories?saved=1");
+    revalidatePath("/admin");
+    revalidatePath("/admin/categories");
+    revalidatePath("/");
+
+    const successPath = parsed.data.categoryId ? returnPath : `/admin/categories/${category.id}`;
+    redirect(`${successPath}?saved=1`);
+  } catch (error) {
+    const message = encodeURIComponent(error instanceof Error ? error.message : "Impossible d'enregistrer la categorie.");
+    redirect(`${returnPath}?error=${message}`);
+  }
 }
 
 export async function saveSettingsAction(formData: FormData) {
+  const session = await getAdminSession();
+
+  if (!session.isAuthenticated) {
+    redirect("/admin/login");
+  }
+
   const parsed = settingsSchema.safeParse({
     maintenanceMode: formData.get("maintenanceMode") === "on",
     maintenanceMessage: formData.get("maintenanceMessage"),
   });
 
   if (!parsed.success) {
-    redirect("/admin/parametres?error=1");
+    const message = encodeURIComponent(parsed.error.issues[0]?.message ?? "Le formulaire contient au moins une erreur.");
+    redirect(`/admin/parametres?error=${message}`);
   }
 
-  await saveSiteSettings(parsed.data);
-  revalidatePath("/admin");
-  revalidatePath("/maintenance");
-  revalidatePath("/");
-  redirect("/admin/parametres?saved=1");
+  try {
+    await saveSiteSettings(parsed.data);
+    revalidatePath("/admin");
+    revalidatePath("/maintenance");
+    revalidatePath("/");
+    redirect("/admin/parametres?saved=1");
+  } catch (error) {
+    const message = encodeURIComponent(error instanceof Error ? error.message : "Impossible d'enregistrer les parametres.");
+    redirect(`/admin/parametres?error=${message}`);
+  }
 }
 
 export async function createAdminAppointmentAction(formData: FormData) {

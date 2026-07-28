@@ -5,6 +5,7 @@ import { PublicFooter } from "@/components/public/public-footer";
 import { PublicHeader } from "@/components/public/public-header";
 import { getPublicUserSession } from "@/lib/auth";
 import { getUserAppointmentsByEmail } from "@/lib/data-access";
+import { formatDateTimeFr } from "@/lib/utils";
 
 import { cancelAppointmentAction, logoutAccountAction } from "./actions";
 
@@ -69,12 +70,7 @@ export default async function AccountPage() {
                           <p className="text-sm uppercase tracking-[0.18em] text-neutral-500">
                             {appointment.category?.title ?? "Rendez-vous"}
                           </p>
-                          <h3 className="mt-2 text-xl font-semibold">
-                            {new Date(appointment.startsAt).toLocaleString("fr-FR", {
-                              dateStyle: "full",
-                              timeStyle: "short",
-                            })}
-                          </h3>
+                          <h3 className="mt-2 text-xl font-semibold">{formatDateTimeFr(appointment.startsAt, { dateStyle: "full", timeStyle: "short" })}</h3>
                           <p className="mt-2 text-sm text-neutral-600">Statut : {getStatusLabel(appointment.status)}</p>
                           {appointment.clientMessage ? (
                             <p className="mt-2 text-sm text-neutral-600">Message : {appointment.clientMessage}</p>

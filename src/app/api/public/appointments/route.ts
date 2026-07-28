@@ -1,5 +1,6 @@
 import { createAppointmentRequest, getCategorySlots } from "@/lib/data-access";
 import { sendTransactionalEmail } from "@/lib/email";
+import { formatDateTimeFr } from "@/lib/utils";
 import { appointmentRequestSchema } from "@/lib/validators";
 
 export async function POST(request: Request) {
@@ -31,7 +32,7 @@ export async function POST(request: Request) {
       <h1>Demande enregistrée</h1>
       <p>Bonjour ${result.appointment.firstName},</p>
       <p>Votre demande pour <strong>${result.category.title}</strong> a bien été enregistrée.</p>
-      <p>Créneau demandé : ${new Date(result.appointment.startsAt).toLocaleString("fr-FR")}</p>
+      <p>Créneau demandé : ${formatDateTimeFr(result.appointment.startsAt, { dateStyle: "full", timeStyle: "short" })}</p>
       <p>Statut actuel : en attente de validation administrateur.</p>
     `,
   });

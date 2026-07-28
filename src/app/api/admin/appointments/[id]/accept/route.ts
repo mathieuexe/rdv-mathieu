@@ -1,6 +1,7 @@
 import { getAdminSession } from "@/lib/auth";
 import { getAppointmentById, getCategoryById, updateAppointmentStatus } from "@/lib/data-access";
 import { sendTransactionalEmail } from "@/lib/email";
+import { formatDateTimeFr } from "@/lib/utils";
 
 export async function POST(_request: Request, context: { params: Promise<{ id: string }> }) {
   const session = await getAdminSession();
@@ -26,7 +27,7 @@ export async function POST(_request: Request, context: { params: Promise<{ id: s
       <h1>Rendez-vous confirmé</h1>
       <p>Bonjour ${appointment.firstName},</p>
       <p>Votre demande pour <strong>${category?.title ?? "votre rendez-vous"}</strong> a été acceptée.</p>
-      <p>Date : ${new Date(appointment.startsAt).toLocaleString("fr-FR")}</p>
+      <p>Date : ${formatDateTimeFr(appointment.startsAt, { dateStyle: "full", timeStyle: "short" })}</p>
     `,
   });
 

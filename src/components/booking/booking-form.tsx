@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { CalendarDays, CheckCircle2, LoaderCircle, MessageSquareText } from "lucide-react";
 
 import { groupSlotsByDay } from "@/lib/booking";
-import { cn } from "@/lib/utils";
+import { cn, formatDateTimeFr } from "@/lib/utils";
 import type { BookingSlot } from "@/types/domain";
 
 interface BookingFormProps {
@@ -193,12 +193,7 @@ export function BookingForm({ categorySlug, slots, helperMessage, initialUser }:
               </span>
             </div>
             <p className="mt-2 text-cyan-900/80">
-              {selectedSlot
-                ? new Date(selectedSlot).toLocaleString("fr-FR", {
-                    dateStyle: "full",
-                    timeStyle: "short",
-                  })
-                : "Le récapitulatif du rendez-vous apparaîtra ici."}
+              {selectedSlot ? formatDateTimeFr(selectedSlot, { dateStyle: "full", timeStyle: "short" }) : "Le récapitulatif du rendez-vous apparaîtra ici."}
             </p>
           </div>
 

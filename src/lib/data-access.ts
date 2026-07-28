@@ -393,7 +393,11 @@ export async function saveCategory(input: {
   const supabase = getSupabaseAdminClient();
 
   if (!supabase) {
-    return null;
+    throw new Error("L'enregistrement des categories est indisponible tant que Supabase n'est pas configure.");
+  }
+
+  if (input.startTime >= input.endTime) {
+    throw new Error("L'heure de debut doit etre inferieure a l'heure de fin.");
   }
 
   const categoryPayload = {
@@ -407,7 +411,7 @@ export async function saveCategory(input: {
     updated_at: new Date().toISOString(),
   };
 
-  const { data: categoryRow } = input.categoryId
+  const { data: categoryRow, error: categoryError } = input.categoryId
     ? await supabase
         .from("categories")
         .update(categoryPayload)
@@ -420,14 +424,23 @@ export async function saveCategory(input: {
         .select("*")
         .single();
 
+  if (categoryError) {
+    throw new Error(categoryError.message);
+  }
+
   if (!categoryRow) {
-    return null;
+    throw new Error("La categorie n'a pas pu etre enregistree.");
   }
 
   const weekdayValues = [1, 2, 3, 4, 5];
 
-  await supabase.from("category_availability_rules").delete().eq("category_id", categoryRow.id);
-  await supabase.from("category_availability_rules").insert(
+  const { error: deleteRulesError } = await supabase.from("category_availability_rules").delete().eq("category_id", categoryRow.id);
+
+  if (deleteRulesError) {
+    throw new Error(deleteRulesError.message);
+  }
+
+  const { error: insertRulesError } = await supabase.from("category_availability_rules").insert(
     weekdayValues.map((weekday) => ({
       category_id: categoryRow.id,
       weekday,
@@ -436,7 +449,16 @@ export async function saveCategory(input: {
     })),
   );
 
+  if (insertRulesError) {
+    throw new Error(insertRulesError.message);
+  }
+
   const refreshed = await getCategoryById(String(categoryRow.id));
+
+  if (!refreshed) {
+    throw new Error("La categorie a ete enregistree mais n'a pas pu etre relue.");
+  }
+
   return refreshed;
 }
 
@@ -444,13 +466,13 @@ export async function saveSiteSettings(input: { maintenanceMode: boolean; mainte
   const supabase = getSupabaseAdminClient();
 
   if (!supabase) {
-    return null;
+    throw new Error("L'enregistrement des parametres est indisponible tant que Supabase n'est pas configure.");
   }
 
   const { data: existing } = await supabase.from("site_settings").select("id").limit(1).maybeSingle();
 
   if (existing?.id) {
-    await supabase
+    const { error } = await supabase
       .from("site_settings")
       .update({
         maintenance_mode: input.maintenanceMode,
@@ -458,11 +480,19 @@ export async function saveSiteSettings(input: { maintenanceMode: boolean; mainte
         updated_at: new Date().toISOString(),
       })
       .eq("id", existing.id);
+
+    if (error) {
+      throw new Error(error.message);
+    }
   } else {
-    await supabase.from("site_settings").insert({
+    const { error } = await supabase.from("site_settings").insert({
       maintenance_mode: input.maintenanceMode,
       maintenance_message: input.maintenanceMessage,
     });
+
+    if (error) {
+      throw new Error(error.message);
+    }
   }
 
   return getSiteSettings();
