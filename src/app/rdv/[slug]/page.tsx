@@ -3,6 +3,8 @@ import { TriangleAlert } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 
 import { BookingForm } from "@/components/booking/booking-form";
+import { PublicFooter } from "@/components/public/public-footer";
+import { PublicHeader } from "@/components/public/public-header";
 import { getPublicUserSession } from "@/lib/auth";
 import { getBookingState } from "@/lib/booking";
 import { getCategorySlots } from "@/lib/data-access";
@@ -27,39 +29,45 @@ export default async function BookingCategoryPage({
   const session = await getPublicUserSession();
 
   return (
-    <main className="min-h-screen bg-[#f6f5f2] px-4 py-6 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl">
-        {!bookingState.available ? (
-          <section className="rounded-[28px] border border-amber-200 bg-amber-50 p-6 shadow-[0_24px_60px_rgba(15,23,42,0.06)] sm:p-8">
-            <Link href="/" className="text-sm text-amber-900 underline underline-offset-4">
-              Retour à l'accueil
-            </Link>
-            <div className="flex items-start gap-3">
-              <TriangleAlert className="mt-1 size-5 text-amber-700" />
-              <div>
-                <h2 className="text-2xl font-semibold text-amber-950">{bookingState.title}</h2>
-                <p className="mt-3 max-w-2xl text-sm leading-7 text-amber-900/90">{bookingState.message}</p>
+    <div className="flex min-h-screen flex-col bg-[#f6f5f2] text-black">
+      <PublicHeader />
+
+      <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-6xl">
+          {!bookingState.available ? (
+            <section className="rounded-[28px] border border-amber-200 bg-amber-50 p-6 shadow-[0_24px_60px_rgba(15,23,42,0.06)] sm:p-8">
+              <Link href="/" className="text-sm text-amber-900 underline underline-offset-4">
+                Retour à l'accueil
+              </Link>
+              <div className="flex items-start gap-3">
+                <TriangleAlert className="mt-1 size-5 text-amber-700" />
+                <div>
+                  <h2 className="text-2xl font-semibold text-amber-950">{bookingState.title}</h2>
+                  <p className="mt-3 max-w-2xl text-sm leading-7 text-amber-900/90">{bookingState.message}</p>
+                </div>
               </div>
-            </div>
-          </section>
-        ) : (
-          <BookingForm
-            category={payload.category}
-            categorySlug={payload.category.slug}
-            slots={payload.slots}
-            helperMessage={bookingState.message}
-            initialUser={
-              session.isAuthenticated
-                ? {
-                    firstName: session.firstName,
-                    lastName: session.lastName,
-                    email: session.email,
-                  }
-                : undefined
-            }
-          />
-        )}
-      </div>
-    </main>
+            </section>
+          ) : (
+            <BookingForm
+              category={payload.category}
+              categorySlug={payload.category.slug}
+              slots={payload.slots}
+              helperMessage={bookingState.message}
+              initialUser={
+                session.isAuthenticated
+                  ? {
+                      firstName: session.firstName,
+                      lastName: session.lastName,
+                      email: session.email,
+                    }
+                  : undefined
+              }
+            />
+          )}
+        </div>
+      </main>
+
+      <PublicFooter />
+    </div>
   );
 }

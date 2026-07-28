@@ -155,9 +155,9 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, init
   }
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-[1100px] space-y-6">
       <section className="overflow-hidden rounded-[28px] border border-neutral-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.06)]">
-        <div className="grid lg:grid-cols-[280px_minmax(0,1fr)_240px]">
+        <div className="grid lg:grid-cols-[250px_minmax(0,1fr)_220px]">
           <aside className="border-b border-neutral-200 bg-[#fafaf9] p-6 lg:border-b-0 lg:border-r">
             <a href="/" className="text-sm text-neutral-500 underline underline-offset-4">
               Retour à l'accueil
