@@ -1,11 +1,15 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { categoryAdminSchema, settingsSchema } from "@/lib/validators";
+import { getAdminSession } from "@/lib/auth";
+import { createAdminAppointment, saveCategory, saveSiteSettings } from "@/lib/data-access";
+import { adminAppointmentSchema, categoryAdminSchema, settingsSchema } from "@/lib/validators";
 
 export async function saveCategoryAction(formData: FormData) {
   const parsed = categoryAdminSchema.safeParse({
+    categoryId: formData.get("categoryId"),
     title: formData.get("title"),
     slug: formData.get("slug"),
     durationMinutes: formData.get("durationMinutes"),
@@ -13,12 +17,30 @@ export async function saveCategoryAction(formData: FormData) {
     description: formData.get("description"),
     isOnline: formData.get("isOnline") === "on",
     customMessage: formData.get("customMessage"),
+    startTime: formData.get("startTime"),
+    endTime: formData.get("endTime"),
   });
 
   if (!parsed.success) {
     redirect("/admin/categories?error=1");
   }
 
+  await saveCategory({
+    categoryId: parsed.data.categoryId || undefined,
+    title: parsed.data.title,
+    slug: parsed.data.slug,
+    durationMinutes: parsed.data.durationMinutes,
+    appointmentMode: parsed.data.appointmentMode,
+    description: parsed.data.description,
+    isOnline: parsed.data.isOnline,
+    customMessage: parsed.data.customMessage || undefined,
+    startTime: parsed.data.startTime,
+    endTime: parsed.data.endTime,
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/categories");
+  revalidatePath("/");
   redirect("/admin/categories?saved=1");
 }
 
@@ -32,5 +54,42 @@ export async function saveSettingsAction(formData: FormData) {
     redirect("/admin/parametres?error=1");
   }
 
+  await saveSiteSettings(parsed.data);
+  revalidatePath("/admin");
+  revalidatePath("/maintenance");
+  revalidatePath("/");
   redirect("/admin/parametres?saved=1");
+}
+
+export async function createAdminAppointmentAction(formData: FormData) {
+  const session = await getAdminSession();
+
+  if (!session.isAuthenticated || !session.userId || !session.email) {
+    redirect("/admin/login");
+  }
+
+  const parsed = adminAppointmentSchema.safeParse({
+    categorySlug: formData.get("categorySlug"),
+    firstName: formData.get("firstName"),
+    lastName: formData.get("lastName"),
+    email: formData.get("email"),
+    phone: formData.get("phone"),
+    message: formData.get("message"),
+    startsAt: formData.get("startsAt"),
+  });
+
+  if (!parsed.success) {
+    redirect("/admin/rendez-vous/nouveau?error=1");
+  }
+
+  await createAdminAppointment({
+    ...parsed.data,
+    message: parsed.data.message || undefined,
+    adminUserId: session.userId,
+    adminEmail: session.email,
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/rendez-vous");
+  redirect("/admin/rendez-vous/agenda?saved=1");
 }

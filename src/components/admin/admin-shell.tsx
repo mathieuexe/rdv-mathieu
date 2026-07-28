@@ -2,14 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarRange, LayoutDashboard, Settings2, Shapes, ShieldAlert } from "lucide-react";
+import { CalendarPlus2, CalendarRange, Clock3, LayoutDashboard, Settings2, Shapes, ShieldAlert } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
 const navigation = [
   { href: "/admin", label: "Tableau de bord", icon: LayoutDashboard },
+  { href: "/admin/rendez-vous/en-attente", label: "En attente", icon: Clock3 },
+  { href: "/admin/rendez-vous/agenda", label: "Agenda", icon: CalendarRange },
+  { href: "/admin/rendez-vous/nouveau", label: "Creer un RDV", icon: CalendarPlus2 },
   { href: "/admin/categories", label: "Catégories", icon: Shapes },
-  { href: "/admin/rendez-vous", label: "Rendez-vous", icon: CalendarRange },
   { href: "/admin/parametres", label: "Paramètres", icon: Settings2 },
 ];
 

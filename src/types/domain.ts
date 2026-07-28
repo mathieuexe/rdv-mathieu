@@ -60,6 +60,9 @@ export interface AppointmentRecord {
   status: AppointmentStatus;
   rejectionReason?: string;
   cancelReason?: string;
+  origin: "utilisateur" | "administrateur";
+  createdByAdminUserId?: string;
+  createdByAdminEmail?: string;
   createdAt: string;
 }
 

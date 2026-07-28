@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 
-import { clearDemoAdminCookie, setDemoAdminCookie } from "@/lib/auth";
+import { clearDemoAdminCookie, isUserAdmin, setDemoAdminCookie } from "@/lib/auth";
 import { getAdminEmail, isSupabaseConfigured } from "@/lib/env";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { loginSchema } from "@/lib/validators";
@@ -54,12 +54,14 @@ export async function loginAction(_state: LoginActionState, formData: FormData):
     password,
   });
 
-  if (error || data.user?.email?.toLowerCase() !== adminEmail) {
+  const isAdmin = data.user ? await isUserAdmin(data.user.id) : false;
+
+  if (error || !isAdmin) {
     await clearDemoAdminCookie();
 
     return {
       status: "error",
-      message: "Accès refusé. Vérifiez vos identifiants administrateur.",
+      message: "Accès refusé. Ce compte n'est pas autorisé à accéder à l'administration.",
     };
   }
 

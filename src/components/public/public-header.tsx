@@ -19,6 +19,10 @@ function getLinkClass(href: string, currentPath?: string) {
     return isActive ? "font-semibold underline underline-offset-4" : "underline underline-offset-4";
   }
 
+  if (href === "/admin") {
+    return "rounded-full bg-red-600 px-4 py-2 font-semibold text-white";
+  }
+
   return isActive ? "font-semibold underline underline-offset-4" : "underline underline-offset-4";
 }
 
@@ -34,9 +38,16 @@ export async function PublicHeader({ currentPath }: PublicHeaderProps) {
 
         <nav className="flex items-center gap-4 text-sm">
           {session.isAuthenticated ? (
-            <Link href="/compte" className={getLinkClass("/compte", currentPath)}>
-              Bonjour : {session.fullName}
-            </Link>
+            <>
+              <Link href="/compte" className={getLinkClass("/compte", currentPath)}>
+                Bonjour : {session.fullName}
+              </Link>
+              {session.isAdmin ? (
+                <Link href="/admin" className={getLinkClass("/admin", currentPath)}>
+                  AdminPanel
+                </Link>
+              ) : null}
+            </>
           ) : (
             <>
               <Link href="/inscription" className={getLinkClass("/inscription", currentPath)}>

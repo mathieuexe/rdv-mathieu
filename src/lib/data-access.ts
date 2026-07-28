@@ -80,6 +80,9 @@ function mapAppointmentRow(row: Record<string, unknown>): AppointmentRecord {
     status: row.status as AppointmentRecord["status"],
     rejectionReason: typeof row.rejection_reason === "string" ? row.rejection_reason : undefined,
     cancelReason: typeof row.cancel_reason === "string" ? row.cancel_reason : undefined,
+    origin: row.origin === "administrateur" ? "administrateur" : "utilisateur",
+    createdByAdminUserId: typeof row.created_by_admin_user_id === "string" ? row.created_by_admin_user_id : undefined,
+    createdByAdminEmail: typeof row.created_by_admin_email === "string" ? row.created_by_admin_email : undefined,
     createdAt: String(row.created_at ?? new Date().toISOString()),
   };
 }
@@ -135,10 +138,46 @@ export async function getCategories() {
 }
 
 export async function getPublicCategoryBySlug(slug: string) {
+  const supabase = getSupabaseAdminClient();
+
+  if (supabase) {
+    const [{ data: categoryRow }, { data: ruleRows }, { data: blackoutRows }] = await Promise.all([
+      supabase.from("categories").select("*").eq("slug", slug).maybeSingle(),
+      supabase.from("category_availability_rules").select("*").order("weekday"),
+      supabase.from("category_blackout_periods").select("*").order("start_date"),
+    ]);
+
+    if (categoryRow) {
+      return mapCategoryRow(
+        categoryRow as Record<string, unknown>,
+        (ruleRows ?? []) as Array<Record<string, unknown>>,
+        (blackoutRows ?? []) as Array<Record<string, unknown>>,
+      );
+    }
+  }
+
   return demoCategories.find((category) => category.slug === slug) ?? null;
 }
 
 export async function getCategoryById(categoryId: string) {
+  const supabase = getSupabaseAdminClient();
+
+  if (supabase) {
+    const [{ data: categoryRow }, { data: ruleRows }, { data: blackoutRows }] = await Promise.all([
+      supabase.from("categories").select("*").eq("id", categoryId).maybeSingle(),
+      supabase.from("category_availability_rules").select("*").order("weekday"),
+      supabase.from("category_blackout_periods").select("*").order("start_date"),
+    ]);
+
+    if (categoryRow) {
+      return mapCategoryRow(
+        categoryRow as Record<string, unknown>,
+        (ruleRows ?? []) as Array<Record<string, unknown>>,
+        (blackoutRows ?? []) as Array<Record<string, unknown>>,
+      );
+    }
+  }
+
   return demoCategories.find((category) => category.id === categoryId) ?? null;
 }
 
@@ -157,6 +196,16 @@ export async function getAppointments() {
 }
 
 export async function getAppointmentById(appointmentId: string) {
+  const supabase = getSupabaseAdminClient();
+
+  if (supabase) {
+    const { data } = await supabase.from("appointments").select("*").eq("id", appointmentId).maybeSingle();
+
+    if (data) {
+      return mapAppointmentRow(data as Record<string, unknown>);
+    }
+  }
+
   return demoAppointments.find((appointment) => appointment.id === appointmentId) ?? null;
 }
 
@@ -214,6 +263,7 @@ export async function createAppointmentRequest(payload: AppointmentRequestPayloa
     startsAt: startsAt.toISOString(),
     endsAt: endsAt.toISOString(),
     status: "en_attente",
+    origin: "utilisateur",
     createdAt: new Date().toISOString(),
   };
 
@@ -232,6 +282,9 @@ export async function createAppointmentRequest(payload: AppointmentRequestPayloa
         starts_at: record.startsAt,
         ends_at: record.endsAt,
         status: record.status,
+        origin: "utilisateur",
+        created_by_admin_user_id: null,
+        created_by_admin_email: null,
         cancel_reason: null,
       })
       .select("*")
@@ -328,6 +381,186 @@ export async function cancelUserAppointmentById(appointmentId: string, email: st
     status: "annule_client" as const,
     cancelReason,
   };
+}
+
+export async function getPendingAppointmentsView() {
+  const appointments = await getAppointmentsView();
+  return appointments.filter((appointment) => appointment.status === "en_attente");
+}
+
+export async function getAgendaAppointmentsView() {
+  const appointments = await getAppointmentsView();
+  return appointments.filter((appointment) => appointment.status === "accepte");
+}
+
+export async function saveCategory(input: {
+  categoryId?: string;
+  title: string;
+  slug: string;
+  durationMinutes: number;
+  appointmentMode: AppointmentCategory["appointmentMode"];
+  description: string;
+  isOnline: boolean;
+  customMessage?: string;
+  startTime: string;
+  endTime: string;
+}) {
+  const supabase = getSupabaseAdminClient();
+
+  if (!supabase) {
+    return null;
+  }
+
+  const categoryPayload = {
+    title: input.title,
+    slug: input.slug,
+    duration_minutes: input.durationMinutes,
+    appointment_mode: input.appointmentMode,
+    description: input.description,
+    is_online: input.isOnline,
+    custom_message: input.customMessage ?? null,
+    updated_at: new Date().toISOString(),
+  };
+
+  const { data: categoryRow } = input.categoryId
+    ? await supabase
+        .from("categories")
+        .update(categoryPayload)
+        .eq("id", input.categoryId)
+        .select("*")
+        .single()
+    : await supabase
+        .from("categories")
+        .insert(categoryPayload)
+        .select("*")
+        .single();
+
+  if (!categoryRow) {
+    return null;
+  }
+
+  const weekdayValues = [1, 2, 3, 4, 5];
+
+  await supabase.from("category_availability_rules").delete().eq("category_id", categoryRow.id);
+  await supabase.from("category_availability_rules").insert(
+    weekdayValues.map((weekday) => ({
+      category_id: categoryRow.id,
+      weekday,
+      start_time: `${input.startTime}:00`,
+      end_time: `${input.endTime}:00`,
+    })),
+  );
+
+  const refreshed = await getCategoryById(String(categoryRow.id));
+  return refreshed;
+}
+
+export async function saveSiteSettings(input: { maintenanceMode: boolean; maintenanceMessage: string }) {
+  const supabase = getSupabaseAdminClient();
+
+  if (!supabase) {
+    return null;
+  }
+
+  const { data: existing } = await supabase.from("site_settings").select("id").limit(1).maybeSingle();
+
+  if (existing?.id) {
+    await supabase
+      .from("site_settings")
+      .update({
+        maintenance_mode: input.maintenanceMode,
+        maintenance_message: input.maintenanceMessage,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", existing.id);
+  } else {
+    await supabase.from("site_settings").insert({
+      maintenance_mode: input.maintenanceMode,
+      maintenance_message: input.maintenanceMessage,
+    });
+  }
+
+  return getSiteSettings();
+}
+
+export async function createAdminAppointment(input: {
+  categorySlug: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  message?: string;
+  startsAt: string;
+  adminUserId: string;
+  adminEmail: string;
+}) {
+  const category = await getPublicCategoryBySlug(input.categorySlug);
+
+  if (!category) {
+    throw new Error("Catégorie introuvable.");
+  }
+
+  const payload = await getCategorySlots(input.categorySlug);
+
+  if (!payload) {
+    throw new Error("Créneaux indisponibles.");
+  }
+
+  const selectedSlot = payload.slots.find((slot) => slot.start === input.startsAt);
+
+  if (!selectedSlot || selectedSlot.isBlocked) {
+    throw new Error("Le créneau sélectionné n'est plus disponible.");
+  }
+
+  const startsAt = parseISO(input.startsAt);
+  const endsAt = addMinutes(startsAt, category.durationMinutes);
+  const supabase = getSupabaseAdminClient();
+
+  const record: AppointmentRecord = {
+    id: randomUUID(),
+    categoryId: category.id,
+    firstName: input.firstName,
+    lastName: input.lastName,
+    email: input.email,
+    phone: input.phone,
+    clientMessage: input.message,
+    startsAt: startsAt.toISOString(),
+    endsAt: endsAt.toISOString(),
+    status: "accepte",
+    origin: "administrateur",
+    createdByAdminUserId: input.adminUserId,
+    createdByAdminEmail: input.adminEmail,
+    createdAt: new Date().toISOString(),
+  };
+
+  if (supabase) {
+    const { data } = await supabase
+      .from("appointments")
+      .insert({
+        category_id: record.categoryId,
+        first_name: record.firstName,
+        last_name: record.lastName,
+        email: record.email,
+        phone: record.phone,
+        client_message: record.clientMessage ?? null,
+        starts_at: record.startsAt,
+        ends_at: record.endsAt,
+        status: record.status,
+        origin: record.origin,
+        created_by_admin_user_id: record.createdByAdminUserId,
+        created_by_admin_email: record.createdByAdminEmail,
+        cancel_reason: null,
+        rejection_reason: null,
+      })
+      .select("*")
+      .single();
+
+    if (data) {
+      return mapAppointmentRow(data as Record<string, unknown>);
+    }
+  }
+
+  return record;
 }
 
 export async function updateAppointmentStatus(

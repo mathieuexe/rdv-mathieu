@@ -46,8 +46,8 @@ export default async function AdminDashboardPage() {
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         <MetricCard label="Demandes totales" value={metrics.totalAppointments} accent="cyan" />
-        <MetricCard label="En attente" value={metrics.pendingAppointments} accent="amber" />
-        <MetricCard label="Acceptées" value={metrics.acceptedAppointments} accent="emerald" />
+        <MetricCard label="Rendez-vous en attente" value={metrics.pendingAppointments} accent="amber" />
+        <MetricCard label="Rendez-vous pris" value={metrics.acceptedAppointments} accent="emerald" />
         <MetricCard label="Refusées" value={metrics.refusedAppointments} accent="rose" />
         <MetricCard label="Catégories en ligne" value={metrics.onlineCategories} accent="cyan" />
       </section>

@@ -50,6 +50,15 @@ export default async function AppointmentDetailPage({
           </div>
         </div>
 
+        <div className="mt-4 rounded-[24px] border border-slate-200 bg-slate-50 p-5">
+          <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Origine</p>
+          <p className="mt-2 font-semibold text-slate-950">
+            {appointment.origin === "administrateur"
+              ? `Rendez-vous cree par un administrateur${appointment.createdByAdminEmail ? ` : ${appointment.createdByAdminEmail}` : ""}`
+              : "Rendez-vous pris directement par l'utilisateur sur le site"}
+          </p>
+        </div>
+
         <div className="mt-6 rounded-[24px] border border-slate-200 bg-slate-50 p-5">
           <p className="text-sm font-semibold text-slate-950">Message client</p>
           <p className="mt-3 text-sm leading-7 text-slate-600">
@@ -73,7 +82,7 @@ export default async function AppointmentDetailPage({
       </div>
 
       <div className="space-y-6">
-        <AppointmentDecisionPanel appointmentId={appointment.id} />
+        {appointment.origin === "utilisateur" ? <AppointmentDecisionPanel appointmentId={appointment.id} /> : null}
         <div className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-[0_24px_60px_rgba(15,23,42,0.08)]">
           <p className="text-sm uppercase tracking-[0.2em] text-slate-500">Email</p>
           <h2 className="mt-2 text-2xl font-semibold text-slate-950">Notifications prévues</h2>

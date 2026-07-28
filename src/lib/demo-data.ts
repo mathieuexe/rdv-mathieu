@@ -100,6 +100,7 @@ export const demoAppointments: AppointmentRecord[] = [
     startsAt: shiftDays(1, 9, 0),
     endsAt: shiftDays(1, 9, 30),
     status: "en_attente",
+    origin: "utilisateur",
     createdAt: new Date().toISOString(),
   },
   {
@@ -113,6 +114,7 @@ export const demoAppointments: AppointmentRecord[] = [
     startsAt: shiftDays(2, 10, 0),
     endsAt: shiftDays(2, 10, 45),
     status: "accepte",
+    origin: "utilisateur",
     createdAt: new Date().toISOString(),
   },
   {
@@ -127,6 +129,7 @@ export const demoAppointments: AppointmentRecord[] = [
     endsAt: shiftDays(3, 14, 30),
     status: "refuse",
     rejectionReason: "Absence exceptionnelle sur ce créneau.",
+    origin: "utilisateur",
     createdAt: new Date().toISOString(),
   },
 ];

@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 
 import { getAdminEmail, isSupabaseConfigured } from "@/lib/env";
+import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 const DEMO_COOKIE = "rdv_demo_admin";
@@ -20,13 +21,15 @@ export async function getAdminSession() {
 
   const supabase = await getSupabaseServerClient();
   const { data } = await supabase!.auth.getUser();
-
-  const email = data.user?.email?.toLowerCase();
+  const user = data.user;
+  const email = user?.email?.toLowerCase();
+  const isAdmin = user ? await isUserAdmin(user.id) : false;
 
   return {
-    isAuthenticated: Boolean(email && email === getAdminEmail()),
+    isAuthenticated: Boolean(email && isAdmin),
     isDemoMode: false,
     email,
+    userId: user?.id,
   };
 }
 
@@ -52,6 +55,19 @@ export interface PublicUserSession {
   firstName?: string;
   lastName?: string;
   fullName?: string;
+  userId?: string;
+  isAdmin?: boolean;
+}
+
+export async function isUserAdmin(userId: string) {
+  const supabaseAdmin = getSupabaseAdminClient();
+
+  if (!supabaseAdmin) {
+    return false;
+  }
+
+  const { data } = await supabaseAdmin.from("admin_users").select("user_id").eq("user_id", userId).maybeSingle();
+  return Boolean(data?.user_id);
 }
 
 export async function getPublicUserSession(): Promise<PublicUserSession> {
@@ -79,6 +95,8 @@ export async function getPublicUserSession(): Promise<PublicUserSession> {
     };
   }
 
+  const isAdmin = await isUserAdmin(user.id);
+
   const { data: profile } = await supabase
     .from("user_profiles")
     .select("first_name, last_name")
@@ -101,9 +119,11 @@ export async function getPublicUserSession(): Promise<PublicUserSession> {
 
   return {
     isAuthenticated: true,
+    userId: user.id,
     email: user.email.toLowerCase(),
     firstName,
     lastName,
     fullName,
+    isAdmin,
   };
 }
