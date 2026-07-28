@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CalendarDays, CheckCircle2, Clock3, LoaderCircle, MapPinned, MessageSquareText } from "lucide-react";
+import { CalendarDays, CheckCircle2, Clock3, LoaderCircle, MapPinned } from "lucide-react";
 
 import { groupSlotsByDay } from "@/lib/booking";
 import { cn, formatAppointmentMode, formatDateTimeFr } from "@/lib/utils";
@@ -32,15 +32,6 @@ function formatMonthLabel(dateKey: string) {
     year: "numeric",
     timeZone: "Europe/Paris",
   }).format(new Date(`${dateKey}-01T12:00:00`));
-}
-
-function formatSelectedDayLabel(dateKey: string) {
-  return new Intl.DateTimeFormat("fr-FR", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    timeZone: "Europe/Paris",
-  }).format(new Date(`${dateKey}T12:00:00`));
 }
 
 function getCalendarCells(monthKey: string) {
@@ -77,8 +68,14 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, init
   const [selectedSlot, setSelectedSlot] = useState<string>("");
   const [selectedDateKey, setSelectedDateKey] = useState(firstAvailableDateKey);
   const [visibleMonthKey, setVisibleMonthKey] = useState(toMonthKey(firstAvailableDateKey || new Date().toISOString().slice(0, 10)));
+  const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string>("");
+  const [firstName, setFirstName] = useState(initialUser?.firstName ?? "");
+  const [lastName, setLastName] = useState(initialUser?.lastName ?? "");
+  const [email, setEmail] = useState(initialUser?.email ?? "");
+  const [phone, setPhone] = useState("");
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     if (!selectedDateKey && firstAvailableDateKey) {
@@ -89,6 +86,7 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, init
   useEffect(() => {
     if (!selectedDateKey) {
       setSelectedSlot("");
+      setCurrentStep(1);
       return;
     }
 
@@ -96,6 +94,7 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, init
 
     if (!currentDaySlots.some((slot) => slot.start === selectedSlot && !slot.isBlocked)) {
       setSelectedSlot("");
+      setCurrentStep(1);
     }
   }, [groupedSlots, selectedDateKey, selectedSlot]);
 
@@ -106,6 +105,7 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, init
   }, [selectedDateKey]);
 
   const selectedDay = dayEntries.find((entry) => entry.dateKey === selectedDateKey) ?? null;
+  const selectedSlotDetails = selectedDay?.dateSlots.find((slot) => slot.start === selectedSlot) ?? null;
   const visibleMonthIndex = Math.max(0, monthKeys.findIndex((monthKey) => monthKey === visibleMonthKey));
   const calendarCells = getCalendarCells(monthKeys[visibleMonthIndex] ?? visibleMonthKey);
   const hasAnyAvailableSlot = dayEntries.some((entry) => entry.availableCount > 0);
@@ -116,17 +116,69 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, init
     .map((part) => part[0]?.toUpperCase() ?? "")
     .join("");
 
-  async function handleSubmit(formData: FormData) {
+  function validateStepTwo() {
+    if (firstName.trim().length < 2) {
+      return "Le prénom est requis.";
+    }
+
+    if (lastName.trim().length < 2) {
+      return "Le nom est requis.";
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      return "Veuillez saisir un email valide.";
+    }
+
+    if (phone.trim().length < 8) {
+      return "Le téléphone est requis.";
+    }
+
+    return null;
+  }
+
+  function handleSelectSlot(slotStart: string) {
+    setSelectedSlot(slotStart);
+    setCurrentStep(2);
+    setError("");
+  }
+
+  function handleContinueToRecap() {
+    const validationError = validateStepTwo();
+
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    setError("");
+    setCurrentStep(3);
+  }
+
+  async function handleSubmit() {
+    if (!selectedSlot) {
+      setError("Sélectionnez un créneau avant de confirmer.");
+      setCurrentStep(1);
+      return;
+    }
+
+    const validationError = validateStepTwo();
+
+    if (validationError) {
+      setError(validationError);
+      setCurrentStep(2);
+      return;
+    }
+
     setIsSubmitting(true);
     setError("");
 
     const payload = {
       categorySlug,
-      firstName: String(formData.get("firstName") ?? ""),
-      lastName: String(formData.get("lastName") ?? ""),
-      email: String(formData.get("email") ?? ""),
-      phone: String(formData.get("phone") ?? ""),
-      message: String(formData.get("message") ?? ""),
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      email: email.trim(),
+      phone: phone.trim(),
+      message: message.trim(),
       startsAt: selectedSlot,
     };
 
@@ -271,138 +323,214 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, init
 
           <section className="p-6">
             <div>
-              <p className="text-sm font-medium text-neutral-500">
-                {selectedDay ? formatSelectedDayLabel(selectedDay.dateKey) : "Aucun jour disponible"}
-              </p>
+              <p className="text-xs uppercase tracking-[0.14em] text-neutral-400">Étapes</p>
+              <div className="mt-3 flex items-center gap-2 text-xs font-medium">
+                <span className={cn("rounded-full px-3 py-1", currentStep === 1 ? "bg-neutral-950 text-white" : "bg-neutral-100 text-neutral-600")}>
+                  1. Date et heure
+                </span>
+                <span className={cn("rounded-full px-3 py-1", currentStep === 2 ? "bg-neutral-950 text-white" : "bg-neutral-100 text-neutral-600")}>
+                  2. Informations
+                </span>
+                <span className={cn("rounded-full px-3 py-1", currentStep === 3 ? "bg-neutral-950 text-white" : "bg-neutral-100 text-neutral-600")}>
+                  3. Récapitulatif
+                </span>
+              </div>
             </div>
 
             <div className="mt-4 max-h-[460px] space-y-3 overflow-y-auto pr-1">
-              {selectedDay ? (
-                selectedDay.dateSlots.map((slot) => {
-                  const active = selectedSlot === slot.start;
+              {currentStep === 1 ? (
+                selectedDay ? (
+                  selectedDay.dateSlots.map((slot) => {
+                    const active = selectedSlot === slot.start;
 
-                  return (
+                    return (
+                      <button
+                        key={slot.start}
+                        type="button"
+                        disabled={slot.isBlocked}
+                        onClick={() => handleSelectSlot(slot.start)}
+                        className={cn(
+                          "flex w-full items-center justify-center rounded-xl border px-4 py-3 text-sm font-medium transition",
+                          slot.isBlocked
+                            ? "cursor-not-allowed border-neutral-200 bg-neutral-100 text-neutral-400"
+                            : "border-neutral-200 bg-white text-neutral-700 hover:border-neutral-900 hover:text-neutral-950",
+                          active && "border-sky-500 bg-sky-500 text-white",
+                        )}
+                      >
+                        {slot.label}
+                      </button>
+                    );
+                  })
+                ) : (
+                  <div className="rounded-2xl border border-dashed border-neutral-300 px-4 py-6 text-sm text-neutral-500">
+                    {hasAnyAvailableSlot
+                      ? "Sélectionnez une date dans le calendrier."
+                      : "Aucun créneau n'est disponible pour le moment."}
+                  </div>
+                )
+              ) : currentStep === 2 ? (
+                <div className="space-y-4">
+                  <div className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-4 text-sm text-neutral-800">
+                    <div className="flex items-center gap-2 font-medium">
+                      <CheckCircle2 className="size-4 text-neutral-700" />
+                      <span>Créneau sélectionné</span>
+                    </div>
+                    <p className="mt-2 text-neutral-600">
+                      {selectedSlot ? formatDateTimeFr(selectedSlot, { dateStyle: "full", timeStyle: "short" }) : "Aucun créneau sélectionné."}
+                    </p>
+                  </div>
+
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <label className="space-y-2 text-sm font-medium text-neutral-700">
+                      <span>Prénom</span>
+                      <input
+                        value={firstName}
+                        onChange={(event) => setFirstName(event.target.value)}
+                        className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 outline-none transition focus:border-neutral-900 focus:bg-white"
+                      />
+                    </label>
+
+                    <label className="space-y-2 text-sm font-medium text-neutral-700">
+                      <span>Nom</span>
+                      <input
+                        value={lastName}
+                        onChange={(event) => setLastName(event.target.value)}
+                        className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 outline-none transition focus:border-neutral-900 focus:bg-white"
+                      />
+                    </label>
+                  </div>
+
+                  <label className="space-y-2 text-sm font-medium text-neutral-700">
+                    <span>Email</span>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(event) => setEmail(event.target.value)}
+                      readOnly={Boolean(initialUser?.email)}
+                      className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 outline-none transition focus:border-neutral-900 focus:bg-white"
+                    />
+                  </label>
+
+                  {initialUser?.email ? (
+                    <p className="text-xs text-neutral-500">L'email du compte connecté est utilisé pour rattacher vos rendez-vous.</p>
+                  ) : null}
+
+                  <label className="space-y-2 text-sm font-medium text-neutral-700">
+                    <span>Téléphone</span>
+                    <input
+                      type="tel"
+                      value={phone}
+                      onChange={(event) => setPhone(event.target.value)}
+                      className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 outline-none transition focus:border-neutral-900 focus:bg-white"
+                    />
+                  </label>
+
+                  <label className="space-y-2 text-sm font-medium text-neutral-700">
+                    <span>Message optionnel</span>
+                    <textarea
+                      rows={4}
+                      value={message}
+                      onChange={(event) => setMessage(event.target.value)}
+                      className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 outline-none transition focus:border-neutral-900 focus:bg-white"
+                    />
+                  </label>
+
+                  {error ? <p className="text-sm font-medium text-rose-600">{error}</p> : null}
+
+                  <div className="flex gap-3">
                     <button
-                      key={slot.start}
                       type="button"
-                      disabled={slot.isBlocked}
-                      onClick={() => setSelectedSlot(slot.start)}
-                      className={cn(
-                        "flex w-full items-center justify-center rounded-xl border px-4 py-3 text-sm font-medium transition",
-                        slot.isBlocked
-                          ? "cursor-not-allowed border-neutral-200 bg-neutral-100 text-neutral-400"
-                          : "border-neutral-200 bg-white text-neutral-700 hover:border-neutral-900 hover:text-neutral-950",
-                        active && "border-sky-500 bg-sky-500 text-white",
-                      )}
+                      onClick={() => {
+                        setCurrentStep(1);
+                        setError("");
+                      }}
+                      className="inline-flex flex-1 items-center justify-center rounded-full border border-neutral-200 px-5 py-3 text-sm font-semibold text-neutral-700 transition hover:bg-neutral-50"
                     >
-                      {slot.label}
+                      Modifier le créneau
                     </button>
-                  );
-                })
+                    <button
+                      type="button"
+                      onClick={handleContinueToRecap}
+                      className="inline-flex flex-1 items-center justify-center rounded-full bg-neutral-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-neutral-800"
+                    >
+                      Continuer
+                    </button>
+                  </div>
+                </div>
               ) : (
-                <div className="rounded-2xl border border-dashed border-neutral-300 px-4 py-6 text-sm text-neutral-500">
-                  {hasAnyAvailableSlot
-                    ? "Sélectionnez une date dans le calendrier."
-                    : "Aucun créneau n'est disponible pour le moment."}
+                <div className="space-y-4">
+                  <div className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-4">
+                    <p className="text-sm font-semibold text-neutral-900">Récapitulatif</p>
+                    <dl className="mt-4 space-y-3 text-sm text-neutral-600">
+                      <div>
+                        <dt className="font-medium text-neutral-900">Catégorie</dt>
+                        <dd>{category.title}</dd>
+                      </div>
+                      <div>
+                        <dt className="font-medium text-neutral-900">Date et heure</dt>
+                        <dd>
+                          {selectedSlotDetails
+                            ? formatDateTimeFr(selectedSlotDetails.start, { dateStyle: "full", timeStyle: "short" })
+                            : "Aucun créneau sélectionné"}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="font-medium text-neutral-900">Nom</dt>
+                        <dd>{firstName} {lastName}</dd>
+                      </div>
+                      <div>
+                        <dt className="font-medium text-neutral-900">Email</dt>
+                        <dd>{email}</dd>
+                      </div>
+                      <div>
+                        <dt className="font-medium text-neutral-900">Téléphone</dt>
+                        <dd>{phone}</dd>
+                      </div>
+                      <div>
+                        <dt className="font-medium text-neutral-900">Message</dt>
+                        <dd>{message.trim() || "Aucun message"}</dd>
+                      </div>
+                    </dl>
+                  </div>
+
+                  <div className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-4 text-sm text-neutral-800">
+                    <div className="flex items-center gap-2 font-medium">
+                      <CheckCircle2 className="size-4 text-neutral-700" />
+                      <span>Confirmation</span>
+                    </div>
+                    <p className="mt-2 text-neutral-600">
+                      En confirmant, votre demande sera enregistrée puis transmise pour validation.
+                    </p>
+                  </div>
+
+                  {error ? <p className="text-sm font-medium text-rose-600">{error}</p> : null}
+
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCurrentStep(2);
+                        setError("");
+                      }}
+                      className="inline-flex flex-1 items-center justify-center rounded-full border border-neutral-200 px-5 py-3 text-sm font-semibold text-neutral-700 transition hover:bg-neutral-50"
+                    >
+                      Modifier les informations
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSubmit}
+                      disabled={isSubmitting}
+                      className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-neutral-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:bg-neutral-300"
+                    >
+                      {isSubmitting ? <LoaderCircle className="size-4 animate-spin" /> : null}
+                      <span>{isSubmitting ? "Confirmation..." : "Confirmer la demande"}</span>
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
           </section>
         </div>
-      </section>
-
-      <section className="rounded-[28px] border border-neutral-200 bg-white p-6 shadow-[0_20px_60px_rgba(15,23,42,0.06)]">
-        <div className="flex items-center gap-3">
-          <MessageSquareText className="size-5 text-neutral-700" />
-          <div>
-            <p className="text-sm uppercase tracking-[0.2em] text-neutral-500">Vos informations</p>
-            <p className="text-sm text-neutral-600">La demande reste en attente tant qu'elle n'est pas validée.</p>
-          </div>
-        </div>
-
-        <form action={handleSubmit} className="mt-6 space-y-4">
-          <input type="hidden" name="selectedSlot" value={selectedSlot} />
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <label className="space-y-2 text-sm font-medium text-neutral-700">
-              <span>Prénom</span>
-              <input
-                name="firstName"
-                required
-                defaultValue={initialUser?.firstName ?? ""}
-                className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 outline-none transition focus:border-neutral-900 focus:bg-white"
-              />
-            </label>
-
-            <label className="space-y-2 text-sm font-medium text-neutral-700">
-              <span>Nom</span>
-              <input
-                name="lastName"
-                required
-                defaultValue={initialUser?.lastName ?? ""}
-                className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 outline-none transition focus:border-neutral-900 focus:bg-white"
-              />
-            </label>
-          </div>
-
-          <label className="space-y-2 text-sm font-medium text-neutral-700">
-            <span>Email</span>
-            <input
-              name="email"
-              type="email"
-              required
-              defaultValue={initialUser?.email ?? ""}
-              readOnly={Boolean(initialUser?.email)}
-              className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 outline-none transition focus:border-neutral-900 focus:bg-white"
-            />
-          </label>
-
-          {initialUser?.email ? (
-            <p className="text-xs text-neutral-500">L'email du compte connecté est utilisé pour rattacher vos rendez-vous.</p>
-          ) : null}
-
-          <label className="space-y-2 text-sm font-medium text-neutral-700">
-            <span>Téléphone</span>
-            <input
-              name="phone"
-              type="tel"
-              required
-              className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 outline-none transition focus:border-neutral-900 focus:bg-white"
-            />
-          </label>
-
-          <label className="space-y-2 text-sm font-medium text-neutral-700">
-            <span>Message optionnel</span>
-            <textarea
-              name="message"
-              rows={4}
-              className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 outline-none transition focus:border-neutral-900 focus:bg-white"
-            />
-          </label>
-
-          <div className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-4 text-sm text-neutral-800">
-            <div className="flex items-center gap-2 font-medium">
-              <CheckCircle2 className="size-4 text-neutral-700" />
-              <span>
-                {selectedSlot ? "Créneau sélectionné" : "Sélectionnez un créneau avant d'envoyer votre demande"}
-              </span>
-            </div>
-            <p className="mt-2 text-neutral-600">
-              {selectedSlot ? formatDateTimeFr(selectedSlot, { dateStyle: "full", timeStyle: "short" }) : "Le récapitulatif du rendez-vous apparaîtra ici."}
-            </p>
-          </div>
-
-          {error ? <p className="text-sm font-medium text-rose-600">{error}</p> : null}
-
-          <button
-            type="submit"
-            disabled={!selectedSlot || isSubmitting || !hasAnyAvailableSlot}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-neutral-950 px-6 py-3 text-sm font-semibold text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:bg-neutral-300"
-          >
-            {isSubmitting ? <LoaderCircle className="size-4 animate-spin" /> : null}
-            <span>{isSubmitting ? "Envoi en cours..." : "Envoyer la demande"}</span>
-          </button>
-        </form>
       </section>
     </div>
   );
