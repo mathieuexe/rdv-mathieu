@@ -36,8 +36,26 @@ interface TransactionalEmailResult {
   reason?: "email_not_configured" | "email_request_failed";
 }
 
+const DEFAULT_RESEND_FROM_NAME = "NOREPLY";
+const DEFAULT_RESEND_FROM_EMAIL = "info@mathieucerenzia.fr";
+
 function createMailReference() {
   return `REF-${randomBytes(3).toString("hex").toUpperCase()}`;
+}
+
+function getResendFromValue() {
+  const fromEmail = process.env.RESEND_FROM_EMAIL?.trim() || DEFAULT_RESEND_FROM_EMAIL;
+  const fromName = process.env.RESEND_FROM_NAME?.trim() || DEFAULT_RESEND_FROM_NAME;
+
+  if (!fromEmail) {
+    return "";
+  }
+
+  if (fromEmail.includes("<") && fromEmail.includes(">")) {
+    return fromEmail;
+  }
+
+  return `${fromName} <${fromEmail}>`;
 }
 
 async function createEmailLog(input: {
@@ -116,7 +134,7 @@ export async function sendTransactionalEmail({
 }: TransactionalEmailPayload): Promise<TransactionalEmailResult> {
   const reference = createMailReference();
   const apiKey = process.env.RESEND_API_KEY?.trim();
-  const from = process.env.RESEND_FROM_EMAIL?.trim();
+  const from = getResendFromValue();
 
   const emailLogId = await createEmailLog({
     reference,
@@ -127,7 +145,10 @@ export async function sendTransactionalEmail({
     subject,
     appointmentId,
     deliveryStatus: apiKey && from ? "sent" : "not_configured",
-    metadata,
+    metadata: {
+      ...(metadata ?? {}),
+      from,
+    },
   });
 
   if (!apiKey || !from) {
@@ -151,6 +172,7 @@ export async function sendTransactionalEmail({
       deliveryStatus: "failed",
       metadata: {
         ...(metadata ?? {}),
+        from,
         resendError: error.message,
       },
     });
@@ -165,7 +187,10 @@ export async function sendTransactionalEmail({
   await updateEmailLog(emailLogId, {
     deliveryStatus: "sent",
     resendEmailId: data?.id,
-    metadata,
+    metadata: {
+      ...(metadata ?? {}),
+      from,
+    },
   });
 
   return {

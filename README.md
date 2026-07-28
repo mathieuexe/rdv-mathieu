@@ -69,7 +69,8 @@ SUPABASE_SERVICE_ROLE_KEY=
 ADMIN_EMAIL=admin@example.com
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 RESEND_API_KEY=
-RESEND_FROM_EMAIL=
+RESEND_FROM_NAME=NOREPLY
+RESEND_FROM_EMAIL=info@mathieucerenzia.fr
 ```
 
 ### 3. Lancer le projet
@@ -137,6 +138,7 @@ Ajoutez dans Vercel :
 - `ADMIN_EMAIL`
 - `NEXT_PUBLIC_APP_URL`
 - `RESEND_API_KEY`
+- `RESEND_FROM_NAME`
 - `RESEND_FROM_EMAIL`
 
 ### 3. Déployer
