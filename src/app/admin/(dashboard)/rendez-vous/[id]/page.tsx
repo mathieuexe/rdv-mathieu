@@ -63,6 +63,13 @@ export default async function AppointmentDetailPage({
             <p className="mt-3 text-sm leading-7 text-rose-800">{appointment.rejectionReason}</p>
           </div>
         ) : null}
+
+        {appointment.cancelReason ? (
+          <div className="mt-6 rounded-[24px] border border-amber-200 bg-amber-50 p-5">
+            <p className="text-sm font-semibold text-amber-900">Motif d'annulation client</p>
+            <p className="mt-3 text-sm leading-7 text-amber-800">{appointment.cancelReason}</p>
+          </div>
+        ) : null}
       </div>
 
       <div className="space-y-6">

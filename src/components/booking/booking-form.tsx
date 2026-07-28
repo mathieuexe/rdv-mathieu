@@ -12,9 +12,14 @@ interface BookingFormProps {
   categorySlug: string;
   slots: BookingSlot[];
   helperMessage: string;
+  initialUser?: {
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+  };
 }
 
-export function BookingForm({ categorySlug, slots, helperMessage }: BookingFormProps) {
+export function BookingForm({ categorySlug, slots, helperMessage, initialUser }: BookingFormProps) {
   const router = useRouter();
   const groupedSlots = useMemo(() => groupSlotsByDay(slots), [slots]);
   const [selectedSlot, setSelectedSlot] = useState<string>("");
@@ -129,6 +134,7 @@ export function BookingForm({ categorySlug, slots, helperMessage }: BookingFormP
               <input
                 name="firstName"
                 required
+                defaultValue={initialUser?.firstName ?? ""}
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-cyan-600 focus:bg-white"
               />
             </label>
@@ -138,6 +144,7 @@ export function BookingForm({ categorySlug, slots, helperMessage }: BookingFormP
               <input
                 name="lastName"
                 required
+                defaultValue={initialUser?.lastName ?? ""}
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-cyan-600 focus:bg-white"
               />
             </label>
@@ -149,9 +156,15 @@ export function BookingForm({ categorySlug, slots, helperMessage }: BookingFormP
               name="email"
               type="email"
               required
+              defaultValue={initialUser?.email ?? ""}
+              readOnly={Boolean(initialUser?.email)}
               className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-cyan-600 focus:bg-white"
             />
           </label>
+
+          {initialUser?.email ? (
+            <p className="text-xs text-slate-500">L'email du compte connecte est utilise pour rattacher vos rendez-vous.</p>
+          ) : null}
 
           <label className="space-y-2 text-sm font-medium text-slate-700">
             <span>Téléphone</span>

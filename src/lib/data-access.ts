@@ -79,6 +79,7 @@ function mapAppointmentRow(row: Record<string, unknown>): AppointmentRecord {
     endsAt: String(row.ends_at),
     status: row.status as AppointmentRecord["status"],
     rejectionReason: typeof row.rejection_reason === "string" ? row.rejection_reason : undefined,
+    cancelReason: typeof row.cancel_reason === "string" ? row.cancel_reason : undefined,
     createdAt: String(row.created_at ?? new Date().toISOString()),
   };
 }
@@ -231,6 +232,7 @@ export async function createAppointmentRequest(payload: AppointmentRequestPayloa
         starts_at: record.startsAt,
         ends_at: record.endsAt,
         status: record.status,
+        cancel_reason: null,
       })
       .select("*")
       .single();
@@ -256,6 +258,76 @@ export async function getAppointmentsView() {
     ...appointment,
     category: categories.find((item) => item.id === appointment.categoryId) as AppointmentCategory | undefined,
   }));
+}
+
+export async function getUserAppointmentsByEmail(email: string) {
+  const normalizedEmail = email.trim().toLowerCase();
+  const supabase = getSupabaseAdminClient();
+  const categories = await getCategories();
+
+  if (supabase) {
+    const { data } = await supabase
+      .from("appointments")
+      .select("*")
+      .ilike("email", normalizedEmail)
+      .order("starts_at", { ascending: false });
+
+    return (data ?? []).map((row) => {
+      const appointment = mapAppointmentRow(row as Record<string, unknown>);
+
+      return {
+        ...appointment,
+        category: categories.find((item) => item.id === appointment.categoryId) as AppointmentCategory | undefined,
+      };
+    });
+  }
+
+  return demoAppointments
+    .filter((appointment) => appointment.email.trim().toLowerCase() === normalizedEmail)
+    .map((appointment) => ({
+      ...appointment,
+      category: categories.find((item) => item.id === appointment.categoryId) as AppointmentCategory | undefined,
+    }));
+}
+
+export async function cancelUserAppointmentById(appointmentId: string, email: string, cancelReason: string) {
+  const normalizedEmail = email.trim().toLowerCase();
+  const supabase = getSupabaseAdminClient();
+
+  if (supabase) {
+    const { data } = await supabase
+      .from("appointments")
+      .update({
+        status: "annule_client",
+        cancel_reason: cancelReason,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", appointmentId)
+      .ilike("email", normalizedEmail)
+      .in("status", ["en_attente", "accepte"])
+      .select("*")
+      .maybeSingle();
+
+    if (data) {
+      return mapAppointmentRow(data as Record<string, unknown>);
+    }
+
+    return null;
+  }
+
+  const appointment = demoAppointments.find(
+    (item) => item.id === appointmentId && item.email.trim().toLowerCase() === normalizedEmail,
+  );
+
+  if (!appointment || !["en_attente", "accepte"].includes(appointment.status)) {
+    return null;
+  }
+
+  return {
+    ...appointment,
+    status: "annule_client" as const,
+    cancelReason,
+  };
 }
 
 export async function updateAppointmentStatus(

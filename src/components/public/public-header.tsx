@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { getPublicUserSession } from "@/lib/auth";
+
 interface PublicHeaderProps {
   currentPath?: string;
 }
@@ -13,10 +15,16 @@ function getLinkClass(href: string, currentPath?: string) {
       : "border border-black px-4 py-2";
   }
 
+  if (href === "/compte") {
+    return isActive ? "font-semibold underline underline-offset-4" : "underline underline-offset-4";
+  }
+
   return isActive ? "font-semibold underline underline-offset-4" : "underline underline-offset-4";
 }
 
-export function PublicHeader({ currentPath }: PublicHeaderProps) {
+export async function PublicHeader({ currentPath }: PublicHeaderProps) {
+  const session = await getPublicUserSession();
+
   return (
     <header className="border-b border-black/10 bg-white">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-5 text-black">
@@ -25,12 +33,20 @@ export function PublicHeader({ currentPath }: PublicHeaderProps) {
         </Link>
 
         <nav className="flex items-center gap-4 text-sm">
-          <Link href="/inscription" className={getLinkClass("/inscription", currentPath)}>
-            S&apos;inscrire
-          </Link>
-          <Link href="/connexion" className={getLinkClass("/connexion", currentPath)}>
-            Se connecter
-          </Link>
+          {session.isAuthenticated ? (
+            <Link href="/compte" className={getLinkClass("/compte", currentPath)}>
+              Bonjour : {session.fullName}
+            </Link>
+          ) : (
+            <>
+              <Link href="/inscription" className={getLinkClass("/inscription", currentPath)}>
+                S&apos;inscrire
+              </Link>
+              <Link href="/connexion" className={getLinkClass("/connexion", currentPath)}>
+                Se connecter
+              </Link>
+            </>
+          )}
         </nav>
       </div>
     </header>

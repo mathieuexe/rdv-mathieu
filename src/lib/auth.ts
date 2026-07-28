@@ -45,3 +45,65 @@ export async function clearDemoAdminCookie() {
   const cookieStore = await cookies();
   cookieStore.delete(DEMO_COOKIE);
 }
+
+export interface PublicUserSession {
+  isAuthenticated: boolean;
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  fullName?: string;
+}
+
+export async function getPublicUserSession(): Promise<PublicUserSession> {
+  if (!isSupabaseConfigured()) {
+    return {
+      isAuthenticated: false,
+    };
+  }
+
+  const supabase = await getSupabaseServerClient();
+
+  if (!supabase) {
+    return {
+      isAuthenticated: false,
+    };
+  }
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user?.email) {
+    return {
+      isAuthenticated: false,
+    };
+  }
+
+  const { data: profile } = await supabase
+    .from("user_profiles")
+    .select("first_name, last_name")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  const firstName =
+    typeof profile?.first_name === "string"
+      ? profile.first_name
+      : typeof user.user_metadata.first_name === "string"
+        ? user.user_metadata.first_name
+        : undefined;
+  const lastName =
+    typeof profile?.last_name === "string"
+      ? profile.last_name
+      : typeof user.user_metadata.last_name === "string"
+        ? user.user_metadata.last_name
+        : undefined;
+  const fullName = [firstName, lastName].filter(Boolean).join(" ").trim() || user.email;
+
+  return {
+    isAuthenticated: true,
+    email: user.email.toLowerCase(),
+    firstName,
+    lastName,
+    fullName,
+  };
+}

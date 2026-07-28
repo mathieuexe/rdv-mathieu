@@ -1,6 +1,6 @@
 export type AppointmentMode = "telephone" | "physique" | "visioconference";
 
-export type AppointmentStatus = "en_attente" | "accepte" | "refuse";
+export type AppointmentStatus = "en_attente" | "accepte" | "refuse" | "annule_client";
 
 export type Weekday =
   | "lundi"
@@ -59,6 +59,7 @@ export interface AppointmentRecord {
   endsAt: string;
   status: AppointmentStatus;
   rejectionReason?: string;
+  cancelReason?: string;
   createdAt: string;
 }
 

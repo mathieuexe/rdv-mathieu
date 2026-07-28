@@ -3,6 +3,7 @@ import { Clock3, MapPinned, MoveRight, TriangleAlert } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 
 import { BookingForm } from "@/components/booking/booking-form";
+import { getPublicUserSession } from "@/lib/auth";
 import { getBookingState } from "@/lib/booking";
 import { getCategorySlots } from "@/lib/data-access";
 import { formatAppointmentMode } from "@/lib/utils";
@@ -24,6 +25,7 @@ export default async function BookingCategoryPage({
   }
 
   const bookingState = getBookingState(payload.category, payload.siteSettings);
+  const session = await getPublicUserSession();
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.16),_transparent_28%),linear-gradient(180deg,#071120_0%,#0f172a_42%,#f8fbff_42%,#ffffff_100%)] px-4 py-6 sm:px-6 lg:px-8">
@@ -76,6 +78,15 @@ export default async function BookingCategoryPage({
             categorySlug={payload.category.slug}
             slots={payload.slots}
             helperMessage={bookingState.message}
+            initialUser={
+              session.isAuthenticated
+                ? {
+                    firstName: session.firstName,
+                    lastName: session.lastName,
+                    email: session.email,
+                  }
+                : undefined
+            }
           />
         )}
 
