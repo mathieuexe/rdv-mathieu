@@ -10,20 +10,15 @@ export default function LegalNoticePage() {
         <div className="mx-auto max-w-3xl space-y-8">
           <div>
             <h1 className="text-3xl font-semibold">Mentions legales</h1>
-            <p className="mt-3 text-sm text-neutral-600">
-              Les informations ci-dessous constituent un modele a completer avec vos donnees legales exactes avant mise en
-              ligne definitive.
-            </p>
           </div>
 
           <section className="space-y-3">
             <h2 className="text-xl font-semibold">Editeur du site</h2>
-            <p>Nom ou raison sociale : a completer</p>
-            <p>Responsable de la publication : a completer</p>
-            <p>Adresse : a completer</p>
-            <p>Email : a completer</p>
-            <p>Telephone : a completer</p>
-            <p>SIREN / SIRET : a completer</p>
+            <p>Nom ou raison sociale : M. CERENZIA Mathieu</p>
+            <p>Responsable de la publication : M. CERENZIA Mathieu</p>
+            <p>Adresse : Sauvian, France</p>
+            <p>Email : info@mathieucerenzia.fr</p>
+            <p>SIREN / SIRET : 883272437</p>
           </section>
 
           <section className="space-y-3">
