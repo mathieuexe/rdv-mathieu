@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
-import { LoaderCircle } from "lucide-react";
+import { useActionState, useState } from "react";
+import { Eye, EyeOff, LoaderCircle } from "lucide-react";
 
 import type { PublicLoginActionState } from "@/app/connexion/actions";
 
@@ -16,11 +16,26 @@ const initialState: PublicLoginActionState = {
 
 export function LoginForm({ action }: LoginFormProps) {
   const [state, formAction, pending] = useActionState(action, initialState);
+  const rememberedEmail =
+    typeof window === "undefined" ? "" : (window.localStorage.getItem("remembered-login-email") ?? "");
+  const [email, setEmail] = useState(rememberedEmail);
+  const [rememberMe, setRememberMe] = useState(Boolean(rememberedEmail));
+  const [showPassword, setShowPassword] = useState(false);
+
+  function handleSubmit() {
+    if (rememberMe && email.trim()) {
+      window.localStorage.setItem("remembered-login-email", email.trim());
+      return;
+    }
+
+    window.localStorage.removeItem("remembered-login-email");
+  }
 
   return (
     <div>
       <form
         action={formAction}
+        onSubmit={handleSubmit}
         className="rounded-[32px] border border-[#d7e0ea] bg-[#f8fafc] p-8 shadow-[0_14px_32px_rgba(120,145,173,0.12)] sm:p-10"
       >
         <div className="space-y-4">
@@ -28,18 +43,43 @@ export function LoginForm({ action }: LoginFormProps) {
             name="email"
             type="email"
             required
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            autoComplete={rememberMe ? "email" : "username"}
             placeholder="Entrez votre e-mail"
             className="w-full rounded-2xl border border-[#a8bfd8] bg-[#f8fafc] px-5 py-4 text-lg text-[#557296] outline-none placeholder:text-[#557296]"
           />
 
-          <input
-            name="password"
-            type="password"
-            required
-            placeholder="Entrez votre mot de passe"
-            className="w-full rounded-2xl border border-[#a8bfd8] bg-[#f8fafc] px-5 py-4 text-lg text-[#557296] outline-none placeholder:text-[#557296]"
-          />
+          <div className="relative">
+            <input
+              name="password"
+              type={showPassword ? "text" : "password"}
+              required
+              autoComplete="current-password"
+              placeholder="Entrez votre mot de passe"
+              className="w-full rounded-2xl border border-[#a8bfd8] bg-[#f8fafc] px-5 py-4 pr-14 text-lg text-[#557296] outline-none placeholder:text-[#557296]"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((value) => !value)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-[#557296] transition hover:text-[#113b67]"
+              aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+            >
+              {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+            </button>
+          </div>
         </div>
+
+        <label className="mt-4 flex items-center gap-3 text-sm text-[#557296]">
+          <input
+            name="rememberMe"
+            type="checkbox"
+            checked={rememberMe}
+            onChange={(event) => setRememberMe(event.target.checked)}
+            className="size-4 rounded border-[#a8bfd8] text-[#1473f6]"
+          />
+          <span>Se souvenir de moi</span>
+        </label>
 
         {state.message ? (
           <p className={`mt-4 text-sm ${state.status === "error" ? "text-red-600" : "text-[#557296]"}`}>{state.message}</p>

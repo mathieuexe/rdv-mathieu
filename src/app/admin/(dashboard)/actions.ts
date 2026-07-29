@@ -12,11 +12,12 @@ import {
   createAdminAppointment,
   createManagedUserAccount,
   deleteManagedUserAccount,
+  getCategoryById,
   saveCategory,
   saveSiteSettings,
   updateManagedUserAccount,
 } from "@/lib/data-access";
-import { sendAdminCreatedSignupEmail } from "@/lib/email";
+import { sendAdminCreatedSignupEmail, sendValidatedAppointmentEmail } from "@/lib/email";
 import { adminAppointmentSchema, categoryAdminSchema, settingsSchema } from "@/lib/validators";
 import { formatDateTimeFr } from "@/lib/utils";
 
@@ -182,6 +183,17 @@ export async function createAdminAppointmentAction(formData: FormData) {
       adminEmail: session.email,
     });
     appointmentCreated = true;
+    const category = await getCategoryById(appointment.categoryId);
+
+    await sendValidatedAppointmentEmail({
+      to: appointment.email,
+      firstName: appointment.firstName,
+      categoryTitle: category?.title ?? "Votre rendez-vous",
+      startsAtLabel: formatDateTimeFr(appointment.startsAt, { dateStyle: "full", timeStyle: "short" }),
+      appointmentMode: category?.appointmentMode ?? "visioconference",
+      phone: appointment.phone,
+      appointmentId: appointment.id,
+    });
 
     if (createdAccount) {
       await sendAdminCreatedSignupEmail({

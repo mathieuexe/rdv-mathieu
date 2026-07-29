@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useActionState, useMemo, useState } from "react";
-import { LoaderCircle } from "lucide-react";
+import { Eye, EyeOff, LoaderCircle } from "lucide-react";
 
 import type { SignUpActionState } from "@/app/inscription/actions";
 
@@ -46,6 +46,7 @@ export function SignUpForm({ action }: SignUpFormProps) {
   const [state, formAction, pending] = useActionState(action, initialState);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const checks = useMemo(
     () =>
@@ -93,25 +94,47 @@ export function SignUpForm({ action }: SignUpFormProps) {
             className="w-full rounded-2xl border border-[#a8bfd8] bg-[#f8fafc] px-5 py-4 text-lg text-[#557296] outline-none placeholder:text-[#557296]"
           />
 
-          <input
-            name="password"
-            type="password"
-            required
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            placeholder="Choisissez votre mot de passe"
-            className="w-full rounded-2xl border border-[#a8bfd8] bg-[#f8fafc] px-5 py-4 text-lg text-[#557296] outline-none placeholder:text-[#557296]"
-          />
+          <div className="relative">
+            <input
+              name="password"
+              type={showPassword ? "text" : "password"}
+              required
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              autoComplete="new-password"
+              placeholder="Choisissez votre mot de passe"
+              className="w-full rounded-2xl border border-[#a8bfd8] bg-[#f8fafc] px-5 py-4 pr-14 text-lg text-[#557296] outline-none placeholder:text-[#557296]"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((value) => !value)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-[#557296] transition hover:text-[#113b67]"
+              aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+            >
+              {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+            </button>
+          </div>
 
-          <input
-            name="confirmPassword"
-            type="password"
-            required
-            value={confirmPassword}
-            onChange={(event) => setConfirmPassword(event.target.value)}
-            placeholder="Confirmez votre mot de passe"
-            className="w-full rounded-2xl border border-[#a8bfd8] bg-[#f8fafc] px-5 py-4 text-lg text-[#557296] outline-none placeholder:text-[#557296]"
-          />
+          <div className="relative">
+            <input
+              name="confirmPassword"
+              type={showPassword ? "text" : "password"}
+              required
+              value={confirmPassword}
+              onChange={(event) => setConfirmPassword(event.target.value)}
+              autoComplete="new-password"
+              placeholder="Confirmez votre mot de passe"
+              className="w-full rounded-2xl border border-[#a8bfd8] bg-[#f8fafc] px-5 py-4 pr-14 text-lg text-[#557296] outline-none placeholder:text-[#557296]"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((value) => !value)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-[#557296] transition hover:text-[#113b67]"
+              aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+            >
+              {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+            </button>
+          </div>
         </div>
 
         <div className="mt-6 rounded-2xl border border-[#d7e0ea] bg-white/70 p-5">
