@@ -80,6 +80,10 @@ export default async function EmailReferenceCheckerPage({
                     </dd>
                   </div>
                   <div>
+                    <dt className="text-xs uppercase tracking-[0.18em] text-slate-500">Resend email id</dt>
+                    <dd className="mt-2 text-slate-950">{result.resendEmailId ?? "Aucun id retourne"}</dd>
+                  </div>
+                  <div>
                     <dt className="text-xs uppercase tracking-[0.18em] text-slate-500">Rendez-vous</dt>
                     <dd className="mt-2 text-slate-950">
                       {result.appointmentId ? (
@@ -127,6 +131,8 @@ export default async function EmailReferenceCheckerPage({
                     <p className="font-semibold text-slate-950">{log.reference}</p>
                     <p className="mt-1 text-sm text-slate-600">{log.sourceLabel}</p>
                     <p className="mt-1 text-sm text-slate-500">{log.recipientEmail}</p>
+                    <p className="mt-1 text-sm text-slate-500">Statut : {log.deliveryStatus}</p>
+                    <p className="mt-1 text-sm text-slate-500">Resend : {log.resendEmailId ?? "Aucun id retourne"}</p>
                   </div>
                   <div className="text-sm text-slate-500">
                     {formatDateTimeFr(log.createdAt, { dateStyle: "medium", timeStyle: "short" })}
