@@ -45,6 +45,7 @@ function getCalendarCells(monthKey: string) {
 export function AdminAppointmentForm({ categories, registeredClients, action }: AdminAppointmentFormProps) {
   const [categorySlug, setCategorySlug] = useState(categories[0]?.slug ?? "");
   const [linkedUserId, setLinkedUserId] = useState("");
+  const [clientSearch, setClientSearch] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -52,6 +53,8 @@ export function AdminAppointmentForm({ categories, registeredClients, action }: 
   const [message, setMessage] = useState("");
   const [slots, setSlots] = useState<BookingSlot[]>([]);
   const [selectedSlot, setSelectedSlot] = useState("");
+  const [selectedDateKey, setSelectedDateKey] = useState("");
+  const [visibleMonthKey, setVisibleMonthKey] = useState(toMonthKey(new Date().toISOString().slice(0, 10)));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -70,13 +73,26 @@ export function AdminAppointmentForm({ categories, registeredClients, action }: 
       const data = (await response.json()) as { slots?: BookingSlot[]; error?: string };
 
       if (!response.ok) {
-        setError(data.error ?? "Impossible de charger les disponibilites.");
+        setError(data.error ?? "Impossible de charger les disponibilités.");
         setSlots([]);
         setLoading(false);
         return;
       }
 
-      setSlots(data.slots ?? []);
+      const nextSlots = data.slots ?? [];
+      const nextGroupedSlots = groupSlotsByDay(nextSlots);
+      const nextDayEntries = Object.entries(nextGroupedSlots)
+        .map(([dateKey, dateSlots]) => ({
+          dateKey,
+          availableCount: dateSlots.filter((slot) => !slot.isBlocked).length,
+        }))
+        .sort((a, b) => a.dateKey.localeCompare(b.dateKey));
+      const nextFirstAvailableDateKey =
+        nextDayEntries.find((entry) => entry.availableCount > 0)?.dateKey ?? nextDayEntries[0]?.dateKey ?? "";
+
+      setSlots(nextSlots);
+      setSelectedDateKey(nextFirstAvailableDateKey);
+      setVisibleMonthKey(toMonthKey(nextFirstAvailableDateKey || new Date().toISOString().slice(0, 10)));
       setLoading(false);
     }
 
@@ -100,35 +116,6 @@ export function AdminAppointmentForm({ categories, registeredClients, action }: 
     [groupedSlots],
   );
   const monthKeys = useMemo(() => Array.from(new Set(dayEntries.map((entry) => toMonthKey(entry.dateKey)))), [dayEntries]);
-  const firstAvailableDateKey = dayEntries.find((entry) => entry.availableCount > 0)?.dateKey ?? dayEntries[0]?.dateKey ?? "";
-  const [selectedDateKey, setSelectedDateKey] = useState(firstAvailableDateKey);
-  const [visibleMonthKey, setVisibleMonthKey] = useState(
-    toMonthKey(firstAvailableDateKey || new Date().toISOString().slice(0, 10)),
-  );
-
-  useEffect(() => {
-    setSelectedDateKey(firstAvailableDateKey);
-  }, [firstAvailableDateKey]);
-
-  useEffect(() => {
-    if (!selectedDateKey) {
-      setSelectedSlot("");
-      return;
-    }
-
-    const currentDaySlots = groupedSlots[selectedDateKey] ?? [];
-
-    if (!currentDaySlots.some((slot) => slot.start === selectedSlot && !slot.isBlocked)) {
-      setSelectedSlot("");
-    }
-  }, [groupedSlots, selectedDateKey, selectedSlot]);
-
-  useEffect(() => {
-    if (selectedDateKey) {
-      setVisibleMonthKey(toMonthKey(selectedDateKey));
-    }
-  }, [selectedDateKey]);
-
   const selectedDay = dayEntries.find((entry) => entry.dateKey === selectedDateKey) ?? null;
   const visibleMonthIndex = Math.max(0, monthKeys.findIndex((monthKey) => monthKey === visibleMonthKey));
   const calendarCells = getCalendarCells(monthKeys[visibleMonthIndex] ?? visibleMonthKey);
@@ -137,17 +124,38 @@ export function AdminAppointmentForm({ categories, registeredClients, action }: 
     () => registeredClients.find((client) => client.userId === linkedUserId) ?? null,
     [registeredClients, linkedUserId],
   );
+  const filteredClients = useMemo(() => {
+    const query = clientSearch.trim().toLowerCase();
 
-  useEffect(() => {
-    if (!selectedClient) {
+    if (!query) {
+      return registeredClients;
+    }
+
+    const matches = registeredClients.filter((client) =>
+      `${client.firstName} ${client.lastName} ${client.email}`.toLowerCase().includes(query),
+    );
+
+    if (selectedClient && !matches.some((client) => client.userId === selectedClient.userId)) {
+      return [selectedClient, ...matches];
+    }
+
+    return matches;
+  }, [clientSearch, registeredClients, selectedClient]);
+
+  function handleClientChange(nextUserId: string) {
+    setLinkedUserId(nextUserId);
+
+    const nextClient = registeredClients.find((client) => client.userId === nextUserId);
+
+    if (!nextClient) {
       return;
     }
 
-    setFirstName(selectedClient.firstName);
-    setLastName(selectedClient.lastName);
-    setEmail(selectedClient.email);
-    setPhone(selectedClient.phone ?? "");
-  }, [selectedClient]);
+    setFirstName(nextClient.firstName);
+    setLastName(nextClient.lastName);
+    setEmail(nextClient.email);
+    setPhone(nextClient.phone ?? "");
+  }
 
   return (
     <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_18px_55px_rgba(37,99,235,0.08)]">
@@ -163,14 +171,21 @@ export function AdminAppointmentForm({ categories, registeredClients, action }: 
         <div className="space-y-5">
           <label className="block space-y-2 text-sm font-medium text-slate-700">
             <span>Client déjà inscrit</span>
+            <input
+              type="search"
+              value={clientSearch}
+              onChange={(event) => setClientSearch(event.target.value)}
+              placeholder="Rechercher par nom, prénom ou email"
+              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition duration-150 focus:border-blue-500"
+            />
             <select
               name="linkedUserId"
               value={linkedUserId}
-              onChange={(event) => setLinkedUserId(event.target.value)}
+              onChange={(event) => handleClientChange(event.target.value)}
               className="w-full rounded-2xl border border-blue-100 bg-blue-50/40 px-4 py-3 outline-none transition duration-150 focus:border-blue-500 focus:bg-white"
             >
               <option value="">Aucun lien client</option>
-              {registeredClients.map((client) => (
+              {filteredClients.map((client) => (
                 <option key={client.userId} value={client.userId}>
                   {client.firstName} {client.lastName} - {client.email}
                 </option>
@@ -179,6 +194,9 @@ export function AdminAppointmentForm({ categories, registeredClients, action }: 
             <p className="text-xs text-slate-500">
               Si vous sélectionnez un client inscrit, ce rendez-vous apparaîtra aussi dans son espace personnel.
             </p>
+            {clientSearch.trim() && filteredClients.length === 0 ? (
+              <p className="text-xs text-amber-700">Aucun client ne correspond à votre recherche.</p>
+            ) : null}
           </label>
 
           <label className="block space-y-2 text-sm font-medium text-slate-700">

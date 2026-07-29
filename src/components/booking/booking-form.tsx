@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   CalendarDays,
@@ -29,6 +29,7 @@ interface BookingFormProps {
     firstName?: string;
     lastName?: string;
     email?: string;
+    phone?: string;
   };
 }
 
@@ -84,38 +85,16 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
   const [firstName, setFirstName] = useState(initialUser?.firstName ?? "");
   const [lastName, setLastName] = useState(initialUser?.lastName ?? "");
   const [email, setEmail] = useState(initialUser?.email ?? "");
-  const [phone, setPhone] = useState("");
+  const [phone, setPhone] = useState(initialUser?.phone ?? "");
   const [message, setMessage] = useState("");
-
-  useEffect(() => {
-    if (!selectedDateKey && firstAvailableDateKey) {
-      setSelectedDateKey(firstAvailableDateKey);
-    }
-  }, [selectedDateKey, firstAvailableDateKey]);
-
-  useEffect(() => {
-    if (!selectedDateKey) {
-      setSelectedSlot("");
-      setCurrentStep(1);
-      return;
-    }
-
-    const currentDaySlots = groupedSlots[selectedDateKey] ?? [];
-
-    if (!currentDaySlots.some((slot) => slot.start === selectedSlot && !slot.isBlocked)) {
-      setSelectedSlot("");
-      setCurrentStep(1);
-    }
-  }, [groupedSlots, selectedDateKey, selectedSlot]);
-
-  useEffect(() => {
-    if (selectedDateKey) {
-      setVisibleMonthKey(toMonthKey(selectedDateKey));
-    }
-  }, [selectedDateKey]);
-
-  const selectedDay = dayEntries.find((entry) => entry.dateKey === selectedDateKey) ?? null;
-  const selectedSlotDetails = selectedDay?.dateSlots.find((slot) => slot.start === selectedSlot) ?? null;
+  const shouldSuggestSavedPhone = category.appointmentMode === "telephone" && Boolean(initialUser?.phone?.trim());
+  const [phoneConfirmation, setPhoneConfirmation] = useState<"pending" | "yes" | "no">(shouldSuggestSavedPhone ? "pending" : "yes");
+  const activeDateKey = selectedDateKey || firstAvailableDateKey;
+  const selectedDay = dayEntries.find((entry) => entry.dateKey === activeDateKey) ?? null;
+  const hasValidSelectedSlot = selectedDay?.dateSlots.some((slot) => slot.start === selectedSlot && !slot.isBlocked) ?? false;
+  const activeSelectedSlot = hasValidSelectedSlot ? selectedSlot : "";
+  const activeStep = activeSelectedSlot ? currentStep : 1;
+  const selectedSlotDetails = selectedDay?.dateSlots.find((slot) => slot.start === activeSelectedSlot) ?? null;
   const visibleMonthIndex = Math.max(0, monthKeys.findIndex((monthKey) => monthKey === visibleMonthKey));
   const calendarCells = getCalendarCells(monthKeys[visibleMonthIndex] ?? visibleMonthKey);
   const hasAnyAvailableSlot = dayEntries.some((entry) => entry.availableCount > 0);
@@ -152,6 +131,14 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
     setError("");
   }
 
+  function handleSelectDate(dateKey: string) {
+    setSelectedDateKey(dateKey);
+    setVisibleMonthKey(toMonthKey(dateKey));
+    setSelectedSlot("");
+    setCurrentStep(1);
+    setError("");
+  }
+
   function handleContinueToRecap() {
     const validationError = validateStepTwo();
 
@@ -165,7 +152,7 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
   }
 
   async function handleSubmit() {
-    if (!selectedSlot) {
+    if (!activeSelectedSlot) {
       setError("Sélectionnez un créneau avant de confirmer.");
       setCurrentStep(1);
       return;
@@ -189,7 +176,7 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
       email: email.trim(),
       phone: phone.trim(),
       message: message.trim(),
-      startsAt: selectedSlot,
+      startsAt: activeSelectedSlot,
     };
 
     let response: Response;
@@ -282,13 +269,13 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
               currentStep === 1 ? "lg:border-r" : "lg:col-span-2",
             )}
           >
-            {currentStep === 1 ? (
+            {activeStep === 1 ? (
               <>
                 <div className="flex items-center gap-3">
                   <CalendarDays className="size-5 text-gray-500" />
                   <div>
-                    <p className="text-lg font-semibold text-gray-950">Sélectionnez la date et l'heure</p>
-                    <p className="text-sm text-gray-500">Choisissez d'abord un jour, puis un créneau disponible.</p>
+                    <p className="text-lg font-semibold text-gray-950">Sélectionnez la date et l&apos;heure</p>
+                    <p className="text-sm text-gray-500">Choisissez d&apos;abord un jour, puis un créneau disponible.</p>
                   </div>
                 </div>
 
@@ -332,7 +319,7 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                       }
 
                       const entry = dayEntries.find((item) => item.dateKey === cell.key);
-                      const isSelected = selectedDateKey === cell.key;
+                      const isSelected = activeDateKey === cell.key;
                       const isDisabled = !entry || entry.availableCount === 0;
 
                       return (
@@ -340,7 +327,7 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                           <button
                             type="button"
                             disabled={isDisabled}
-                            onClick={() => setSelectedDateKey(cell.key)}
+                            onClick={() => handleSelectDate(cell.key)}
                             className={cn(
                               "flex size-10 items-center justify-center rounded-lg text-sm transition-all duration-150",
                               isDisabled && "cursor-not-allowed text-gray-300",
@@ -360,13 +347,13 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                   </div>
                 </div>
               </>
-            ) : currentStep === 2 ? (
+            ) : activeStep === 2 ? (
               <div className="mx-auto max-w-2xl space-y-5">
                 <div className="space-y-1">
                   <p className="text-lg font-semibold text-gray-950">Vos informations</p>
                   <p className="text-sm text-gray-500">
-                    {selectedSlot
-                      ? `Créneau choisi : ${formatDateTimeFr(selectedSlot, { dateStyle: "full", timeStyle: "short" })}`
+                    {activeSelectedSlot
+                      ? `Créneau choisi : ${formatDateTimeFr(activeSelectedSlot, { dateStyle: "full", timeStyle: "short" })}`
                       : "Complétez vos informations pour continuer."}
                   </p>
                 </div>
@@ -405,6 +392,52 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                   <p className="text-xs text-gray-500">
                     Les champs préremplis peuvent être corrigés avant la confirmation du rendez-vous.
                   </p>
+                ) : null}
+
+                {shouldSuggestSavedPhone ? (
+                  <div className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-4 text-sm leading-7 text-gray-600">
+                    <p className="font-medium text-gray-900">
+                      Lors de votre dernier rendez-vous téléphonique, vous aviez utilisé le numéro de téléphone{" "}
+                      <span className="font-semibold">{initialUser?.phone}</span>. Est-ce toujours correct ?
+                    </p>
+                    <div className="mt-3 flex flex-wrap gap-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPhone(initialUser?.phone ?? "");
+                          setPhoneConfirmation("yes");
+                        }}
+                        className={cn(
+                          "rounded-full border px-4 py-2 text-sm font-medium transition-all duration-150",
+                          phoneConfirmation === "yes"
+                            ? "border-black bg-black text-white"
+                            : "border-gray-200 bg-white text-gray-700 hover:border-gray-400",
+                        )}
+                      >
+                        Oui
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPhone("");
+                          setPhoneConfirmation("no");
+                        }}
+                        className={cn(
+                          "rounded-full border px-4 py-2 text-sm font-medium transition-all duration-150",
+                          phoneConfirmation === "no"
+                            ? "border-black bg-black text-white"
+                            : "border-gray-200 bg-white text-gray-700 hover:border-gray-400",
+                        )}
+                      >
+                        Non
+                      </button>
+                    </div>
+                    {phoneConfirmation === "no" ? (
+                      <p className="mt-3 text-xs text-gray-500">
+                        Si non, vous pouvez modifier le numéro ci-dessous.
+                      </p>
+                    ) : null}
+                  </div>
                 ) : null}
 
                 <label className="space-y-2 text-sm font-medium text-gray-700">
@@ -540,7 +573,7 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
             )}
           </section>
 
-          {currentStep === 1 ? (
+          {activeStep === 1 ? (
             <section className="p-6 lg:p-8">
               <div className="mb-5 flex items-center justify-between gap-3">
                 <p className="text-sm font-semibold text-gray-900">Créneaux horaires</p>
@@ -553,7 +586,7 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
               <div className="max-h-[460px] space-y-3 overflow-y-auto pr-1">
                 {selectedDay ? (
                   selectedDay.dateSlots.map((slot) => {
-                    const active = selectedSlot === slot.start;
+                    const active = activeSelectedSlot === slot.start;
 
                     return (
                       <button

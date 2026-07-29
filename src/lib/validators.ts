@@ -69,7 +69,7 @@ export const settingsSchema = z
   });
 
 export const adminAppointmentSchema = appointmentRequestSchema.extend({
-  categorySlug: z.string().trim().min(1, "La categorie est requise."),
+  categorySlug: z.string().trim().min(1, "La catégorie est requise."),
   linkedUserId: z.string().trim().uuid("Le client sélectionné est invalide.").optional().or(z.literal("")),
 });
 

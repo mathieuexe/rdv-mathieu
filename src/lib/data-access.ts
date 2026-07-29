@@ -681,11 +681,11 @@ export async function saveCategory(input: {
   const supabase = getSupabaseAdminClient();
 
   if (!supabase) {
-    throw new Error("L'enregistrement des categories est indisponible tant que Supabase n'est pas configure.");
+    throw new Error("L'enregistrement des catégories est indisponible tant que Supabase n'est pas configuré.");
   }
 
   if (input.startTime >= input.endTime) {
-    throw new Error("L'heure de debut doit etre inferieure a l'heure de fin.");
+    throw new Error("L'heure de début doit être inférieure à l'heure de fin.");
   }
 
   const categoryPayload = {
@@ -719,7 +719,7 @@ export async function saveCategory(input: {
   }
 
   if (!categoryRow) {
-    throw new Error("La categorie n'a pas pu etre enregistree.");
+    throw new Error("La catégorie n'a pas pu être enregistrée.");
   }
 
   const weekdayValues = [1, 2, 3, 4, 5];
@@ -746,7 +746,7 @@ export async function saveCategory(input: {
   const refreshed = await getCategoryById(String(categoryRow.id));
 
   if (!refreshed) {
-    throw new Error("La categorie a ete enregistree mais n'a pas pu etre relue.");
+    throw new Error("La catégorie a été enregistrée mais n'a pas pu être relue.");
   }
 
   return refreshed;
@@ -761,7 +761,7 @@ export async function saveSiteSettings(input: {
   const supabase = getSupabaseAdminClient();
 
   if (!supabase) {
-    throw new Error("L'enregistrement des parametres est indisponible tant que Supabase n'est pas configure.");
+    throw new Error("L'enregistrement des paramètres est indisponible tant que Supabase n'est pas configuré.");
   }
 
   const { data: existing } = await supabase.from("site_settings").select("id").limit(1).maybeSingle();

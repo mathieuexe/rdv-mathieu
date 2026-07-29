@@ -169,7 +169,8 @@ export async function createAdminAppointmentAction(formData: FormData) {
 
   revalidatePath("/admin");
   revalidatePath("/admin/rendez-vous");
+  revalidatePath("/admin/rendez-vous/agenda");
   revalidatePath("/compte");
   revalidatePath("/compte/logs");
-  redirect("/admin/rendez-vous/agenda?saved=1");
+  redirect("/admin/rendez-vous?saved=1");
 }

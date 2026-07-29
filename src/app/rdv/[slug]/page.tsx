@@ -67,6 +67,7 @@ export default async function BookingCategoryPage({
                       firstName: session.firstName,
                       lastName: session.lastName,
                       email: session.email,
+                      phone: session.phone,
                     }
                   : undefined
               }
