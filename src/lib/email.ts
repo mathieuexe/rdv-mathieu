@@ -1,5 +1,6 @@
 import { randomBytes } from "node:crypto";
 import type { ReactElement } from "react";
+import { render } from "@react-email/render";
 import { Resend } from "resend";
 
 import {
@@ -185,11 +186,13 @@ export async function sendTransactionalEmail({
 
   const resend = new Resend(apiKey);
   try {
+    const html = await render(buildTemplate(reference));
+
     const { data, error } = await resend.emails.send({
       from,
       to,
       subject,
-      react: buildTemplate(reference),
+      html,
     });
 
     if (error) {
