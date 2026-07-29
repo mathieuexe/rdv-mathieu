@@ -58,7 +58,11 @@ export async function cancelAppointmentAction(
     };
   }
 
-  const appointment = await cancelUserAppointmentById(appointmentId, session.email, cancelReason);
+  const appointment = await cancelUserAppointmentById(
+    appointmentId,
+    { email: session.email, userId: session.userId },
+    cancelReason,
+  );
 
   if (!appointment) {
     return {

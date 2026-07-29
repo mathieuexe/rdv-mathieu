@@ -61,18 +61,18 @@ export function AdminShell({ children }: AdminShellProps) {
   const currentSection = getCurrentSection(currentPath);
 
   return (
-    <div className="min-h-screen bg-[#f5f7fb]">
+    <div className="min-h-screen bg-[linear-gradient(180deg,#f3f7ff_0%,#f8fafc_24%,#f8fafc_100%)]">
       <div className="grid min-h-screen lg:grid-cols-[280px_minmax(0,1fr)]">
-        <aside className="border-b border-slate-200 bg-[#f8fafc] px-5 py-6 lg:border-r lg:border-b-0 lg:px-6">
+        <aside className="border-b border-blue-100 bg-[linear-gradient(180deg,#f8fbff_0%,#f8fafc_100%)] px-5 py-6 lg:border-r lg:border-b-0 lg:px-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Administration</p>
+              <p className="text-xs uppercase tracking-[0.24em] text-blue-500/70">Administration</p>
               <h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">RDV Mathieu</h1>
             </div>
 
             <Link
               href="/"
-              className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600 transition hover:border-slate-300 hover:text-slate-950"
+              className="inline-flex items-center gap-1 rounded-full border border-blue-100 bg-white px-3 py-2 text-xs font-medium text-slate-600 transition hover:border-blue-300 hover:text-slate-950"
             >
               <span>Voir le site</span>
               <ArrowUpRight className="size-3.5" />
@@ -81,7 +81,7 @@ export function AdminShell({ children }: AdminShellProps) {
 
           <Link
             href="/admin/rendez-vous/nouveau"
-            className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-900 transition hover:border-slate-400"
+            className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full border border-blue-200 bg-blue-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-blue-700"
           >
             <CalendarPlus2 className="size-4" />
             <span>Créer</span>
@@ -90,7 +90,7 @@ export function AdminShell({ children }: AdminShellProps) {
           <div className="mt-8 space-y-7">
             {navigationSections.map((section) => (
               <div key={section.title}>
-                <p className="mb-2 px-3 text-xs font-medium uppercase tracking-[0.18em] text-slate-400">{section.title}</p>
+                <p className="mb-2 px-3 text-xs font-medium uppercase tracking-[0.18em] text-blue-500/60">{section.title}</p>
                 <nav className="space-y-1">
                   {section.items.map((item) => {
                     const isActive = currentPath === item.href || currentPath.startsWith(`${item.href}/`);
@@ -102,13 +102,15 @@ export function AdminShell({ children }: AdminShellProps) {
                         href={item.href}
                         className={cn(
                           "flex items-center gap-3 rounded-2xl px-3 py-3 text-sm transition",
-                          isActive ? "bg-white text-slate-950 shadow-sm" : "text-slate-600 hover:bg-white hover:text-slate-950",
+                          isActive
+                            ? "bg-white text-slate-950 shadow-sm ring-1 ring-blue-100"
+                            : "text-slate-600 hover:bg-white hover:text-slate-950",
                         )}
                       >
                         <div
                           className={cn(
                             "flex size-9 items-center justify-center rounded-xl border text-slate-500",
-                            isActive ? "border-slate-200 bg-slate-50" : "border-transparent bg-transparent",
+                            isActive ? "border-blue-100 bg-blue-50 text-blue-600" : "border-transparent bg-transparent",
                           )}
                         >
                           <Icon className="size-4" />
@@ -127,8 +129,8 @@ export function AdminShell({ children }: AdminShellProps) {
         </aside>
 
         <div className="min-w-0 px-4 py-4 sm:px-6 lg:px-8">
-          <header className="rounded-[28px] border border-slate-200 bg-white px-6 py-5 shadow-[0_16px_50px_rgba(15,23,42,0.04)]">
-            <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Espace administrateur</p>
+          <header className="rounded-[28px] border border-blue-100 bg-white px-6 py-5 shadow-[0_16px_50px_rgba(37,99,235,0.08)]">
+            <p className="text-xs uppercase tracking-[0.18em] text-blue-600/70">Espace administrateur</p>
             <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <h2 className="text-2xl font-semibold tracking-tight text-slate-950">{currentSection.label}</h2>

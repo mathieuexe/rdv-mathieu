@@ -5,10 +5,11 @@ import { CalendarDays, Clock3, MapPinned } from "lucide-react";
 
 import { groupSlotsByDay } from "@/lib/booking";
 import { cn, formatAppointmentMode } from "@/lib/utils";
-import type { AppointmentCategory, BookingSlot } from "@/types/domain";
+import type { AppointmentCategory, BookingSlot, UserProfileRecord } from "@/types/domain";
 
 interface AdminAppointmentFormProps {
   categories: AppointmentCategory[];
+  registeredClients: UserProfileRecord[];
   action: (formData: FormData) => Promise<void>;
 }
 
@@ -41,8 +42,14 @@ function getCalendarCells(monthKey: string) {
   ];
 }
 
-export function AdminAppointmentForm({ categories, action }: AdminAppointmentFormProps) {
+export function AdminAppointmentForm({ categories, registeredClients, action }: AdminAppointmentFormProps) {
   const [categorySlug, setCategorySlug] = useState(categories[0]?.slug ?? "");
+  const [linkedUserId, setLinkedUserId] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [message, setMessage] = useState("");
   const [slots, setSlots] = useState<BookingSlot[]>([]);
   const [selectedSlot, setSelectedSlot] = useState("");
   const [loading, setLoading] = useState(false);
@@ -126,11 +133,26 @@ export function AdminAppointmentForm({ categories, action }: AdminAppointmentFor
   const visibleMonthIndex = Math.max(0, monthKeys.findIndex((monthKey) => monthKey === visibleMonthKey));
   const calendarCells = getCalendarCells(monthKeys[visibleMonthIndex] ?? visibleMonthKey);
   const hasAnyAvailableSlot = dayEntries.some((entry) => entry.availableCount > 0);
+  const selectedClient = useMemo(
+    () => registeredClients.find((client) => client.userId === linkedUserId) ?? null,
+    [registeredClients, linkedUserId],
+  );
+
+  useEffect(() => {
+    if (!selectedClient) {
+      return;
+    }
+
+    setFirstName(selectedClient.firstName);
+    setLastName(selectedClient.lastName);
+    setEmail(selectedClient.email);
+    setPhone(selectedClient.phone ?? "");
+  }, [selectedClient]);
 
   return (
-    <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_16px_50px_rgba(15,23,42,0.04)]">
+    <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_18px_55px_rgba(37,99,235,0.08)]">
       <div>
-        <p className="text-sm uppercase tracking-[0.2em] text-slate-400">Création</p>
+        <p className="text-sm uppercase tracking-[0.2em] text-blue-600/70">Création</p>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">Créer un rendez-vous</h1>
         <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
           L&apos;administrateur peut réserver directement un créneau disponible au nom d&apos;un client.
@@ -140,12 +162,32 @@ export function AdminAppointmentForm({ categories, action }: AdminAppointmentFor
       <form action={action} className="mt-8 grid gap-6 xl:grid-cols-[1fr_0.95fr]">
         <div className="space-y-5">
           <label className="block space-y-2 text-sm font-medium text-slate-700">
+            <span>Client déjà inscrit</span>
+            <select
+              name="linkedUserId"
+              value={linkedUserId}
+              onChange={(event) => setLinkedUserId(event.target.value)}
+              className="w-full rounded-2xl border border-blue-100 bg-blue-50/40 px-4 py-3 outline-none transition duration-150 focus:border-blue-500 focus:bg-white"
+            >
+              <option value="">Aucun lien client</option>
+              {registeredClients.map((client) => (
+                <option key={client.userId} value={client.userId}>
+                  {client.firstName} {client.lastName} - {client.email}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-slate-500">
+              Si vous sélectionnez un client inscrit, ce rendez-vous apparaîtra aussi dans son espace personnel.
+            </p>
+          </label>
+
+          <label className="block space-y-2 text-sm font-medium text-slate-700">
             <span>Catégorie</span>
             <select
               name="categorySlug"
               value={categorySlug}
               onChange={(event) => setCategorySlug(event.target.value)}
-              className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition duration-150 focus:border-slate-950 focus:bg-white"
+              className="w-full rounded-2xl border border-blue-100 bg-blue-50/40 px-4 py-3 outline-none transition duration-150 focus:border-blue-500 focus:bg-white"
             >
               {categories.map((category) => (
                 <option key={category.id} value={category.slug}>
@@ -161,7 +203,9 @@ export function AdminAppointmentForm({ categories, action }: AdminAppointmentFor
               <input
                 name="firstName"
                 required
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition duration-150 focus:border-slate-950 focus:bg-white"
+                value={firstName}
+                onChange={(event) => setFirstName(event.target.value)}
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition duration-150 focus:border-blue-500 focus:bg-white"
               />
             </label>
 
@@ -170,7 +214,9 @@ export function AdminAppointmentForm({ categories, action }: AdminAppointmentFor
               <input
                 name="lastName"
                 required
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition duration-150 focus:border-slate-950 focus:bg-white"
+                value={lastName}
+                onChange={(event) => setLastName(event.target.value)}
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition duration-150 focus:border-blue-500 focus:bg-white"
               />
             </label>
           </div>
@@ -181,7 +227,9 @@ export function AdminAppointmentForm({ categories, action }: AdminAppointmentFor
               name="email"
               type="email"
               required
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition duration-150 focus:border-slate-950 focus:bg-white"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition duration-150 focus:border-blue-500 focus:bg-white"
             />
           </label>
 
@@ -191,7 +239,9 @@ export function AdminAppointmentForm({ categories, action }: AdminAppointmentFor
               name="phone"
               type="tel"
               required
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition duration-150 focus:border-slate-950 focus:bg-white"
+              value={phone}
+              onChange={(event) => setPhone(event.target.value)}
+              className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition duration-150 focus:border-blue-500 focus:bg-white"
             />
           </label>
 
@@ -200,7 +250,9 @@ export function AdminAppointmentForm({ categories, action }: AdminAppointmentFor
             <textarea
               name="message"
               rows={4}
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition duration-150 focus:border-slate-950 focus:bg-white"
+              value={message}
+              onChange={(event) => setMessage(event.target.value)}
+              className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition duration-150 focus:border-blue-500 focus:bg-white"
             />
           </label>
         </div>
@@ -208,7 +260,7 @@ export function AdminAppointmentForm({ categories, action }: AdminAppointmentFor
         <div className="space-y-5">
           <input type="hidden" name="startsAt" value={selectedSlot} />
 
-          <div className="rounded-[24px] border border-slate-200 bg-slate-50/60 p-5">
+          <div className="rounded-[24px] border border-blue-100 bg-blue-50/40 p-5">
             <div className="space-y-2">
               <p className="text-sm font-semibold text-slate-900">Disponibilités</p>
               {selectedCategory ? (
@@ -250,7 +302,7 @@ export function AdminAppointmentForm({ categories, action }: AdminAppointmentFor
                         type="button"
                         onClick={() => setVisibleMonthKey(monthKeys[Math.max(0, visibleMonthIndex - 1)] ?? visibleMonthKey)}
                         disabled={visibleMonthIndex === 0}
-                        className="flex size-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition duration-150 hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                      className="flex size-9 items-center justify-center rounded-full border border-blue-100 bg-white text-slate-600 transition duration-150 hover:border-blue-300 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         ‹
                       </button>
@@ -260,7 +312,7 @@ export function AdminAppointmentForm({ categories, action }: AdminAppointmentFor
                           setVisibleMonthKey(monthKeys[Math.min(monthKeys.length - 1, visibleMonthIndex + 1)] ?? visibleMonthKey)
                         }
                         disabled={visibleMonthIndex >= monthKeys.length - 1}
-                        className="flex size-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition duration-150 hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                        className="flex size-9 items-center justify-center rounded-full border border-blue-100 bg-white text-slate-600 transition duration-150 hover:border-blue-300 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         ›
                       </button>
@@ -292,8 +344,8 @@ export function AdminAppointmentForm({ categories, action }: AdminAppointmentFor
                             className={cn(
                               "flex size-10 items-center justify-center rounded-xl text-sm transition duration-150",
                               isDisabled && "cursor-not-allowed text-slate-300",
-                              !isDisabled && !isSelected && "bg-white text-slate-700 hover:bg-slate-100",
-                              isSelected && "bg-slate-950 text-white",
+                              !isDisabled && !isSelected && "bg-white text-slate-700 hover:bg-blue-50",
+                              isSelected && "bg-blue-600 text-white",
                             )}
                           >
                             {cell.dayNumber}
@@ -322,8 +374,8 @@ export function AdminAppointmentForm({ categories, action }: AdminAppointmentFor
                           "flex w-full items-center justify-center rounded-2xl border px-4 py-3 text-sm font-medium transition duration-150",
                           slot.isBlocked
                             ? "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400"
-                            : "border-slate-200 bg-white text-slate-700 hover:border-slate-900 hover:text-slate-950",
-                          active && "border-slate-950 bg-slate-950 text-white",
+                            : "border-slate-200 bg-white text-slate-700 hover:border-blue-500 hover:text-slate-950",
+                          active && "border-blue-600 bg-blue-600 text-white",
                         )}
                       >
                         {slot.label}
@@ -344,7 +396,7 @@ export function AdminAppointmentForm({ categories, action }: AdminAppointmentFor
           <button
             type="submit"
             disabled={!selectedSlot}
-            className="inline-flex w-full items-center justify-center rounded-full bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition duration-150 hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+            className="inline-flex w-full items-center justify-center rounded-full bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition duration-150 hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300"
           >
             Créer le rendez-vous
           </button>

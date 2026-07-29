@@ -102,6 +102,7 @@ function mapAppointmentRow(row: Record<string, unknown>): AppointmentRecord {
   return {
     id: String(row.id),
     categoryId: String(row.category_id),
+    linkedUserId: typeof row.linked_user_id === "string" ? row.linked_user_id : undefined,
     firstName: String(row.first_name),
     lastName: String(row.last_name),
     email: String(row.email),
@@ -371,6 +372,7 @@ export async function createAppointmentRequest(
   const record: AppointmentRecord = {
     id: randomUUID(),
     categoryId: category.id,
+    linkedUserId: options?.requestedByUserId,
     firstName: payload.firstName,
     lastName: payload.lastName,
     email: payload.email,
@@ -390,6 +392,7 @@ export async function createAppointmentRequest(
       .from("appointments")
       .insert({
         category_id: record.categoryId,
+        linked_user_id: record.linkedUserId ?? null,
         first_name: record.firstName,
         last_name: record.lastName,
         email: record.email,
@@ -431,19 +434,26 @@ export async function getAppointmentsView() {
   }));
 }
 
-export async function getUserAppointmentsByEmail(email: string) {
-  const normalizedEmail = email.trim().toLowerCase();
+export async function getUserAppointmentsForAccount(input: { userId?: string; email?: string }) {
+  const normalizedEmail = input.email?.trim().toLowerCase() ?? "";
   const supabase = getSupabaseAdminClient();
   const categories = await getCategories();
 
-  if (supabase) {
-    const { data } = await supabase
-      .from("appointments")
-      .select("*")
-      .ilike("email", normalizedEmail)
-      .order("starts_at", { ascending: false });
+  if (supabase && (input.userId || normalizedEmail)) {
+    let query = supabase.from("appointments").select("*").order("starts_at", { ascending: false });
 
-    return (data ?? []).map((row) => {
+    if (input.userId && normalizedEmail) {
+      query = query.or(`linked_user_id.eq.${input.userId},email.ilike.${normalizedEmail}`);
+    } else if (input.userId) {
+      query = query.eq("linked_user_id", input.userId);
+    } else {
+      query = query.ilike("email", normalizedEmail);
+    }
+
+    const { data } = await query;
+    const uniqueRows = Array.from(new Map((data ?? []).map((row) => [String((row as Record<string, unknown>).id), row])).values());
+
+    return uniqueRows.map((row) => {
       const appointment = mapAppointmentRow(row as Record<string, unknown>);
 
       return {
@@ -456,6 +466,10 @@ export async function getUserAppointmentsByEmail(email: string) {
   return [];
 }
 
+export async function getUserAppointmentsByEmail(email: string) {
+  return getUserAppointmentsForAccount({ email });
+}
+
 export async function getUserProfileByUserId(userId: string) {
   const supabase = getSupabaseAdminClient();
 
@@ -465,6 +479,22 @@ export async function getUserProfileByUserId(userId: string) {
 
   const { data } = await supabase.from("user_profiles").select("*").eq("user_id", userId).maybeSingle();
   return data ? mapUserProfileRow(data as Record<string, unknown>) : null;
+}
+
+export async function getUserProfiles() {
+  const supabase = getSupabaseAdminClient();
+
+  if (!supabase) {
+    return [];
+  }
+
+  const { data } = await supabase
+    .from("user_profiles")
+    .select("*")
+    .order("last_name", { ascending: true })
+    .order("first_name", { ascending: true });
+
+  return (data ?? []).map((row) => mapUserProfileRow(row as Record<string, unknown>));
 }
 
 export async function updateUserProfileByUserId(input: {
@@ -583,32 +613,45 @@ export async function getUserAccountActivityLogs(userId: string, limit = 100) {
   return (data ?? []).map((row) => mapAccountActivityLogRow(row as Record<string, unknown>));
 }
 
-export async function cancelUserAppointmentById(appointmentId: string, email: string, cancelReason: string) {
-  const normalizedEmail = email.trim().toLowerCase();
+export async function cancelUserAppointmentById(
+  appointmentId: string,
+  input: { email: string; userId?: string },
+  cancelReason: string,
+) {
+  const normalizedEmail = input.email.trim().toLowerCase();
   const supabase = getSupabaseAdminClient();
 
-  if (supabase) {
-    const { data } = await supabase
-      .from("appointments")
-      .update({
-        status: "annule_client",
-        cancel_reason: cancelReason,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", appointmentId)
-      .ilike("email", normalizedEmail)
-      .in("status", ["en_attente", "accepte"])
-      .select("*")
-      .maybeSingle();
-
-    if (data) {
-      return mapAppointmentRow(data as Record<string, unknown>);
-    }
-
+  if (!supabase) {
     return null;
   }
 
-  return null;
+  const { data: existing } = await supabase.from("appointments").select("*").eq("id", appointmentId).maybeSingle();
+
+  if (!existing) {
+    return null;
+  }
+
+  const existingRow = existing as Record<string, unknown>;
+  const canManage =
+    (typeof existingRow.email === "string" && existingRow.email.toLowerCase() === normalizedEmail) ||
+    (typeof existingRow.linked_user_id === "string" && existingRow.linked_user_id === input.userId);
+
+  if (!canManage || !["en_attente", "accepte"].includes(String(existingRow.status ?? ""))) {
+    return null;
+  }
+
+  const { data } = await supabase
+    .from("appointments")
+    .update({
+      status: "annule_client",
+      cancel_reason: cancelReason,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", appointmentId)
+    .select("*")
+    .maybeSingle();
+
+  return data ? mapAppointmentRow(data as Record<string, unknown>) : null;
 }
 
 export async function getPendingAppointmentsView() {
@@ -762,6 +805,7 @@ export async function createAdminAppointment(input: {
   phone: string;
   message?: string;
   startsAt: string;
+  linkedUserId?: string;
   adminUserId: string;
   adminEmail: string;
 }) {
@@ -790,6 +834,7 @@ export async function createAdminAppointment(input: {
   const record: AppointmentRecord = {
     id: randomUUID(),
     categoryId: category.id,
+    linkedUserId: input.linkedUserId,
     firstName: input.firstName,
     lastName: input.lastName,
     email: input.email,
@@ -809,6 +854,7 @@ export async function createAdminAppointment(input: {
       .from("appointments")
       .insert({
         category_id: record.categoryId,
+        linked_user_id: record.linkedUserId ?? null,
         first_name: record.firstName,
         last_name: record.lastName,
         email: record.email,

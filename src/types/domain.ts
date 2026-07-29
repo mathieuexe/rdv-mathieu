@@ -54,6 +54,7 @@ export interface SiteSettings {
 export interface AppointmentRecord {
   id: string;
   categoryId: string;
+  linkedUserId?: string;
   firstName: string;
   lastName: string;
   email: string;

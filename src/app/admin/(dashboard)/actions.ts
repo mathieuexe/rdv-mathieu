@@ -5,9 +5,11 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { getAdminSession } from "@/lib/auth";
+import { extractClientContextFromHeaders } from "@/lib/account-activity";
 import { extractClientIpFromHeaders, mergeAllowedIps, splitAllowedIpsInput } from "@/lib/maintenance";
-import { createAdminAppointment, saveCategory, saveSiteSettings } from "@/lib/data-access";
+import { createAccountActivityLog, createAdminAppointment, saveCategory, saveSiteSettings } from "@/lib/data-access";
 import { adminAppointmentSchema, categoryAdminSchema, settingsSchema } from "@/lib/validators";
+import { formatDateTimeFr } from "@/lib/utils";
 
 export async function saveCategoryAction(formData: FormData) {
   const session = await getAdminSession();
@@ -116,6 +118,7 @@ export async function createAdminAppointmentAction(formData: FormData) {
 
   const parsed = adminAppointmentSchema.safeParse({
     categorySlug: formData.get("categorySlug"),
+    linkedUserId: formData.get("linkedUserId"),
     firstName: formData.get("firstName"),
     lastName: formData.get("lastName"),
     email: formData.get("email"),
@@ -128,14 +131,45 @@ export async function createAdminAppointmentAction(formData: FormData) {
     redirect("/admin/rendez-vous/nouveau?error=1");
   }
 
-  await createAdminAppointment({
+  const appointment = await createAdminAppointment({
     ...parsed.data,
+    linkedUserId: parsed.data.linkedUserId || undefined,
     message: parsed.data.message || undefined,
     adminUserId: session.userId,
     adminEmail: session.email,
   });
 
+  if (parsed.data.linkedUserId) {
+    const requestHeaders = await headers();
+    const clientContext = extractClientContextFromHeaders(requestHeaders);
+
+    await createAccountActivityLog({
+      userId: parsed.data.linkedUserId,
+      actionType: "prise_rendez_vous",
+      actionLabel: "Rendez-vous ajouté par l'administration",
+      description: `Un administrateur a ajouté un rendez-vous le ${formatDateTimeFr(appointment.startsAt, {
+        dateStyle: "full",
+        timeStyle: "short",
+      })}.`,
+      appointmentId: appointment.id,
+      ipAddress: clientContext.ipAddress,
+      country: clientContext.country,
+      region: clientContext.region,
+      city: clientContext.city,
+      deviceType: clientContext.deviceType,
+      operatingSystem: clientContext.operatingSystem,
+      browser: clientContext.browser,
+      userAgent: clientContext.userAgent,
+      metadata: {
+        categorySlug: parsed.data.categorySlug,
+        createdFrom: "admin",
+      },
+    });
+  }
+
   revalidatePath("/admin");
   revalidatePath("/admin/rendez-vous");
+  revalidatePath("/compte");
+  revalidatePath("/compte/logs");
   redirect("/admin/rendez-vous/agenda?saved=1");
 }

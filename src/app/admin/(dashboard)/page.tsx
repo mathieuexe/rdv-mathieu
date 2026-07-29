@@ -16,10 +16,10 @@ export default async function AdminDashboardPage() {
 
   return (
     <>
-      <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_16px_50px_rgba(15,23,42,0.04)]">
+      <section className="rounded-[28px] border border-blue-100 bg-white p-6 shadow-[0_18px_55px_rgba(37,99,235,0.08)]">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-sm uppercase tracking-[0.2em] text-slate-400">Tableau de bord</p>
+            <p className="text-sm uppercase tracking-[0.2em] text-blue-600/70">Tableau de bord</p>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">Vue d&apos;ensemble</h1>
             <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
               Retrouvez rapidement les demandes à traiter, l&apos;état du site et les catégories disponibles.
@@ -29,7 +29,7 @@ export default async function AdminDashboardPage() {
           <div className="flex flex-wrap gap-3">
             <Link
               href="/admin/rendez-vous/nouveau"
-              className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-slate-950 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800"
+              className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700"
             >
               <CalendarPlus2 className="size-4" />
               <span>Créer un rendez-vous</span>
@@ -48,24 +48,24 @@ export default async function AdminDashboardPage() {
         </div>
 
         <div className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-          <div className="rounded-[22px] border border-slate-200 bg-slate-50/70 px-5 py-5">
-            <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Demandes</p>
+          <div className="rounded-[22px] border border-blue-100 bg-blue-50/60 px-5 py-5">
+            <p className="text-xs uppercase tracking-[0.18em] text-blue-700/70">Demandes</p>
             <p className="mt-2 text-2xl font-semibold text-slate-950">{metrics.totalAppointments}</p>
           </div>
-          <div className="rounded-[22px] border border-slate-200 bg-slate-50/70 px-5 py-5">
-            <p className="text-xs uppercase tracking-[0.18em] text-slate-500">En attente</p>
+          <div className="rounded-[22px] border border-amber-100 bg-amber-50/70 px-5 py-5">
+            <p className="text-xs uppercase tracking-[0.18em] text-amber-700/80">En attente</p>
             <p className="mt-2 text-2xl font-semibold text-slate-950">{metrics.pendingAppointments}</p>
           </div>
-          <div className="rounded-[22px] border border-slate-200 bg-slate-50/70 px-5 py-5">
-            <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Confirmés</p>
+          <div className="rounded-[22px] border border-emerald-100 bg-emerald-50/70 px-5 py-5">
+            <p className="text-xs uppercase tracking-[0.18em] text-emerald-700/80">Confirmés</p>
             <p className="mt-2 text-2xl font-semibold text-slate-950">{metrics.acceptedAppointments}</p>
           </div>
-          <div className="rounded-[22px] border border-slate-200 bg-slate-50/70 px-5 py-5">
-            <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Refusés</p>
+          <div className="rounded-[22px] border border-rose-100 bg-rose-50/70 px-5 py-5">
+            <p className="text-xs uppercase tracking-[0.18em] text-rose-700/80">Refusés</p>
             <p className="mt-2 text-2xl font-semibold text-slate-950">{metrics.refusedAppointments}</p>
           </div>
-          <div className="rounded-[22px] border border-slate-200 bg-slate-50/70 px-5 py-5">
-            <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Catégories</p>
+          <div className="rounded-[22px] border border-violet-100 bg-violet-50/70 px-5 py-5">
+            <p className="text-xs uppercase tracking-[0.18em] text-violet-700/80">Catégories</p>
             <p className="mt-2 text-2xl font-semibold text-slate-950">{metrics.onlineCategories}</p>
           </div>
         </div>

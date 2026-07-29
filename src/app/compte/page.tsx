@@ -4,7 +4,7 @@ import { CalendarDays, Clock3, MapPin, Phone, Video } from "lucide-react";
 import { AppointmentCancelForm } from "@/components/account/appointment-cancel-form";
 import { AccountShell } from "@/components/account/account-shell";
 import { getPublicUserSession } from "@/lib/auth";
-import { getUserAppointmentsByEmail } from "@/lib/data-access";
+import { getUserAppointmentsForAccount } from "@/lib/data-access";
 import { formatAppointmentMode, formatDateTimeFr } from "@/lib/utils";
 
 import { cancelAppointmentAction } from "./actions";
@@ -59,7 +59,10 @@ export default async function AccountPage() {
     redirect("/connexion");
   }
 
-  const appointments = await getUserAppointmentsByEmail(session.email);
+  const appointments = await getUserAppointmentsForAccount({
+    userId: session.userId,
+    email: session.email,
+  });
 
   return (
     <AccountShell

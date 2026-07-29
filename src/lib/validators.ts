@@ -70,6 +70,7 @@ export const settingsSchema = z
 
 export const adminAppointmentSchema = appointmentRequestSchema.extend({
   categorySlug: z.string().trim().min(1, "La categorie est requise."),
+  linkedUserId: z.string().trim().uuid("Le client sélectionné est invalide.").optional().or(z.literal("")),
 });
 
 export const accountProfileSchema = z.object({
