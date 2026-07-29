@@ -38,7 +38,7 @@ export function AppointmentDecisionPanel({ appointmentId }: AppointmentDecisionP
         onChange={(event) => setReason(event.target.value)}
         rows={4}
         placeholder="Motif de refus obligatoire si vous refusez la demande..."
-        className="mt-4 w-full rounded-2xl border border-slate-200 bg-[#f8fafc] px-4 py-3 outline-none transition focus:border-blue-500"
+        className="mt-4 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-blue-500"
       />
 
       {feedback ? <p className="mt-4 text-sm font-medium text-blue-900">{feedback}</p> : null}

@@ -25,6 +25,8 @@ export async function POST(_request: Request, context: { params: Promise<{ id: s
     firstName: appointment.firstName,
     categoryTitle: category?.title ?? "Votre rendez-vous",
     startsAtLabel: formatDateTimeFr(appointment.startsAt, { dateStyle: "full", timeStyle: "short" }),
+    appointmentMode: category?.appointmentMode ?? "visioconference",
+    phone: appointment.phone,
     appointmentId: appointment.id,
   });
 

@@ -2,6 +2,8 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 import { getPublicSupabaseEnv, isSupabaseConfigured } from "@/lib/env";
+import { extractClientIpFromHeaders, isMaintenanceBypassedForIp, normalizeAllowedIps } from "@/lib/maintenance";
+import type { SiteSettings } from "@/types/domain";
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({
@@ -30,6 +32,39 @@ export async function middleware(request: NextRequest) {
   });
 
   await supabase.auth.getUser();
+
+  const pathname = request.nextUrl.pathname;
+  const isAdminRoute = pathname.startsWith("/admin");
+  const isApiRoute = pathname.startsWith("/api");
+  const isMaintenancePage = pathname === "/maintenance";
+
+  if (isAdminRoute || isApiRoute) {
+    return response;
+  }
+
+  const { data: settingsRow } = await supabase.from("site_settings").select("*").limit(1).maybeSingle();
+
+  const siteSettings: SiteSettings = {
+    maintenanceMode: Boolean(settingsRow?.maintenance_mode),
+    maintenanceMessage: typeof settingsRow?.maintenance_message === "string" ? settingsRow.maintenance_message : "",
+    maintenanceAllowedIps: normalizeAllowedIps(settingsRow?.maintenance_allowed_ips),
+    globalBlackoutPeriods: [],
+  };
+
+  const clientIp = extractClientIpFromHeaders(request.headers);
+  const bypassMaintenance = isMaintenanceBypassedForIp(clientIp, siteSettings);
+
+  if (!siteSettings.maintenanceMode && isMaintenancePage) {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  if (siteSettings.maintenanceMode && !bypassMaintenance && !isMaintenancePage) {
+    return NextResponse.redirect(new URL("/maintenance", request.url));
+  }
+
+  if (siteSettings.maintenanceMode && bypassMaintenance && isMaintenancePage) {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
 
   return response;
 }

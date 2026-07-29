@@ -23,6 +23,7 @@ const nextMondayEnd = getNextWeekdayAtTime(1, 9, 30);
 const testSiteSettings: SiteSettings = {
   maintenanceMode: false,
   maintenanceMessage: "",
+  maintenanceAllowedIps: [],
   globalBlackoutPeriods: [],
 };
 

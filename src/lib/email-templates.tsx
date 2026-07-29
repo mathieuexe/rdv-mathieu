@@ -34,6 +34,7 @@ function MailLayout({
         padding: "0",
         backgroundColor: "#ffffff",
         color: "#111111",
+        textAlign: "left",
         fontFamily:
           'Gilroy, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
         lineHeight: 1.7,
@@ -45,6 +46,7 @@ function MailLayout({
           maxWidth: "720px",
           margin: "0 auto",
           padding: "8px 0",
+          textAlign: "left",
         }}
       >
         <p style={{ margin: "0 0 18px", fontSize: "13px", color: "#555555" }}>
@@ -121,6 +123,8 @@ interface ProvisionalAppointmentEmailProps {
   firstName: string;
   categoryTitle: string;
   startsAtLabel: string;
+  appointmentModeLabel: string;
+  phone?: string;
   reference: string;
 }
 
@@ -128,6 +132,8 @@ export function ProvisionalAppointmentEmail({
   firstName,
   categoryTitle,
   startsAtLabel,
+  appointmentModeLabel,
+  phone,
   reference,
 }: ProvisionalAppointmentEmailProps) {
   return (
@@ -138,9 +144,15 @@ export function ProvisionalAppointmentEmail({
       details={[
         { label: "Catégorie", value: categoryTitle, underline: true },
         { label: "Date et heure", value: startsAtLabel, underline: true },
+        { label: "Type de rendez-vous", value: appointmentModeLabel, underline: true },
         { label: "Statut", value: "En attente de validation", underline: true },
       ]}
-      paragraphs={["Votre demande reste provisoire tant qu'un administrateur ne l'a pas validée."]}
+      paragraphs={[
+        "Votre demande reste provisoire tant qu'un administrateur ne l'a pas validée.",
+        ...(appointmentModeLabel === "Téléphonique" && phone
+          ? [`Je vous appellerai sur le numéro de téléphone inscrit sur votre fiche client à savoir le : ${phone}.`]
+          : []),
+      ]}
       linkLabel="Site"
       linkHref={getAppUrl()}
       reference={reference}
@@ -152,6 +164,8 @@ interface ValidatedAppointmentEmailProps {
   firstName: string;
   categoryTitle: string;
   startsAtLabel: string;
+  appointmentModeLabel: string;
+  phone?: string;
   reference: string;
 }
 
@@ -159,6 +173,8 @@ export function ValidatedAppointmentEmail({
   firstName,
   categoryTitle,
   startsAtLabel,
+  appointmentModeLabel,
+  phone,
   reference,
 }: ValidatedAppointmentEmailProps) {
   return (
@@ -169,9 +185,15 @@ export function ValidatedAppointmentEmail({
       details={[
         { label: "Catégorie", value: categoryTitle, underline: true },
         { label: "Date et heure", value: startsAtLabel, underline: true },
+        { label: "Type de rendez-vous", value: appointmentModeLabel, underline: true },
         { label: "Statut", value: "Validé", underline: true },
       ]}
-      paragraphs={["Conservez cet email. Vous pouvez retrouver l'historique de vos rendez-vous depuis votre espace compte."]}
+      paragraphs={[
+        "Conservez cet email. Vous pouvez retrouver l'historique de vos rendez-vous depuis votre espace compte.",
+        ...(appointmentModeLabel === "Téléphonique" && phone
+          ? [`Je vous appellerai sur le numéro de téléphone inscrit sur votre fiche client à savoir le : ${phone}.`]
+          : []),
+      ]}
       linkLabel="Mon compte"
       linkHref={`${getAppUrl()}/compte`}
       reference={reference}

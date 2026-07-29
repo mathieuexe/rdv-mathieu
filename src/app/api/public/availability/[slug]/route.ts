@@ -1,8 +1,16 @@
 import { getCategorySlots } from "@/lib/data-access";
+import { isMaintenanceBypassedForHeaders } from "@/lib/maintenance";
 
-export async function GET(_request: Request, context: { params: Promise<{ slug: string }> }) {
+export async function GET(request: Request, context: { params: Promise<{ slug: string }> }) {
   const { slug } = await context.params;
-  const payload = await getCategorySlots(slug);
+  const initialPayload = await getCategorySlots(slug);
+
+  if (!initialPayload) {
+    return Response.json({ error: "Catégorie introuvable." }, { status: 404 });
+  }
+
+  const bypassMaintenance = isMaintenanceBypassedForHeaders(request.headers, initialPayload.siteSettings);
+  const payload = bypassMaintenance ? await getCategorySlots(slug, { bypassMaintenance: true }) : initialPayload;
 
   if (!payload) {
     return Response.json({ error: "Catégorie introuvable." }, { status: 404 });

@@ -11,7 +11,8 @@ import {
   ValidatedAppointmentEmail,
 } from "@/lib/email-templates";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
-import type { EmailDeliveryStatus } from "@/types/domain";
+import { formatAppointmentMode } from "@/lib/utils";
+import type { AppointmentMode, EmailDeliveryStatus } from "@/types/domain";
 
 type AppMailTemplateKey =
   | "confirmation_inscription"
@@ -301,6 +302,8 @@ export async function sendProvisionalAppointmentEmail(input: {
   firstName: string;
   categoryTitle: string;
   startsAtLabel: string;
+  appointmentMode: AppointmentMode;
+  phone?: string;
   appointmentId: string;
 }) {
   return sendTransactionalEmail({
@@ -313,12 +316,16 @@ export async function sendProvisionalAppointmentEmail(input: {
     metadata: {
       categoryTitle: input.categoryTitle,
       startsAtLabel: input.startsAtLabel,
+      appointmentMode: input.appointmentMode,
+      phone: input.phone,
     },
     buildTemplate: (reference) =>
       ProvisionalAppointmentEmail({
         firstName: input.firstName,
         categoryTitle: input.categoryTitle,
         startsAtLabel: input.startsAtLabel,
+        appointmentModeLabel: formatAppointmentMode(input.appointmentMode),
+        phone: input.phone,
         reference,
       }),
   });
@@ -329,6 +336,8 @@ export async function sendValidatedAppointmentEmail(input: {
   firstName: string;
   categoryTitle: string;
   startsAtLabel: string;
+  appointmentMode: AppointmentMode;
+  phone?: string;
   appointmentId: string;
 }) {
   return sendTransactionalEmail({
@@ -341,12 +350,16 @@ export async function sendValidatedAppointmentEmail(input: {
     metadata: {
       categoryTitle: input.categoryTitle,
       startsAtLabel: input.startsAtLabel,
+      appointmentMode: input.appointmentMode,
+      phone: input.phone,
     },
     buildTemplate: (reference) =>
       ValidatedAppointmentEmail({
         firstName: input.firstName,
         categoryTitle: input.categoryTitle,
         startsAtLabel: input.startsAtLabel,
+        appointmentModeLabel: formatAppointmentMode(input.appointmentMode),
+        phone: input.phone,
         reference,
       }),
   });

@@ -1,9 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { getAdminSession } from "@/lib/auth";
+import { extractClientIpFromHeaders, mergeAllowedIps, splitAllowedIpsInput } from "@/lib/maintenance";
 import { createAdminAppointment, saveCategory, saveSiteSettings } from "@/lib/data-access";
 import { adminAppointmentSchema, categoryAdminSchema, settingsSchema } from "@/lib/validators";
 
@@ -69,6 +71,7 @@ export async function saveSettingsAction(formData: FormData) {
   const parsed = settingsSchema.safeParse({
     maintenanceMode: formData.get("maintenanceMode") === "on",
     maintenanceMessage: formData.get("maintenanceMessage"),
+    maintenanceAllowedIps: formData.get("maintenanceAllowedIps"),
   });
 
   if (!parsed.success) {
@@ -77,8 +80,15 @@ export async function saveSettingsAction(formData: FormData) {
   }
 
   try {
-    await saveSiteSettings(parsed.data);
+    const requestHeaders = await headers();
+    const currentIp = formData.get("allowCurrentIp") === "on" ? extractClientIpFromHeaders(requestHeaders) : null;
+
+    await saveSiteSettings({
+      ...parsed.data,
+      maintenanceAllowedIps: mergeAllowedIps(splitAllowedIpsInput(parsed.data.maintenanceAllowedIps), [currentIp]),
+    });
     revalidatePath("/admin");
+    revalidatePath("/admin/parametres");
     revalidatePath("/maintenance");
     revalidatePath("/");
     redirect("/admin/parametres?saved=1");

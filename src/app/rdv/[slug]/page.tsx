@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { TriangleAlert } from "lucide-react";
+import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 
 import { BookingForm } from "@/components/booking/booking-form";
@@ -8,6 +9,8 @@ import { PublicHeader } from "@/components/public/public-header";
 import { getPublicUserSession } from "@/lib/auth";
 import { getBookingState } from "@/lib/booking";
 import { getCategorySlots } from "@/lib/data-access";
+import { isMaintenanceBypassedForHeaders } from "@/lib/maintenance";
+import type { SiteSettings } from "@/types/domain";
 
 export default async function BookingCategoryPage({
   params,
@@ -15,7 +18,15 @@ export default async function BookingCategoryPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const payload = await getCategorySlots(slug);
+  const requestHeaders = await headers();
+  const initialPayload = await getCategorySlots(slug);
+
+  if (!initialPayload) {
+    notFound();
+  }
+
+  const bypassMaintenance = isMaintenanceBypassedForHeaders(requestHeaders, initialPayload.siteSettings as SiteSettings);
+  const payload = bypassMaintenance ? await getCategorySlots(slug, { bypassMaintenance: true }) : initialPayload;
 
   if (!payload) {
     notFound();

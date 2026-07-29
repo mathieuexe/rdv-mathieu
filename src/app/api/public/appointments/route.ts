@@ -1,5 +1,6 @@
 import { createAppointmentRequest, getCategorySlots } from "@/lib/data-access";
 import { sendProvisionalAppointmentEmail } from "@/lib/email";
+import { isMaintenanceBypassedForHeaders } from "@/lib/maintenance";
 import { formatDateTimeFr } from "@/lib/utils";
 import { appointmentRequestSchema } from "@/lib/validators";
 
@@ -12,7 +13,16 @@ export async function POST(request: Request) {
       return Response.json({ error: parsed.error.issues[0]?.message ?? "Données invalides." }, { status: 400 });
     }
 
-    const categoryPayload = await getCategorySlots(parsed.data.categorySlug);
+    const initialPayload = await getCategorySlots(parsed.data.categorySlug);
+
+    if (!initialPayload) {
+      return Response.json({ error: "Catégorie introuvable." }, { status: 404 });
+    }
+
+    const bypassMaintenance = isMaintenanceBypassedForHeaders(request.headers, initialPayload.siteSettings);
+    const categoryPayload = bypassMaintenance
+      ? await getCategorySlots(parsed.data.categorySlug, { bypassMaintenance: true })
+      : initialPayload;
 
     if (!categoryPayload) {
       return Response.json({ error: "Catégorie introuvable." }, { status: 404 });
@@ -21,7 +31,14 @@ export async function POST(request: Request) {
     const selectedSlot = categoryPayload.slots.find((slot) => slot.start === parsed.data.startsAt);
 
     if (!selectedSlot || selectedSlot.isBlocked) {
-      return Response.json({ error: "Le créneau sélectionné n'est plus disponible." }, { status: 409 });
+      return Response.json(
+        {
+          error: categoryPayload.siteSettings.maintenanceMode
+            ? "Le site est actuellement en maintenance."
+            : "Le créneau sélectionné n'est plus disponible.",
+        },
+        { status: categoryPayload.siteSettings.maintenanceMode ? 503 : 409 },
+      );
     }
 
     const result = await createAppointmentRequest(parsed.data);
@@ -31,6 +48,8 @@ export async function POST(request: Request) {
       firstName: result.appointment.firstName,
       categoryTitle: result.category.title,
       startsAtLabel: formatDateTimeFr(result.appointment.startsAt, { dateStyle: "full", timeStyle: "short" }),
+      appointmentMode: result.category.appointmentMode,
+      phone: result.appointment.phone,
       appointmentId: result.appointment.id,
     });
 

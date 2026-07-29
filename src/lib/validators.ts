@@ -58,6 +58,7 @@ export const settingsSchema = z
   .object({
     maintenanceMode: z.boolean(),
     maintenanceMessage: z.string().trim(),
+    maintenanceAllowedIps: z.string().trim().max(2000, "La liste des IP autorisées est trop longue."),
   })
   .refine((data) => !data.maintenanceMode || data.maintenanceMessage.length >= 8, {
     path: ["maintenanceMessage"],

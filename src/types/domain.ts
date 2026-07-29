@@ -44,6 +44,7 @@ export interface AppointmentCategory {
 export interface SiteSettings {
   maintenanceMode: boolean;
   maintenanceMessage: string;
+  maintenanceAllowedIps: string[];
   globalBlackoutPeriods: BlackoutPeriod[];
 }
 

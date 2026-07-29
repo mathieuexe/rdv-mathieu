@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { addMinutes, parseISO } from "date-fns";
 
 import { buildBookingSlots } from "@/lib/booking";
+import { getEffectiveSiteSettings, normalizeAllowedIps } from "@/lib/maintenance";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import type {
@@ -18,6 +19,7 @@ import type {
 const defaultSiteSettings: SiteSettings = {
   maintenanceMode: false,
   maintenanceMessage: "",
+  maintenanceAllowedIps: [],
   globalBlackoutPeriods: [],
 };
 
@@ -145,6 +147,7 @@ export async function getSiteSettings() {
           typeof settingsRow.maintenance_message === "string"
             ? settingsRow.maintenance_message
             : "",
+        maintenanceAllowedIps: normalizeAllowedIps(settingsRow.maintenance_allowed_ips),
         globalBlackoutPeriods: (blackoutRows ?? []).map((row) => mapBlackoutPeriod(row as Record<string, unknown>)),
       };
 
@@ -288,7 +291,7 @@ export async function getDashboardMetrics(): Promise<DashboardMetrics> {
   };
 }
 
-export async function getCategorySlots(slug: string) {
+export async function getCategorySlots(slug: string, options?: { bypassMaintenance?: boolean }) {
   const category = await getPublicCategoryBySlug(slug);
 
   if (!category) {
@@ -296,13 +299,14 @@ export async function getCategorySlots(slug: string) {
   }
 
   const [siteSettings, appointments] = await Promise.all([getSiteSettings(), getAppointments()]);
+  const effectiveSiteSettings = getEffectiveSiteSettings(siteSettings, Boolean(options?.bypassMaintenance));
 
   return {
     category,
-    siteSettings,
+    siteSettings: effectiveSiteSettings,
     slots: buildBookingSlots({
       category,
-      siteSettings,
+      siteSettings: effectiveSiteSettings,
       appointments,
     }),
   };
@@ -527,7 +531,11 @@ export async function saveCategory(input: {
   return refreshed;
 }
 
-export async function saveSiteSettings(input: { maintenanceMode: boolean; maintenanceMessage: string }) {
+export async function saveSiteSettings(input: {
+  maintenanceMode: boolean;
+  maintenanceMessage: string;
+  maintenanceAllowedIps: string[];
+}) {
   const supabase = getSupabaseAdminClient();
 
   if (!supabase) {
@@ -542,6 +550,7 @@ export async function saveSiteSettings(input: { maintenanceMode: boolean; mainte
       .update({
         maintenance_mode: input.maintenanceMode,
         maintenance_message: input.maintenanceMessage,
+        maintenance_allowed_ips: input.maintenanceAllowedIps,
         updated_at: new Date().toISOString(),
       })
       .eq("id", existing.id);
@@ -553,6 +562,7 @@ export async function saveSiteSettings(input: { maintenanceMode: boolean; mainte
     const { error } = await supabase.from("site_settings").insert({
       maintenance_mode: input.maintenanceMode,
       maintenance_message: input.maintenanceMessage,
+      maintenance_allowed_ips: input.maintenanceAllowedIps,
     });
 
     if (error) {
