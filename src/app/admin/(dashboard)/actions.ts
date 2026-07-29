@@ -7,7 +7,16 @@ import { redirect } from "next/navigation";
 import { getAdminSession } from "@/lib/auth";
 import { extractClientContextFromHeaders } from "@/lib/account-activity";
 import { extractClientIpFromHeaders, mergeAllowedIps, splitAllowedIpsInput } from "@/lib/maintenance";
-import { createAccountActivityLog, createAdminAppointment, saveCategory, saveSiteSettings } from "@/lib/data-access";
+import {
+  createAccountActivityLog,
+  createAdminAppointment,
+  createManagedUserAccount,
+  deleteManagedUserAccount,
+  saveCategory,
+  saveSiteSettings,
+  updateManagedUserAccount,
+} from "@/lib/data-access";
+import { sendAdminCreatedSignupEmail } from "@/lib/email";
 import { adminAppointmentSchema, categoryAdminSchema, settingsSchema } from "@/lib/validators";
 import { formatDateTimeFr } from "@/lib/utils";
 
@@ -119,57 +128,115 @@ export async function createAdminAppointmentAction(formData: FormData) {
   const parsed = adminAppointmentSchema.safeParse({
     categorySlug: formData.get("categorySlug"),
     linkedUserId: formData.get("linkedUserId"),
+    createClientAccount: formData.get("createClientAccount") === "on",
     firstName: formData.get("firstName"),
     lastName: formData.get("lastName"),
     email: formData.get("email"),
     phone: formData.get("phone"),
     message: formData.get("message"),
     startsAt: formData.get("startsAt"),
+    updateLinkedUserProfile: formData.get("updateLinkedUserProfile") === "on",
   });
 
   if (!parsed.success) {
-    redirect("/admin/rendez-vous/nouveau?error=1");
+    const message = encodeURIComponent(parsed.error.issues[0]?.message ?? "Le formulaire contient au moins une erreur.");
+    redirect(`/admin/rendez-vous/nouveau?error=${message}`);
   }
 
-  const appointment = await createAdminAppointment({
-    ...parsed.data,
-    linkedUserId: parsed.data.linkedUserId || undefined,
-    message: parsed.data.message || undefined,
-    adminUserId: session.userId,
-    adminEmail: session.email,
-  });
+  let createdAccount:
+    | {
+        userId: string;
+        email: string;
+        temporaryPassword: string;
+      }
+    | undefined;
+  let effectiveLinkedUserId = parsed.data.linkedUserId || undefined;
+  let appointmentCreated = false;
 
-  if (parsed.data.linkedUserId) {
-    const requestHeaders = await headers();
-    const clientContext = extractClientContextFromHeaders(requestHeaders);
+  try {
+    if (parsed.data.linkedUserId && parsed.data.updateLinkedUserProfile) {
+      await updateManagedUserAccount({
+        userId: parsed.data.linkedUserId,
+        email: parsed.data.email,
+        firstName: parsed.data.firstName,
+        lastName: parsed.data.lastName,
+        phone: parsed.data.phone,
+      });
+    }
 
-    await createAccountActivityLog({
-      userId: parsed.data.linkedUserId,
-      actionType: "prise_rendez_vous",
-      actionLabel: "Rendez-vous ajouté par l'administration",
-      description: `Un administrateur a ajouté un rendez-vous le ${formatDateTimeFr(appointment.startsAt, {
-        dateStyle: "full",
-        timeStyle: "short",
-      })}.`,
-      appointmentId: appointment.id,
-      ipAddress: clientContext.ipAddress,
-      country: clientContext.country,
-      region: clientContext.region,
-      city: clientContext.city,
-      deviceType: clientContext.deviceType,
-      operatingSystem: clientContext.operatingSystem,
-      browser: clientContext.browser,
-      userAgent: clientContext.userAgent,
-      metadata: {
-        categorySlug: parsed.data.categorySlug,
-        createdFrom: "admin",
-      },
+    if (!parsed.data.linkedUserId && parsed.data.createClientAccount) {
+      createdAccount = await createManagedUserAccount({
+        email: parsed.data.email,
+        firstName: parsed.data.firstName,
+        lastName: parsed.data.lastName,
+        phone: parsed.data.phone,
+      });
+      effectiveLinkedUserId = createdAccount.userId;
+    }
+
+    const appointment = await createAdminAppointment({
+      ...parsed.data,
+      linkedUserId: effectiveLinkedUserId,
+      message: parsed.data.message || undefined,
+      adminUserId: session.userId,
+      adminEmail: session.email,
     });
+    appointmentCreated = true;
+
+    if (createdAccount) {
+      await sendAdminCreatedSignupEmail({
+        to: createdAccount.email,
+        firstName: parsed.data.firstName,
+        temporaryPassword: createdAccount.temporaryPassword,
+      });
+    }
+
+    if (effectiveLinkedUserId) {
+      const requestHeaders = await headers();
+      const clientContext = extractClientContextFromHeaders(requestHeaders);
+
+      await createAccountActivityLog({
+        userId: effectiveLinkedUserId,
+        actionType: "prise_rendez_vous",
+        actionLabel: "Rendez-vous ajouté par l'administration",
+        description: `Un administrateur a ajouté un rendez-vous le ${formatDateTimeFr(appointment.startsAt, {
+          dateStyle: "full",
+          timeStyle: "short",
+        })}.`,
+        appointmentId: appointment.id,
+        ipAddress: clientContext.ipAddress,
+        country: clientContext.country,
+        region: clientContext.region,
+        city: clientContext.city,
+        deviceType: clientContext.deviceType,
+        operatingSystem: clientContext.operatingSystem,
+        browser: clientContext.browser,
+        userAgent: clientContext.userAgent,
+        metadata: {
+          categorySlug: parsed.data.categorySlug,
+          createdFrom: "admin",
+          accountCreatedByAdmin: Boolean(createdAccount),
+          linkedUserUpdatedByAdmin: parsed.data.updateLinkedUserProfile,
+        },
+      });
+    }
+  } catch (error) {
+    if (createdAccount?.userId && !appointmentCreated) {
+      try {
+        await deleteManagedUserAccount(createdAccount.userId);
+      } catch {}
+    }
+
+    const message = encodeURIComponent(
+      error instanceof Error ? error.message : "Impossible de créer le rendez-vous pour le moment.",
+    );
+    redirect(`/admin/rendez-vous/nouveau?error=${message}`);
   }
 
   revalidatePath("/admin");
   revalidatePath("/admin/rendez-vous");
   revalidatePath("/admin/rendez-vous/agenda");
+  revalidatePath("/admin/rendez-vous/nouveau");
   revalidatePath("/compte");
   revalidatePath("/compte/logs");
   redirect("/admin/rendez-vous?saved=1");

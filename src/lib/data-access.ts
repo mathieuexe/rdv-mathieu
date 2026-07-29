@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
 
 import { addMinutes, parseISO } from "date-fns";
 
@@ -145,10 +145,47 @@ function mapUserProfileRow(row: Record<string, unknown>): UserProfileRecord {
     firstName: String(row.first_name ?? ""),
     lastName: String(row.last_name ?? ""),
     phone: typeof row.phone === "string" ? row.phone : undefined,
+    requiresPasswordChange: Boolean(row.requires_password_change),
     role: String(row.role ?? "Prospect"),
     createdAt: String(row.created_at ?? new Date().toISOString()),
     updatedAt: String(row.updated_at ?? new Date().toISOString()),
   };
+}
+
+function pickRandomCharacter(alphabet: string) {
+  const index = randomBytes(1)[0] % alphabet.length;
+  return alphabet[index] ?? alphabet[0] ?? "A";
+}
+
+function shuffleCharacters(characters: string[]) {
+  const result = [...characters];
+
+  for (let index = result.length - 1; index > 0; index -= 1) {
+    const nextIndex = randomBytes(1)[0] % (index + 1);
+    [result[index], result[nextIndex]] = [result[nextIndex] ?? result[index] ?? "", result[index] ?? result[nextIndex] ?? ""];
+  }
+
+  return result;
+}
+
+function createTemporaryPassword() {
+  const lowercase = "abcdefghjkmnpqrstuvwxyz";
+  const uppercase = "ABCDEFGHJKMNPQRSTUVWXYZ";
+  const digits = "23456789";
+  const specials = "!@#$%^&*_-+=";
+  const alphabet = `${lowercase}${uppercase}${digits}${specials}`;
+  const passwordCharacters = [
+    pickRandomCharacter(lowercase),
+    pickRandomCharacter(uppercase),
+    pickRandomCharacter(digits),
+    pickRandomCharacter(specials),
+  ];
+
+  while (passwordCharacters.length < 14) {
+    passwordCharacters.push(pickRandomCharacter(alphabet));
+  }
+
+  return shuffleCharacters(passwordCharacters).join("");
 }
 
 function mapAccountActivityLogRow(row: Record<string, unknown>): AccountActivityLogRecord {
@@ -528,6 +565,149 @@ export async function updateUserProfileByUserId(input: {
   }
 
   return mapUserProfileRow(data as Record<string, unknown>);
+}
+
+export async function setUserPasswordChangeRequirement(userId: string, requiresPasswordChange: boolean) {
+  const supabase = getSupabaseAdminClient();
+
+  if (!supabase) {
+    throw new Error("La mise à jour de sécurité du profil est indisponible tant que Supabase n'est pas configuré.");
+  }
+
+  const { error } = await supabase
+    .from("user_profiles")
+    .update({
+      requires_password_change: requiresPasswordChange,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("user_id", userId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
+export async function createManagedUserAccount(input: {
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+}) {
+  const supabase = getSupabaseAdminClient();
+
+  if (!supabase) {
+    throw new Error("La création de compte est indisponible tant que Supabase n'est pas configuré.");
+  }
+
+  const normalizedEmail = input.email.trim().toLowerCase();
+  const temporaryPassword = createTemporaryPassword();
+  const { data, error } = await supabase.auth.admin.createUser({
+    email: normalizedEmail,
+    password: temporaryPassword,
+    email_confirm: true,
+    user_metadata: {
+      first_name: input.firstName,
+      last_name: input.lastName,
+    },
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!data.user?.id) {
+    throw new Error("Le compte client n'a pas pu être créé.");
+  }
+
+  await updateUserProfileByUserId({
+    userId: data.user.id,
+    email: normalizedEmail,
+    firstName: input.firstName,
+    lastName: input.lastName,
+    phone: input.phone,
+  });
+
+  await setUserPasswordChangeRequirement(data.user.id, true);
+
+  return {
+    userId: data.user.id,
+    email: normalizedEmail,
+    temporaryPassword,
+  };
+}
+
+export async function updateManagedUserAccount(input: {
+  userId: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+}) {
+  const supabase = getSupabaseAdminClient();
+
+  if (!supabase) {
+    throw new Error("La mise à jour du compte client est indisponible tant que Supabase n'est pas configuré.");
+  }
+
+  const existingProfile = await getUserProfileByUserId(input.userId);
+
+  if (!existingProfile) {
+    throw new Error("Le client sélectionné est introuvable.");
+  }
+
+  const normalizedEmail = input.email.trim().toLowerCase();
+  const authPayload: {
+    email?: string;
+    email_confirm?: boolean;
+    user_metadata: {
+      first_name: string;
+      last_name: string;
+    };
+  } = {
+    user_metadata: {
+      first_name: input.firstName,
+      last_name: input.lastName,
+    },
+  };
+
+  if (normalizedEmail !== existingProfile.email.toLowerCase()) {
+    authPayload.email = normalizedEmail;
+    authPayload.email_confirm = true;
+  }
+
+  const { error } = await supabase.auth.admin.updateUserById(input.userId, authPayload);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  const profile = await updateUserProfileByUserId({
+    userId: input.userId,
+    email: normalizedEmail,
+    firstName: input.firstName,
+    lastName: input.lastName,
+    phone: input.phone,
+  });
+
+  if (normalizedEmail !== existingProfile.email.toLowerCase()) {
+    await reassignAppointmentsEmailForUser(existingProfile.email, normalizedEmail);
+  }
+
+  return profile;
+}
+
+export async function deleteManagedUserAccount(userId: string) {
+  const supabase = getSupabaseAdminClient();
+
+  if (!supabase) {
+    throw new Error("La suppression de compte est indisponible tant que Supabase n'est pas configuré.");
+  }
+
+  const { error } = await supabase.auth.admin.deleteUser(userId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
 }
 
 export async function reassignAppointmentsEmailForUser(previousEmail: string, nextEmail: string) {

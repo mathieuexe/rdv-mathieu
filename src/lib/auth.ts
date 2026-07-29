@@ -32,6 +32,7 @@ export interface PublicUserSession {
   phone?: string;
   userId?: string;
   isAdmin?: boolean;
+  requiresPasswordChange?: boolean;
 }
 
 export async function isUserAdmin(userId: string) {
@@ -74,7 +75,7 @@ export async function getPublicUserSession(): Promise<PublicUserSession> {
 
   const { data: profile } = await supabase
     .from("user_profiles")
-    .select("first_name, last_name, phone")
+    .select("first_name, last_name, phone, requires_password_change")
     .eq("user_id", user.id)
     .maybeSingle();
 
@@ -92,6 +93,7 @@ export async function getPublicUserSession(): Promise<PublicUserSession> {
         : undefined;
   const fullName = [firstName, lastName].filter(Boolean).join(" ").trim() || user.email;
   const phone = typeof profile?.phone === "string" ? profile.phone : undefined;
+  const requiresPasswordChange = Boolean(profile?.requires_password_change);
 
   return {
     isAuthenticated: true,
@@ -102,5 +104,6 @@ export async function getPublicUserSession(): Promise<PublicUserSession> {
     fullName,
     phone,
     isAdmin,
+    requiresPasswordChange,
   };
 }

@@ -77,6 +77,7 @@ export interface UserProfileRecord {
   firstName: string;
   lastName: string;
   phone?: string;
+  requiresPasswordChange: boolean;
   role: string;
   createdAt: string;
   updatedAt: string;
@@ -87,7 +88,8 @@ export type AccountActivityType =
   | "deconnexion"
   | "prise_rendez_vous"
   | "annulation_rendez_vous"
-  | "mise_a_jour_profil";
+  | "mise_a_jour_profil"
+  | "mise_a_jour_securite";
 
 export interface AccountActivityLogRecord {
   id: string;

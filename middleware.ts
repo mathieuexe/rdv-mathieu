@@ -31,12 +31,15 @@ export async function middleware(request: NextRequest) {
     },
   });
 
-  await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   const pathname = request.nextUrl.pathname;
   const isAdminRoute = pathname.startsWith("/admin");
   const isApiRoute = pathname.startsWith("/api");
   const isMaintenancePage = pathname === "/maintenance";
+  const isSecurityPage = pathname === "/compte/securite";
 
   if (isAdminRoute || isApiRoute) {
     return response;
@@ -65,6 +68,24 @@ export async function middleware(request: NextRequest) {
 
   if (siteSettings.maintenanceMode && bypassMaintenance && isMaintenancePage) {
     return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  if (user?.id) {
+    const { data: profile } = await supabase
+      .from("user_profiles")
+      .select("requires_password_change")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    const requiresPasswordChange = Boolean(profile?.requires_password_change);
+
+    if (requiresPasswordChange && !isSecurityPage && !isMaintenancePage) {
+      return NextResponse.redirect(new URL("/compte/securite", request.url));
+    }
+
+    if (!requiresPasswordChange && isSecurityPage) {
+      return NextResponse.redirect(new URL("/compte", request.url));
+    }
   }
 
   return response;

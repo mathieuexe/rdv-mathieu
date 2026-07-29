@@ -127,6 +127,42 @@ export function SignupConfirmationEmail({ firstName, email, reference }: SignupC
   );
 }
 
+interface AdminCreatedSignupEmailProps {
+  firstName: string;
+  email: string;
+  temporaryPassword: string;
+  reference: string;
+}
+
+export function AdminCreatedSignupEmail({
+  firstName,
+  email,
+  temporaryPassword,
+  reference,
+}: AdminCreatedSignupEmailProps) {
+  return (
+    <MailLayout
+      title="Confirmation d'inscription"
+      greeting={`Bonjour ${firstName},`}
+      lead="Votre compte a été créé par l'administration."
+      details={[
+        { label: "Email", value: email, underline: true },
+        { label: "Mot de passe temporaire", value: temporaryPassword, underline: true },
+      ]}
+      highlightedParagraphs={[
+        "Lors de votre première connexion, il vous sera demandé de modifier ce mot de passe pour plus de sécurité.",
+      ]}
+      paragraphs={[
+        "Vous pouvez vous connecter dès maintenant avec les identifiants ci-dessus.",
+        "Conservez cet email jusqu'à votre première connexion.",
+      ]}
+      linkLabel="Connexion"
+      linkHref={`${getAppUrl()}/connexion`}
+      reference={reference}
+    />
+  );
+}
+
 interface ProvisionalAppointmentEmailProps {
   firstName: string;
   categoryTitle: string;

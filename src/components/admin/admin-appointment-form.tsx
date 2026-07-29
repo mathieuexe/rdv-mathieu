@@ -11,6 +11,7 @@ interface AdminAppointmentFormProps {
   categories: AppointmentCategory[];
   registeredClients: UserProfileRecord[];
   action: (formData: FormData) => Promise<void>;
+  errorMessage?: string;
 }
 
 const weekdayHeaders = ["LUN.", "MAR.", "MER.", "JEU.", "VEN.", "SAM.", "DIM."];
@@ -42,10 +43,12 @@ function getCalendarCells(monthKey: string) {
   ];
 }
 
-export function AdminAppointmentForm({ categories, registeredClients, action }: AdminAppointmentFormProps) {
+export function AdminAppointmentForm({ categories, registeredClients, action, errorMessage }: AdminAppointmentFormProps) {
   const [categorySlug, setCategorySlug] = useState(categories[0]?.slug ?? "");
   const [linkedUserId, setLinkedUserId] = useState("");
   const [clientSearch, setClientSearch] = useState("");
+  const [updateLinkedUserProfile, setUpdateLinkedUserProfile] = useState(false);
+  const [createClientAccount, setCreateClientAccount] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -144,6 +147,8 @@ export function AdminAppointmentForm({ categories, registeredClients, action }: 
 
   function handleClientChange(nextUserId: string) {
     setLinkedUserId(nextUserId);
+    setUpdateLinkedUserProfile(false);
+    setCreateClientAccount(false);
 
     const nextClient = registeredClients.find((client) => client.userId === nextUserId);
 
@@ -165,6 +170,11 @@ export function AdminAppointmentForm({ categories, registeredClients, action }: 
         <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
           L&apos;administrateur peut réserver directement un créneau disponible au nom d&apos;un client.
         </p>
+        {errorMessage ? (
+          <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+            {errorMessage}
+          </div>
+        ) : null}
       </div>
 
       <form action={action} className="mt-8 grid gap-6 xl:grid-cols-[1fr_0.95fr]">
@@ -198,6 +208,47 @@ export function AdminAppointmentForm({ categories, registeredClients, action }: 
               <p className="text-xs text-amber-700">Aucun client ne correspond à votre recherche.</p>
             ) : null}
           </label>
+
+          {selectedClient ? (
+            <label className="block rounded-2xl border border-blue-100 bg-blue-50/40 px-4 py-4 text-sm text-slate-700">
+              <span className="flex items-start gap-3">
+                <input
+                  name="updateLinkedUserProfile"
+                  type="checkbox"
+                  checked={updateLinkedUserProfile}
+                  onChange={(event) => setUpdateLinkedUserProfile(event.target.checked)}
+                  className="mt-1 size-4 rounded border-slate-300 text-blue-600"
+                />
+                <span>
+                  <span className="block font-medium text-slate-950">Mettre aussi à jour la fiche client</span>
+                  <span className="mt-1 block text-xs leading-6 text-slate-500">
+                    Si cette option est cochée, le prénom, le nom, l&apos;email et le téléphone du client sélectionné
+                    seront aussi modifiés dans son espace personnel.
+                  </span>
+                </span>
+              </span>
+            </label>
+          ) : (
+            <label className="block rounded-2xl border border-emerald-100 bg-emerald-50/70 px-4 py-4 text-sm text-slate-700">
+              <span className="flex items-start gap-3">
+                <input
+                  name="createClientAccount"
+                  type="checkbox"
+                  checked={createClientAccount}
+                  onChange={(event) => setCreateClientAccount(event.target.checked)}
+                  className="mt-1 size-4 rounded border-slate-300 text-emerald-600"
+                />
+                <span>
+                  <span className="block font-medium text-slate-950">Créer aussi un compte client</span>
+                  <span className="mt-1 block text-xs leading-6 text-slate-500">
+                    Si aucun client n&apos;est sélectionné, vous pouvez créer son compte avec ces informations. Le client
+                    recevra automatiquement un email avec un mot de passe temporaire et devra le modifier lors de sa
+                    première connexion.
+                  </span>
+                </span>
+              </span>
+            </label>
+          )}
 
           <label className="block space-y-2 text-sm font-medium text-slate-700">
             <span>Catégorie</span>

@@ -71,6 +71,8 @@ export const settingsSchema = z
 export const adminAppointmentSchema = appointmentRequestSchema.extend({
   categorySlug: z.string().trim().min(1, "La catégorie est requise."),
   linkedUserId: z.string().trim().uuid("Le client sélectionné est invalide.").optional().or(z.literal("")),
+  createClientAccount: z.boolean(),
+  updateLinkedUserProfile: z.boolean(),
 });
 
 export const accountProfileSchema = z.object({
@@ -79,3 +81,13 @@ export const accountProfileSchema = z.object({
   email: z.string().trim().email("Veuillez saisir un email valide."),
   phone: z.string().trim().min(8, "Le numéro de téléphone est requis."),
 });
+
+export const changePasswordSchema = z
+  .object({
+    password: passwordSchema,
+    confirmPassword: z.string().min(1, "Veuillez confirmer votre mot de passe."),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Les mots de passe ne correspondent pas.",
+  });

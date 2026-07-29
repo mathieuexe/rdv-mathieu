@@ -58,6 +58,11 @@ export async function loginAction(
   if (data.user?.id) {
     const requestHeaders = await headers();
     const clientContext = extractClientContextFromHeaders(requestHeaders);
+    const { data: profile } = await supabase
+      .from("user_profiles")
+      .select("requires_password_change")
+      .eq("user_id", data.user.id)
+      .maybeSingle();
 
     await createAccountActivityLog({
       userId: data.user.id,
@@ -76,6 +81,10 @@ export async function loginAction(
         email: data.user.email?.toLowerCase() ?? parsed.data.email.toLowerCase(),
       },
     });
+
+    if (profile?.requires_password_change) {
+      redirect("/compte/securite");
+    }
   }
 
   redirect("/");

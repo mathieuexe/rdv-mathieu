@@ -11,11 +11,12 @@ import {
   createAccountActivityLog,
   getCategoryById,
   reassignAppointmentsEmailForUser,
+  setUserPasswordChangeRequirement,
   updateUserProfileByUserId,
 } from "@/lib/data-access";
 import { sendAppointmentCancellationEmail } from "@/lib/email";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
-import { accountProfileSchema } from "@/lib/validators";
+import { accountProfileSchema, changePasswordSchema } from "@/lib/validators";
 import { formatDateTimeFr } from "@/lib/utils";
 
 export interface AccountActionState {
@@ -24,6 +25,11 @@ export interface AccountActionState {
 }
 
 export interface AccountProfileActionState {
+  status: "idle" | "error" | "success";
+  message?: string;
+}
+
+export interface AccountPasswordActionState {
   status: "idle" | "error" | "success";
   message?: string;
 }
@@ -240,6 +246,81 @@ export async function updateAccountProfileAction(
         ? "Vos informations ont été mises à jour. Si nécessaire, vérifiez votre boîte mail pour confirmer le changement d'adresse email."
         : "Vos informations ont bien été mises à jour.",
   };
+}
+
+export async function changeAccountPasswordAction(
+  _state: AccountPasswordActionState,
+  formData: FormData,
+): Promise<AccountPasswordActionState> {
+  const session = await getPublicUserSession();
+
+  if (!session.isAuthenticated || !session.userId) {
+    return {
+      status: "error",
+      message: "Vous devez être connecté pour modifier votre mot de passe.",
+    };
+  }
+
+  const parsed = changePasswordSchema.safeParse({
+    password: formData.get("password"),
+    confirmPassword: formData.get("confirmPassword"),
+  });
+
+  if (!parsed.success) {
+    return {
+      status: "error",
+      message: parsed.error.issues[0]?.message ?? "Veuillez vérifier le formulaire.",
+    };
+  }
+
+  const supabase = await getSupabaseServerClient();
+
+  if (!supabase) {
+    return {
+      status: "error",
+      message: "Supabase n'est pas configuré.",
+    };
+  }
+
+  const { error } = await supabase.auth.updateUser({
+    password: parsed.data.password,
+  });
+
+  if (error) {
+    return {
+      status: "error",
+      message: error.message,
+    };
+  }
+
+  await setUserPasswordChangeRequirement(session.userId, false);
+
+  const requestHeaders = await headers();
+  const clientContext = extractClientContextFromHeaders(requestHeaders);
+
+  await createAccountActivityLog({
+    userId: session.userId,
+    actionType: "mise_a_jour_securite",
+    actionLabel: "Mise à jour du mot de passe",
+    description: "Le mot de passe du compte a été modifié.",
+    ipAddress: clientContext.ipAddress,
+    country: clientContext.country,
+    region: clientContext.region,
+    city: clientContext.city,
+    deviceType: clientContext.deviceType,
+    operatingSystem: clientContext.operatingSystem,
+    browser: clientContext.browser,
+    userAgent: clientContext.userAgent,
+    metadata: {
+      requiresPasswordChange: false,
+    },
+  });
+
+  revalidatePath("/compte");
+  revalidatePath("/compte/parametres");
+  revalidatePath("/compte/logs");
+  revalidatePath("/compte/securite");
+  redirect("/compte");
 }
 
 export async function logoutAccountAction() {

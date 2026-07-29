@@ -4,6 +4,7 @@ import { render } from "@react-email/render";
 import { Resend } from "resend";
 
 import {
+  AdminCreatedSignupEmail,
   AppointmentCancellationEmail,
   ProvisionalAppointmentEmail,
   RefusedAppointmentEmail,
@@ -16,6 +17,7 @@ import type { AppointmentMode, EmailDeliveryStatus } from "@/types/domain";
 
 type AppMailTemplateKey =
   | "confirmation_inscription"
+  | "confirmation_inscription_admin"
   | "prise_rdv_provisoire"
   | "rendez_vous_valide"
   | "rendez_vous_annule"
@@ -292,6 +294,31 @@ export async function sendSignupConfirmationEmail(input: {
       SignupConfirmationEmail({
         firstName: input.firstName,
         email: input.to,
+        reference,
+      }),
+  });
+}
+
+export async function sendAdminCreatedSignupEmail(input: {
+  to: string;
+  firstName: string;
+  temporaryPassword: string;
+}) {
+  return sendTransactionalEmail({
+    to: input.to,
+    subject: "Confirmation d'inscription",
+    templateKey: "confirmation_inscription_admin",
+    sourceType: "inscription_admin",
+    sourceLabel: "Confirmation d'inscription créée par l'administration",
+    metadata: {
+      firstName: input.firstName,
+      temporaryPassword: input.temporaryPassword,
+    },
+    buildTemplate: (reference) =>
+      AdminCreatedSignupEmail({
+        firstName: input.firstName,
+        email: input.to,
+        temporaryPassword: input.temporaryPassword,
         reference,
       }),
   });

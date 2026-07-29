@@ -3,11 +3,23 @@ import { getCategories, getUserProfiles } from "@/lib/data-access";
 
 import { createAdminAppointmentAction } from "../../actions";
 
-export default async function NewAdminAppointmentPage() {
+export default async function NewAdminAppointmentPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const { error } = await searchParams;
   const [categories, registeredClients] = await Promise.all([
     getCategories().then((items) => items.filter((category) => category.isOnline)),
     getUserProfiles(),
   ]);
 
-  return <AdminAppointmentForm categories={categories} registeredClients={registeredClients} action={createAdminAppointmentAction} />;
+  return (
+    <AdminAppointmentForm
+      categories={categories}
+      registeredClients={registeredClients}
+      action={createAdminAppointmentAction}
+      errorMessage={error}
+    />
+  );
 }
