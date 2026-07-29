@@ -1,4 +1,7 @@
 import { createAppointmentRequest, getCategorySlots } from "@/lib/data-access";
+import { extractClientContextFromHeaders } from "@/lib/account-activity";
+import { createAccountActivityLog } from "@/lib/data-access";
+import { getPublicUserSession } from "@/lib/auth";
 import { sendProvisionalAppointmentEmail } from "@/lib/email";
 import { isMaintenanceBypassedForHeaders } from "@/lib/maintenance";
 import { formatDateTimeFr } from "@/lib/utils";
@@ -41,7 +44,11 @@ export async function POST(request: Request) {
       );
     }
 
-    const result = await createAppointmentRequest(parsed.data);
+    const session = await getPublicUserSession();
+    const result = await createAppointmentRequest(parsed.data, {
+      requestedByUserId:
+        session.isAuthenticated && session.userId && session.email === parsed.data.email.toLowerCase() ? session.userId : undefined,
+    });
 
     await sendProvisionalAppointmentEmail({
       to: result.appointment.email,
@@ -52,6 +59,33 @@ export async function POST(request: Request) {
       phone: result.appointment.phone,
       appointmentId: result.appointment.id,
     });
+
+    if (result.requestedByUserId) {
+      const clientContext = extractClientContextFromHeaders(request.headers);
+
+      await createAccountActivityLog({
+        userId: result.requestedByUserId,
+        actionType: "prise_rendez_vous",
+        actionLabel: "Prise de rendez-vous",
+        description: `Demande de rendez-vous pour ${result.category.title} le ${formatDateTimeFr(result.appointment.startsAt, {
+          dateStyle: "full",
+          timeStyle: "short",
+        })}.`,
+        appointmentId: result.appointment.id,
+        ipAddress: clientContext.ipAddress,
+        country: clientContext.country,
+        region: clientContext.region,
+        city: clientContext.city,
+        deviceType: clientContext.deviceType,
+        operatingSystem: clientContext.operatingSystem,
+        browser: clientContext.browser,
+        userAgent: clientContext.userAgent,
+        metadata: {
+          categoryTitle: result.category.title,
+          appointmentMode: result.category.appointmentMode,
+        },
+      });
+    }
 
     return Response.json({
       success: true,

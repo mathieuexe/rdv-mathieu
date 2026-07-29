@@ -234,16 +234,17 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, init
       <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg">
         <div className="grid lg:grid-cols-[280px_minmax(0,1fr)_240px]">
           <aside className="border-b border-gray-200 bg-white p-6 lg:border-r lg:border-b-0 lg:p-8">
-            <a href="/" className="text-sm text-gray-500 underline underline-offset-4">
-              Retour à l'accueil
-            </a>
             {category.bannerImageUrl ? (
-              <div className="mt-6 aspect-[8/3] w-full overflow-hidden rounded-2xl border border-gray-200 bg-gray-100">
-                <img src={category.bannerImageUrl} alt="" className="h-full w-full object-cover" />
+              <div className="-m-6 mb-6 overflow-hidden border-b border-gray-200 bg-gray-100 rounded-t-2xl lg:-m-8 lg:mb-8 lg:rounded-tr-none">
+                <div className="h-[240px] w-full">
+                  <img src={category.bannerImageUrl} alt="" className="h-full w-full object-cover" />
+                </div>
               </div>
-            ) : null}
+            ) : (
+              <div className="-m-6 mb-6 h-[240px] rounded-t-2xl border-b border-gray-200 bg-gray-100 lg:-m-8 lg:mb-8 lg:rounded-tr-none" />
+            )}
 
-            <div className="mt-6 flex size-16 items-center justify-center overflow-hidden rounded-full border border-gray-200 bg-gray-100 text-sm font-semibold text-gray-900">
+            <div className="flex size-16 items-center justify-center overflow-hidden rounded-full border border-gray-200 bg-gray-100 text-sm font-semibold text-gray-900">
               {category.thumbnailImageUrl ? (
                 <img src={category.thumbnailImageUrl} alt="" className="h-full w-full object-cover" />
               ) : (

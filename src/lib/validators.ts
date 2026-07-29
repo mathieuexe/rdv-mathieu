@@ -70,3 +70,10 @@ export const settingsSchema = z
 export const adminAppointmentSchema = appointmentRequestSchema.extend({
   categorySlug: z.string().trim().min(1, "La categorie est requise."),
 });
+
+export const accountProfileSchema = z.object({
+  firstName: z.string().trim().min(2, "Le prénom est requis."),
+  lastName: z.string().trim().min(2, "Le nom est requis."),
+  email: z.string().trim().email("Veuillez saisir un email valide."),
+  phone: z.string().trim().min(8, "Le numéro de téléphone est requis."),
+});

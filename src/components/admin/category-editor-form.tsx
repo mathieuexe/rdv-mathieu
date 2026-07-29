@@ -123,12 +123,12 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
   }
 
   return (
-    <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_18px_45px_rgba(15,23,42,0.06)]">
+    <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_16px_50px_rgba(15,23,42,0.04)]">
       <div>
-        <p className="text-sm uppercase tracking-[0.2em] text-slate-500">Editeur</p>
+        <p className="text-sm uppercase tracking-[0.2em] text-slate-400">Éditeur</p>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">{title}</h1>
         <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
-          Renseignez le titre, la description, la duree, les heures de disponibilite et le type de rendez-vous.
+          Renseignez le titre, la description, la durée, les heures de disponibilité et le type de rendez-vous.
         </p>
       </div>
 
@@ -140,7 +140,7 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
 
         {saved ? (
           <div className="xl:col-span-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-            La categorie a bien ete enregistree.
+            La catégorie a bien été enregistrée.
           </div>
         ) : null}
 
@@ -163,7 +163,7 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
               name="title"
               defaultValue={category?.title}
               required
-              className="w-full rounded-2xl border border-slate-200 bg-[#f8fafc] px-4 py-3 outline-none transition focus:border-blue-500 focus:bg-white"
+              className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition duration-150 focus:border-slate-950 focus:bg-white"
             />
           </label>
 
@@ -174,7 +174,7 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
               rows={5}
               defaultValue={category?.description}
               required
-              className="w-full rounded-2xl border border-slate-200 bg-[#f8fafc] px-4 py-3 outline-none transition focus:border-blue-500 focus:bg-white"
+              className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition duration-150 focus:border-slate-950 focus:bg-white"
             />
           </label>
 
@@ -187,7 +187,7 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
                 min={15}
                 step={15}
                 defaultValue={category?.durationMinutes ?? 30}
-                className="w-full rounded-2xl border border-slate-200 bg-[#f8fafc] px-4 py-3 outline-none transition focus:border-blue-500 focus:bg-white"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition duration-150 focus:border-slate-950 focus:bg-white"
               />
             </label>
 
@@ -196,7 +196,7 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
               <select
                 name="appointmentMode"
                 defaultValue={category?.appointmentMode ?? "visioconference"}
-                className="w-full rounded-2xl border border-slate-200 bg-[#f8fafc] px-4 py-3 outline-none transition focus:border-blue-500 focus:bg-white"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition duration-150 focus:border-slate-950 focus:bg-white"
               >
                 <option value="telephone">Téléphonique</option>
                 <option value="physique">Présentiel</option>
@@ -210,7 +210,7 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
                 name="slug"
                 defaultValue={category?.slug}
                 placeholder="consultation-30min"
-                className="w-full rounded-2xl border border-slate-200 bg-[#f8fafc] px-4 py-3 outline-none transition focus:border-blue-500 focus:bg-white"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition duration-150 focus:border-slate-950 focus:bg-white"
               />
             </label>
           </div>
@@ -224,7 +224,7 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
                 lang="fr-FR"
                 step={900}
                 defaultValue={defaultWindow?.start ?? "09:00"}
-                className="w-full rounded-2xl border border-slate-200 bg-[#f8fafc] px-4 py-3 outline-none transition focus:border-blue-500 focus:bg-white"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition duration-150 focus:border-slate-950 focus:bg-white"
               />
               <p className="text-xs text-slate-500">Format français 24h : HH:MM</p>
             </label>
@@ -237,13 +237,13 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
                 lang="fr-FR"
                 step={900}
                 defaultValue={defaultWindow?.end ?? "18:00"}
-                className="w-full rounded-2xl border border-slate-200 bg-[#f8fafc] px-4 py-3 outline-none transition focus:border-blue-500 focus:bg-white"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition duration-150 focus:border-slate-950 focus:bg-white"
               />
               <p className="text-xs text-slate-500">Format français 24h : HH:MM</p>
             </label>
           </div>
 
-          <div className="rounded-[24px] border border-slate-200 bg-[#f8fafc] p-5">
+          <div className="rounded-[24px] border border-slate-200 bg-slate-50/60 p-5">
             <p className="text-sm font-semibold text-slate-900">Visuels de la catégorie</p>
             <p className="mt-2 text-sm leading-7 text-slate-600">
               Chaque image est automatiquement recadrée, redimensionnée puis enregistrée au format JPEG.
@@ -274,7 +274,7 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
                   type="file"
                   accept="image/*"
                   onChange={(event) => void handleImageChange(event, "thumbnail")}
-                  className="block w-full text-sm text-slate-600 file:mr-4 file:rounded-xl file:border file:border-slate-200 file:bg-white file:px-4 file:py-2 file:text-sm file:font-medium"
+                  className="block w-full text-sm text-slate-600 file:mr-4 file:rounded-full file:border file:border-slate-200 file:bg-white file:px-4 file:py-2 file:text-sm file:font-medium"
                 />
 
                 <div className="flex h-40 w-40 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white">
@@ -310,7 +310,7 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
                   type="file"
                   accept="image/*"
                   onChange={(event) => void handleImageChange(event, "banner")}
-                  className="block w-full text-sm text-slate-600 file:mr-4 file:rounded-xl file:border file:border-slate-200 file:bg-white file:px-4 file:py-2 file:text-sm file:font-medium"
+                  className="block w-full text-sm text-slate-600 file:mr-4 file:rounded-full file:border file:border-slate-200 file:bg-white file:px-4 file:py-2 file:text-sm file:font-medium"
                 />
 
                 <div className="flex aspect-[8/3] w-full items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white">
@@ -326,7 +326,7 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
         </div>
 
         <div className="space-y-5">
-          <div className="rounded-[24px] border border-slate-200 bg-[#f8fafc] p-5">
+          <div className="rounded-[24px] border border-slate-200 bg-slate-50/60 p-5">
             <p className="text-sm font-semibold text-slate-900">Publication</p>
             <label className="mt-4 flex items-center gap-3 text-sm text-slate-700">
               <input type="checkbox" name="isOnline" defaultChecked={category?.isOnline ?? true} />
@@ -334,21 +334,21 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
             </label>
           </div>
 
-          <div className="rounded-[24px] border border-slate-200 bg-[#f8fafc] p-5">
+          <div className="rounded-[24px] border border-slate-200 bg-slate-50/60 p-5">
             <p className="text-sm font-semibold text-slate-900">Message personnalisé</p>
             <textarea
               name="customMessage"
               rows={6}
               defaultValue={category?.customMessage}
               placeholder="Instructions, congés, informations utiles..."
-              className="mt-4 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-blue-500"
+              className="mt-4 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition duration-150 focus:border-slate-950"
             />
           </div>
 
-          <div className="rounded-[24px] border border-slate-200 bg-[linear-gradient(135deg,#eff6ff_0%,#f8fafc_100%)] p-5 text-sm leading-7 text-slate-600">
-            <p className="font-semibold text-slate-900">Disponibilites de la categorie</p>
+          <div className="rounded-[24px] border border-slate-200 bg-slate-50/60 p-5 text-sm leading-7 text-slate-600">
+            <p className="font-semibold text-slate-900">Disponibilités de la catégorie</p>
             <p className="mt-3">
-              Les heures enregistrees sont appliquees du lundi au vendredi. Vous pourrez les affiner ensuite si besoin.
+              Les heures enregistrées sont appliquées du lundi au vendredi. Vous pourrez les affiner ensuite si besoin.
             </p>
           </div>
         </div>
@@ -356,9 +356,9 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
         <div className="xl:col-span-2">
           <button
             type="submit"
-            className="inline-flex rounded-2xl bg-[linear-gradient(135deg,#4f46e5_0%,#2563eb_55%,#06b6d4_100%)] px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_40px_rgba(37,99,235,0.2)] transition hover:opacity-95"
+            className="inline-flex rounded-full bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition duration-150 hover:bg-slate-800"
           >
-            Enregistrer la categorie
+            Enregistrer la catégorie
           </button>
         </div>
       </form>

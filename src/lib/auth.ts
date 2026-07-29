@@ -29,6 +29,7 @@ export interface PublicUserSession {
   firstName?: string;
   lastName?: string;
   fullName?: string;
+  phone?: string;
   userId?: string;
   isAdmin?: boolean;
 }
@@ -73,7 +74,7 @@ export async function getPublicUserSession(): Promise<PublicUserSession> {
 
   const { data: profile } = await supabase
     .from("user_profiles")
-    .select("first_name, last_name")
+    .select("first_name, last_name, phone")
     .eq("user_id", user.id)
     .maybeSingle();
 
@@ -90,6 +91,7 @@ export async function getPublicUserSession(): Promise<PublicUserSession> {
         ? user.user_metadata.last_name
         : undefined;
   const fullName = [firstName, lastName].filter(Boolean).join(" ").trim() || user.email;
+  const phone = typeof profile?.phone === "string" ? profile.phone : undefined;
 
   return {
     isAuthenticated: true,
@@ -98,6 +100,7 @@ export async function getPublicUserSession(): Promise<PublicUserSession> {
     firstName,
     lastName,
     fullName,
+    phone,
     isAdmin,
   };
 }

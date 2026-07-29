@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { TriangleAlert } from "lucide-react";
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
@@ -47,9 +46,6 @@ export default async function BookingCategoryPage({
         <div className="mx-auto max-w-6xl">
           {!bookingState.available ? (
             <section className="rounded-[28px] border border-amber-200 bg-amber-50 p-6 shadow-[0_24px_60px_rgba(15,23,42,0.06)] sm:p-8">
-              <Link href="/" className="text-sm text-amber-900 underline underline-offset-4">
-                Retour à l'accueil
-              </Link>
               <div className="flex items-start gap-3">
                 <TriangleAlert className="mt-1 size-5 text-amber-700" />
                 <div>

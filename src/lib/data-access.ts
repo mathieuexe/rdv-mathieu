@@ -7,6 +7,8 @@ import { getEffectiveSiteSettings, normalizeAllowedIps } from "@/lib/maintenance
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import type {
+  AccountActivityLogRecord,
+  AccountActivityType,
   AppointmentCategory,
   AppointmentRecord,
   AppointmentRequestPayload,
@@ -14,6 +16,7 @@ import type {
   DashboardMetrics,
   EmailLogRecord,
   SiteSettings,
+  UserProfileRecord,
 } from "@/types/domain";
 
 const defaultSiteSettings: SiteSettings = {
@@ -128,6 +131,40 @@ function mapEmailLogRow(row: Record<string, unknown>): EmailLogRecord {
     resendEmailId: typeof row.resend_email_id === "string" ? row.resend_email_id : undefined,
     deliveryStatus:
       row.delivery_status === "not_configured" || row.delivery_status === "failed" ? row.delivery_status : "sent",
+    metadata: row.metadata && typeof row.metadata === "object" ? (row.metadata as Record<string, unknown>) : {},
+    createdAt: String(row.created_at ?? new Date().toISOString()),
+  };
+}
+
+function mapUserProfileRow(row: Record<string, unknown>): UserProfileRecord {
+  return {
+    userId: String(row.user_id),
+    email: String(row.email),
+    firstName: String(row.first_name ?? ""),
+    lastName: String(row.last_name ?? ""),
+    phone: typeof row.phone === "string" ? row.phone : undefined,
+    role: String(row.role ?? "Prospect"),
+    createdAt: String(row.created_at ?? new Date().toISOString()),
+    updatedAt: String(row.updated_at ?? new Date().toISOString()),
+  };
+}
+
+function mapAccountActivityLogRow(row: Record<string, unknown>): AccountActivityLogRecord {
+  return {
+    id: String(row.id),
+    userId: String(row.user_id),
+    actionType: row.action_type as AccountActivityType,
+    actionLabel: String(row.action_label),
+    description: typeof row.description === "string" ? row.description : undefined,
+    appointmentId: typeof row.appointment_id === "string" ? row.appointment_id : undefined,
+    ipAddress: typeof row.ip_address === "string" ? row.ip_address : undefined,
+    country: typeof row.country === "string" ? row.country : undefined,
+    region: typeof row.region === "string" ? row.region : undefined,
+    city: typeof row.city === "string" ? row.city : undefined,
+    deviceType: typeof row.device_type === "string" ? row.device_type : undefined,
+    operatingSystem: typeof row.operating_system === "string" ? row.operating_system : undefined,
+    browser: typeof row.browser === "string" ? row.browser : undefined,
+    userAgent: typeof row.user_agent === "string" ? row.user_agent : undefined,
     metadata: row.metadata && typeof row.metadata === "object" ? (row.metadata as Record<string, unknown>) : {},
     createdAt: String(row.created_at ?? new Date().toISOString()),
   };
@@ -314,7 +351,12 @@ export async function getCategorySlots(slug: string, options?: { bypassMaintenan
   };
 }
 
-export async function createAppointmentRequest(payload: AppointmentRequestPayload) {
+export async function createAppointmentRequest(
+  payload: AppointmentRequestPayload,
+  options?: {
+    requestedByUserId?: string;
+  },
+) {
   const category = await getPublicCategoryBySlug(payload.categorySlug);
 
   if (!category) {
@@ -370,6 +412,7 @@ export async function createAppointmentRequest(payload: AppointmentRequestPayloa
       return {
         appointment: mapAppointmentRow(data as Record<string, unknown>),
         category,
+        requestedByUserId: options?.requestedByUserId,
       };
     }
   }
@@ -409,6 +452,133 @@ export async function getUserAppointmentsByEmail(email: string) {
   }
 
   return [];
+}
+
+export async function getUserProfileByUserId(userId: string) {
+  const supabase = getSupabaseAdminClient();
+
+  if (!supabase || !userId) {
+    return null;
+  }
+
+  const { data } = await supabase.from("user_profiles").select("*").eq("user_id", userId).maybeSingle();
+  return data ? mapUserProfileRow(data as Record<string, unknown>) : null;
+}
+
+export async function updateUserProfileByUserId(input: {
+  userId: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+}) {
+  const supabase = getSupabaseAdminClient();
+
+  if (!supabase) {
+    throw new Error("La mise à jour du profil est indisponible tant que Supabase n'est pas configuré.");
+  }
+
+  const { data, error } = await supabase
+    .from("user_profiles")
+    .update({
+      email: input.email,
+      first_name: input.firstName,
+      last_name: input.lastName,
+      phone: input.phone ?? null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("user_id", input.userId)
+    .select("*")
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return mapUserProfileRow(data as Record<string, unknown>);
+}
+
+export async function reassignAppointmentsEmailForUser(previousEmail: string, nextEmail: string) {
+  const supabase = getSupabaseAdminClient();
+
+  if (!supabase || !previousEmail || !nextEmail || previousEmail === nextEmail) {
+    return;
+  }
+
+  const { error } = await supabase
+    .from("appointments")
+    .update({
+      email: nextEmail,
+      updated_at: new Date().toISOString(),
+    })
+    .ilike("email", previousEmail);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
+export async function createAccountActivityLog(input: {
+  userId: string;
+  actionType: AccountActivityType;
+  actionLabel: string;
+  description?: string;
+  appointmentId?: string;
+  ipAddress?: string;
+  country?: string;
+  region?: string;
+  city?: string;
+  deviceType?: string;
+  operatingSystem?: string;
+  browser?: string;
+  userAgent?: string;
+  metadata?: Record<string, unknown>;
+}) {
+  const supabase = getSupabaseAdminClient();
+
+  if (!supabase || !input.userId) {
+    return null;
+  }
+
+  const { data } = await supabase
+    .from("account_activity_logs")
+    .insert({
+      user_id: input.userId,
+      action_type: input.actionType,
+      action_label: input.actionLabel,
+      description: input.description ?? null,
+      appointment_id: input.appointmentId ?? null,
+      ip_address: input.ipAddress ?? null,
+      country: input.country ?? null,
+      region: input.region ?? null,
+      city: input.city ?? null,
+      device_type: input.deviceType ?? null,
+      operating_system: input.operatingSystem ?? null,
+      browser: input.browser ?? null,
+      user_agent: input.userAgent ?? null,
+      metadata: input.metadata ?? {},
+    })
+    .select("*")
+    .maybeSingle();
+
+  return data ? mapAccountActivityLogRow(data as Record<string, unknown>) : null;
+}
+
+export async function getUserAccountActivityLogs(userId: string, limit = 100) {
+  const supabase = getSupabaseAdminClient();
+
+  if (!supabase || !userId) {
+    return [];
+  }
+
+  const { data } = await supabase
+    .from("account_activity_logs")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  return (data ?? []).map((row) => mapAccountActivityLogRow(row as Record<string, unknown>));
 }
 
 export async function cancelUserAppointmentById(appointmentId: string, email: string, cancelReason: string) {

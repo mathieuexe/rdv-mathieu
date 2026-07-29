@@ -1,7 +1,10 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 
+import { extractClientContextFromHeaders } from "@/lib/account-activity";
+import { createAccountActivityLog } from "@/lib/data-access";
 import { isSupabaseConfigured } from "@/lib/env";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { loginSchema } from "@/lib/validators";
@@ -43,13 +46,36 @@ export async function loginAction(
     };
   }
 
-  const { error } = await supabase.auth.signInWithPassword(parsed.data);
+  const { data, error } = await supabase.auth.signInWithPassword(parsed.data);
 
   if (error) {
     return {
       status: "error",
       message: "Connexion impossible. Vérifiez vos identifiants.",
     };
+  }
+
+  if (data.user?.id) {
+    const requestHeaders = await headers();
+    const clientContext = extractClientContextFromHeaders(requestHeaders);
+
+    await createAccountActivityLog({
+      userId: data.user.id,
+      actionType: "connexion",
+      actionLabel: "Connexion à l'espace client",
+      description: "Connexion réussie à l'espace client.",
+      ipAddress: clientContext.ipAddress,
+      country: clientContext.country,
+      region: clientContext.region,
+      city: clientContext.city,
+      deviceType: clientContext.deviceType,
+      operatingSystem: clientContext.operatingSystem,
+      browser: clientContext.browser,
+      userAgent: clientContext.userAgent,
+      metadata: {
+        email: data.user.email?.toLowerCase() ?? parsed.data.email.toLowerCase(),
+      },
+    });
   }
 
   redirect("/");

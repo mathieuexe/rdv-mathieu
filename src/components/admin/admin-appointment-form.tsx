@@ -128,9 +128,9 @@ export function AdminAppointmentForm({ categories, action }: AdminAppointmentFor
   const hasAnyAvailableSlot = dayEntries.some((entry) => entry.availableCount > 0);
 
   return (
-    <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_18px_45px_rgba(15,23,42,0.06)]">
+    <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_16px_50px_rgba(15,23,42,0.04)]">
       <div>
-        <p className="text-sm uppercase tracking-[0.2em] text-slate-500">Création</p>
+        <p className="text-sm uppercase tracking-[0.2em] text-slate-400">Création</p>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">Créer un rendez-vous</h1>
         <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
           L&apos;administrateur peut réserver directement un créneau disponible au nom d&apos;un client.
@@ -145,7 +145,7 @@ export function AdminAppointmentForm({ categories, action }: AdminAppointmentFor
               name="categorySlug"
               value={categorySlug}
               onChange={(event) => setCategorySlug(event.target.value)}
-              className="w-full rounded-2xl border border-slate-200 bg-[#f8fafc] px-4 py-3 outline-none transition focus:border-blue-500 focus:bg-white"
+              className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition duration-150 focus:border-slate-950 focus:bg-white"
             >
               {categories.map((category) => (
                 <option key={category.id} value={category.slug}>
@@ -161,7 +161,7 @@ export function AdminAppointmentForm({ categories, action }: AdminAppointmentFor
               <input
                 name="firstName"
                 required
-                className="w-full rounded-2xl border border-slate-200 bg-[#f8fafc] px-4 py-3 outline-none transition focus:border-blue-500 focus:bg-white"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition duration-150 focus:border-slate-950 focus:bg-white"
               />
             </label>
 
@@ -170,7 +170,7 @@ export function AdminAppointmentForm({ categories, action }: AdminAppointmentFor
               <input
                 name="lastName"
                 required
-                className="w-full rounded-2xl border border-slate-200 bg-[#f8fafc] px-4 py-3 outline-none transition focus:border-blue-500 focus:bg-white"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition duration-150 focus:border-slate-950 focus:bg-white"
               />
             </label>
           </div>
@@ -181,7 +181,7 @@ export function AdminAppointmentForm({ categories, action }: AdminAppointmentFor
               name="email"
               type="email"
               required
-              className="w-full rounded-2xl border border-slate-200 bg-[#f8fafc] px-4 py-3 outline-none transition focus:border-blue-500 focus:bg-white"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition duration-150 focus:border-slate-950 focus:bg-white"
             />
           </label>
 
@@ -191,7 +191,7 @@ export function AdminAppointmentForm({ categories, action }: AdminAppointmentFor
               name="phone"
               type="tel"
               required
-              className="w-full rounded-2xl border border-slate-200 bg-[#f8fafc] px-4 py-3 outline-none transition focus:border-blue-500 focus:bg-white"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition duration-150 focus:border-slate-950 focus:bg-white"
             />
           </label>
 
@@ -200,7 +200,7 @@ export function AdminAppointmentForm({ categories, action }: AdminAppointmentFor
             <textarea
               name="message"
               rows={4}
-              className="w-full rounded-2xl border border-slate-200 bg-[#f8fafc] px-4 py-3 outline-none transition focus:border-blue-500 focus:bg-white"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition duration-150 focus:border-slate-950 focus:bg-white"
             />
           </label>
         </div>
@@ -208,7 +208,7 @@ export function AdminAppointmentForm({ categories, action }: AdminAppointmentFor
         <div className="space-y-5">
           <input type="hidden" name="startsAt" value={selectedSlot} />
 
-          <div className="rounded-[24px] border border-slate-200 bg-[#f8fafc] p-5">
+          <div className="rounded-[24px] border border-slate-200 bg-slate-50/60 p-5">
             <div className="space-y-2">
               <p className="text-sm font-semibold text-slate-900">Disponibilités</p>
               {selectedCategory ? (
@@ -233,7 +233,7 @@ export function AdminAppointmentForm({ categories, action }: AdminAppointmentFor
             <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1fr)_220px]">
               <div>
                 <div className="flex items-center gap-3">
-                  <CalendarDays className="size-5 text-slate-700" />
+                  <CalendarDays className="size-5 text-slate-500" />
                   <div>
                     <p className="text-lg font-semibold text-slate-950">Sélectionnez la date et l&apos;heure</p>
                     <p className="text-sm text-slate-500">Le sélecteur reprend la même logique que sur le site public.</p>
@@ -250,7 +250,7 @@ export function AdminAppointmentForm({ categories, action }: AdminAppointmentFor
                         type="button"
                         onClick={() => setVisibleMonthKey(monthKeys[Math.max(0, visibleMonthIndex - 1)] ?? visibleMonthKey)}
                         disabled={visibleMonthIndex === 0}
-                        className="flex size-8 items-center justify-center rounded-full border border-slate-200 text-slate-600 disabled:cursor-not-allowed disabled:opacity-40"
+                        className="flex size-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition duration-150 hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         ‹
                       </button>
@@ -260,7 +260,7 @@ export function AdminAppointmentForm({ categories, action }: AdminAppointmentFor
                           setVisibleMonthKey(monthKeys[Math.min(monthKeys.length - 1, visibleMonthIndex + 1)] ?? visibleMonthKey)
                         }
                         disabled={visibleMonthIndex >= monthKeys.length - 1}
-                        className="flex size-8 items-center justify-center rounded-full border border-slate-200 text-slate-600 disabled:cursor-not-allowed disabled:opacity-40"
+                        className="flex size-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition duration-150 hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         ›
                       </button>
@@ -290,10 +290,10 @@ export function AdminAppointmentForm({ categories, action }: AdminAppointmentFor
                             disabled={isDisabled}
                             onClick={() => setSelectedDateKey(cell.key)}
                             className={cn(
-                              "flex size-10 items-center justify-center rounded-full text-sm transition",
+                              "flex size-10 items-center justify-center rounded-xl text-sm transition duration-150",
                               isDisabled && "cursor-not-allowed text-slate-300",
-                              !isDisabled && !isSelected && "text-slate-700 hover:bg-slate-100",
-                              isSelected && "bg-sky-500 text-white",
+                              !isDisabled && !isSelected && "bg-white text-slate-700 hover:bg-slate-100",
+                              isSelected && "bg-slate-950 text-white",
                             )}
                           >
                             {cell.dayNumber}
@@ -319,11 +319,11 @@ export function AdminAppointmentForm({ categories, action }: AdminAppointmentFor
                         disabled={slot.isBlocked}
                         onClick={() => setSelectedSlot(slot.start)}
                         className={cn(
-                          "flex w-full items-center justify-center rounded-xl border px-4 py-3 text-sm font-medium transition",
+                          "flex w-full items-center justify-center rounded-2xl border px-4 py-3 text-sm font-medium transition duration-150",
                           slot.isBlocked
                             ? "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400"
                             : "border-slate-200 bg-white text-slate-700 hover:border-slate-900 hover:text-slate-950",
-                          active && "border-sky-500 bg-sky-500 text-white",
+                          active && "border-slate-950 bg-slate-950 text-white",
                         )}
                       >
                         {slot.label}
@@ -344,7 +344,7 @@ export function AdminAppointmentForm({ categories, action }: AdminAppointmentFor
           <button
             type="submit"
             disabled={!selectedSlot}
-            className="inline-flex w-full items-center justify-center rounded-2xl bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+            className="inline-flex w-full items-center justify-center rounded-full bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition duration-150 hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
           >
             Créer le rendez-vous
           </button>

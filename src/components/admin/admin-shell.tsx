@@ -2,19 +2,55 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarPlus2, CalendarRange, Clock3, LayoutDashboard, Search, Settings2, Shapes } from "lucide-react";
+import {
+  ArrowUpRight,
+  CalendarPlus2,
+  CalendarRange,
+  Clock3,
+  LayoutDashboard,
+  Search,
+  Settings2,
+  Shapes,
+} from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
-const navigation = [
-  { href: "/admin", label: "Tableau de bord", icon: LayoutDashboard },
-  { href: "/admin/rendez-vous/en-attente", label: "En attente", icon: Clock3 },
-  { href: "/admin/rendez-vous/agenda", label: "Agenda", icon: CalendarRange },
-  { href: "/admin/rendez-vous/nouveau", label: "Creer un RDV", icon: CalendarPlus2 },
-  { href: "/admin/categories", label: "Catégories", icon: Shapes },
-  { href: "/admin/checker-ref-mail", label: "Checker ref mail", icon: Search },
-  { href: "/admin/parametres", label: "Paramètres", icon: Settings2 },
+const navigationSections = [
+  {
+    title: "Vue générale",
+    items: [
+      { href: "/admin", label: "Tableau de bord", icon: LayoutDashboard, description: "Synthèse" },
+    ],
+  },
+  {
+    title: "Rendez-vous",
+    items: [
+      { href: "/admin/rendez-vous/en-attente", label: "En attente", icon: Clock3, description: "À traiter" },
+      { href: "/admin/rendez-vous/agenda", label: "Agenda", icon: CalendarRange, description: "Confirmés" },
+      { href: "/admin/rendez-vous/nouveau", label: "Créer un rendez-vous", icon: CalendarPlus2, description: "Ajout manuel" },
+    ],
+  },
+  {
+    title: "Configuration",
+    items: [
+      { href: "/admin/categories", label: "Catégories", icon: Shapes, description: "Types de rendez-vous" },
+      { href: "/admin/checker-ref-mail", label: "Checker ref mail", icon: Search, description: "Historique email" },
+      { href: "/admin/parametres", label: "Paramètres", icon: Settings2, description: "Site et maintenance" },
+    ],
+  },
 ];
+
+function getCurrentSection(pathname: string) {
+  for (const section of navigationSections) {
+    for (const item of section.items) {
+      if (pathname === item.href || pathname.startsWith(`${item.href}/`)) {
+        return item;
+      }
+    }
+  }
+
+  return navigationSections[0].items[0];
+}
 
 interface AdminShellProps {
   children: React.ReactNode;
@@ -22,41 +58,88 @@ interface AdminShellProps {
 
 export function AdminShell({ children }: AdminShellProps) {
   const currentPath = usePathname();
+  const currentSection = getCurrentSection(currentPath);
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="mx-auto grid min-h-screen max-w-6xl gap-4 px-4 py-4 lg:grid-cols-[220px_1fr] lg:px-6">
-        <aside className="rounded-[20px] border border-slate-200 bg-white p-4">
-          <div className="border-b border-slate-200 pb-4">
-            <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Administration</p>
-            <h1 className="mt-2 text-lg font-semibold text-slate-950">Rendez-vous</h1>
+    <div className="min-h-screen bg-[#f5f7fb]">
+      <div className="grid min-h-screen lg:grid-cols-[280px_minmax(0,1fr)]">
+        <aside className="border-b border-slate-200 bg-[#f8fafc] px-5 py-6 lg:border-r lg:border-b-0 lg:px-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Administration</p>
+              <h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">RDV Mathieu</h1>
+            </div>
+
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600 transition hover:border-slate-300 hover:text-slate-950"
+            >
+              <span>Voir le site</span>
+              <ArrowUpRight className="size-3.5" />
+            </Link>
           </div>
 
-          <nav className="mt-4 space-y-1.5">
-            {navigation.map((item) => {
-              const isActive = currentPath === item.href || currentPath.startsWith(`${item.href}/`);
-              const Icon = item.icon;
+          <Link
+            href="/admin/rendez-vous/nouveau"
+            className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-900 transition hover:border-slate-400"
+          >
+            <CalendarPlus2 className="size-4" />
+            <span>Créer</span>
+          </Link>
 
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition",
-                    isActive
-                      ? "border border-slate-950 bg-slate-950 text-white"
-                      : "border border-transparent text-slate-600 hover:bg-slate-50 hover:text-slate-950",
-                  )}
-                >
-                  <Icon className="size-4" />
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
-          </nav>
+          <div className="mt-8 space-y-7">
+            {navigationSections.map((section) => (
+              <div key={section.title}>
+                <p className="mb-2 px-3 text-xs font-medium uppercase tracking-[0.18em] text-slate-400">{section.title}</p>
+                <nav className="space-y-1">
+                  {section.items.map((item) => {
+                    const isActive = currentPath === item.href || currentPath.startsWith(`${item.href}/`);
+                    const Icon = item.icon;
+
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className={cn(
+                          "flex items-center gap-3 rounded-2xl px-3 py-3 text-sm transition",
+                          isActive ? "bg-white text-slate-950 shadow-sm" : "text-slate-600 hover:bg-white hover:text-slate-950",
+                        )}
+                      >
+                        <div
+                          className={cn(
+                            "flex size-9 items-center justify-center rounded-xl border text-slate-500",
+                            isActive ? "border-slate-200 bg-slate-50" : "border-transparent bg-transparent",
+                          )}
+                        >
+                          <Icon className="size-4" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className={cn("font-medium", isActive ? "text-slate-950" : "text-slate-700")}>{item.label}</p>
+                          <p className="text-xs text-slate-400">{item.description}</p>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </nav>
+              </div>
+            ))}
+          </div>
         </aside>
 
-        <main className="space-y-4">{children}</main>
+        <div className="min-w-0 px-4 py-4 sm:px-6 lg:px-8">
+          <header className="rounded-[28px] border border-slate-200 bg-white px-6 py-5 shadow-[0_16px_50px_rgba(15,23,42,0.04)]">
+            <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Espace administrateur</p>
+            <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <h2 className="text-2xl font-semibold tracking-tight text-slate-950">{currentSection.label}</h2>
+                <p className="mt-1 text-sm text-slate-500">{currentSection.description}</p>
+              </div>
+              <div className="text-sm text-slate-400">Interface de gestion des rendez-vous</div>
+            </div>
+          </header>
+
+          <main className="mt-4 space-y-4">{children}</main>
+        </div>
       </div>
     </div>
   );

@@ -12,6 +12,7 @@ interface MailLayoutProps {
   lead: string;
   details?: MailDetail[];
   paragraphs?: string[];
+  highlightedParagraphs?: string[];
   linkLabel?: string;
   linkHref?: string;
   reference: string;
@@ -23,6 +24,7 @@ function MailLayout({
   lead,
   details = [],
   paragraphs = [],
+  highlightedParagraphs = [],
   linkLabel,
   linkHref,
   reference,
@@ -73,6 +75,12 @@ function MailLayout({
           </p>
         ))}
 
+        {highlightedParagraphs.map((paragraph) => (
+          <p key={paragraph} style={{ margin: "14px 0 0", color: "#dc2626", fontWeight: 700 }}>
+            {paragraph}
+          </p>
+        ))}
+
         {linkLabel && linkHref ? (
           <p style={{ margin: "18px 0 0", color: "#111111" }}>
             <strong>{linkLabel} :</strong>{" "}
@@ -109,7 +117,7 @@ export function SignupConfirmationEmail({ firstName, email, reference }: SignupC
         { label: "Email", value: email, underline: true },
       ]}
       paragraphs={[
-        "Si une vérification de compte est requise, pensez également à consulter l'email envoyé par le service d'authentification.",
+        "Si une vérification du compte est requise, pensez également à consulter l'email envoyé par le service d'authentification.",
         "Vous pouvez ensuite vous connecter et retrouver vos rendez-vous depuis votre espace compte.",
       ]}
       linkLabel="Connexion"
@@ -140,15 +148,15 @@ export function ProvisionalAppointmentEmail({
     <MailLayout
       title="Confirmation de prise de rendez-vous (provisoire)"
       greeting={`Bonjour ${firstName},`}
-      lead={`Votre demande pour « ${categoryTitle} » a bien été enregistrée à titre provisoire.`}
+      lead={`Votre demande de rendez-vous pour « ${categoryTitle} » a bien été enregistrée à titre provisoire.`}
       details={[
         { label: "Catégorie", value: categoryTitle, underline: true },
         { label: "Date et heure", value: startsAtLabel, underline: true },
         { label: "Type de rendez-vous", value: appointmentModeLabel, underline: true },
         { label: "Statut", value: "En attente de validation", underline: true },
       ]}
+      highlightedParagraphs={["Votre demande reste provisoire tant qu'un administrateur ne l'a pas validée."]}
       paragraphs={[
-        "Votre demande reste provisoire tant qu'un administrateur ne l'a pas validée.",
         ...(appointmentModeLabel === "Téléphonique" && phone
           ? [`Je vous appellerai sur le numéro de téléphone inscrit sur votre fiche client à savoir le : ${phone}.`]
           : []),
@@ -179,9 +187,9 @@ export function ValidatedAppointmentEmail({
 }: ValidatedAppointmentEmailProps) {
   return (
     <MailLayout
-      title="Confirmation de rendez-vous"
+      title="Confirmation de rendez-vous validé"
       greeting={`Bonjour ${firstName},`}
-      lead={`Votre rendez-vous pour « ${categoryTitle} » est validé.`}
+      lead={`Votre rendez-vous pour « ${categoryTitle} » a bien été validé.`}
       details={[
         { label: "Catégorie", value: categoryTitle, underline: true },
         { label: "Date et heure", value: startsAtLabel, underline: true },
@@ -259,7 +267,7 @@ export function RefusedAppointmentEmail({
         { label: "Date et heure", value: startsAtLabel, underline: true },
         { label: "Motif", value: reason, underline: true },
       ]}
-      paragraphs={["Vous pouvez choisir un autre créneau si vous souhaitez refaire une demande."]}
+      paragraphs={["Vous pouvez choisir un autre créneau si vous souhaitez effectuer une nouvelle demande."]}
       linkLabel="Choisir un autre créneau"
       linkHref={getAppUrl()}
       reference={reference}

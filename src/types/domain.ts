@@ -69,6 +69,43 @@ export interface AppointmentRecord {
   createdAt: string;
 }
 
+export interface UserProfileRecord {
+  userId: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  role: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type AccountActivityType =
+  | "connexion"
+  | "deconnexion"
+  | "prise_rendez_vous"
+  | "annulation_rendez_vous"
+  | "mise_a_jour_profil";
+
+export interface AccountActivityLogRecord {
+  id: string;
+  userId: string;
+  actionType: AccountActivityType;
+  actionLabel: string;
+  description?: string;
+  appointmentId?: string;
+  ipAddress?: string;
+  country?: string;
+  region?: string;
+  city?: string;
+  deviceType?: string;
+  operatingSystem?: string;
+  browser?: string;
+  userAgent?: string;
+  metadata: Record<string, unknown>;
+  createdAt: string;
+}
+
 export interface AppointmentRequestPayload {
   categorySlug: string;
   firstName: string;
