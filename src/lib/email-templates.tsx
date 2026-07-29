@@ -3,98 +3,88 @@ import { getAppUrl } from "@/lib/env";
 type MailDetail = {
   label: string;
   value: string;
+  underline?: boolean;
 };
 
 interface MailLayoutProps {
   title: string;
-  intro: string;
+  greeting: string;
+  lead: string;
   details?: MailDetail[];
   paragraphs?: string[];
-  ctaLabel?: string;
-  ctaHref?: string;
+  linkLabel?: string;
+  linkHref?: string;
   reference: string;
 }
 
-function MailLayout({ title, intro, details = [], paragraphs = [], ctaLabel, ctaHref, reference }: MailLayoutProps) {
+function MailLayout({
+  title,
+  greeting,
+  lead,
+  details = [],
+  paragraphs = [],
+  linkLabel,
+  linkHref,
+  reference,
+}: MailLayoutProps) {
   return (
     <div
       style={{
         margin: 0,
-        padding: "32px 16px",
-        backgroundColor: "#f5f5f4",
+        padding: "0",
+        backgroundColor: "#ffffff",
         color: "#111111",
         fontFamily:
           'Gilroy, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+        lineHeight: 1.7,
+        fontSize: "15px",
       }}
     >
       <div
         style={{
-          maxWidth: "640px",
+          maxWidth: "720px",
           margin: "0 auto",
-          backgroundColor: "#ffffff",
-          border: "1px solid #e7e5e4",
-          borderRadius: "24px",
-          padding: "32px",
+          padding: "8px 0",
         }}
       >
-        <p style={{ margin: 0, fontSize: "12px", letterSpacing: "0.18em", textTransform: "uppercase", color: "#78716c" }}>
+        <p style={{ margin: "0 0 18px", fontSize: "13px", color: "#555555" }}>
           Prise de rendez-vous - Mathieu CERENZIA
         </p>
-        <h1 style={{ margin: "16px 0 0", fontSize: "28px", lineHeight: "1.2", color: "#111111" }}>{title}</h1>
-        <p style={{ margin: "16px 0 0", fontSize: "16px", lineHeight: "1.7", color: "#44403c" }}>{intro}</p>
+        <p style={{ margin: 0, fontSize: "18px", lineHeight: "1.5", color: "#111111", fontWeight: 700 }}>{title}</p>
+        <p style={{ margin: "18px 0 0", color: "#111111" }}>{greeting}</p>
+        <p style={{ margin: "10px 0 0", color: "#111111" }}>{lead}</p>
 
         {details.length > 0 ? (
-          <div
-            style={{
-              marginTop: "24px",
-              padding: "20px",
-              borderRadius: "18px",
-              border: "1px solid #e7e5e4",
-              backgroundColor: "#fafaf9",
-            }}
-          >
+          <div style={{ marginTop: "18px" }}>
             {details.map((detail) => (
-              <div key={detail.label} style={{ marginTop: detail === details[0] ? 0 : "14px" }}>
-                <p style={{ margin: 0, fontSize: "12px", letterSpacing: "0.12em", textTransform: "uppercase", color: "#78716c" }}>
-                  {detail.label}
-                </p>
-                <p style={{ margin: "6px 0 0", fontSize: "15px", lineHeight: "1.6", color: "#111111" }}>{detail.value}</p>
-              </div>
+              <p key={detail.label} style={{ margin: detail === details[0] ? "0" : "8px 0 0", color: "#111111" }}>
+                <strong>{detail.label} :</strong>{" "}
+                <span style={detail.underline ? { textDecoration: "underline" } : undefined}>{detail.value}</span>
+              </p>
             ))}
           </div>
         ) : null}
 
         {paragraphs.map((paragraph) => (
-          <p key={paragraph} style={{ margin: "18px 0 0", fontSize: "15px", lineHeight: "1.7", color: "#44403c" }}>
+          <p key={paragraph} style={{ margin: "14px 0 0", color: "#111111" }}>
             {paragraph}
           </p>
         ))}
 
-        {ctaLabel && ctaHref ? (
-          <div style={{ marginTop: "28px" }}>
-            <a
-              href={ctaHref}
-              style={{
-                display: "inline-block",
-                borderRadius: "999px",
-                backgroundColor: "#111111",
-                color: "#ffffff",
-                padding: "12px 20px",
-                fontSize: "14px",
-                fontWeight: 600,
-                textDecoration: "none",
-              }}
-            >
-              {ctaLabel}
+        {linkLabel && linkHref ? (
+          <p style={{ margin: "18px 0 0", color: "#111111" }}>
+            <strong>{linkLabel} :</strong>{" "}
+            <a href={linkHref} style={{ color: "#111111", textDecoration: "underline" }}>
+              {linkHref}
             </a>
-          </div>
+          </p>
         ) : null}
 
-        <div style={{ marginTop: "28px", borderTop: "1px solid #e7e5e4", paddingTop: "18px" }}>
-          <p style={{ margin: 0, fontSize: "12px", lineHeight: "1.7", color: "#78716c" }}>
-            Mail envoye automatiquement merci de ne pas y repondre
+        <div style={{ marginTop: "24px", paddingTop: "16px", borderTop: "1px solid #dddddd" }}>
+          <p style={{ margin: 0, fontSize: "13px", color: "#555555" }}>
+            Mail envoyé automatiquement, merci de ne pas y répondre.
           </p>
-          <p style={{ margin: "8px 0 0", fontSize: "12px", lineHeight: "1.7", color: "#78716c" }}>ref mail : {reference}</p>
+          <p style={{ margin: "6px 0 0", fontSize: "13px", color: "#555555" }}>Réf mail : {reference}</p>
         </div>
       </div>
     </div>
@@ -111,17 +101,17 @@ export function SignupConfirmationEmail({ firstName, email, reference }: SignupC
   return (
     <MailLayout
       title="Confirmation d'inscription"
-      intro={`Bonjour ${firstName}, votre compte a bien ete cree.`}
+      greeting={`Bonjour ${firstName},`}
+      lead="Votre compte a bien été créé."
       details={[
-        { label: "Email", value: email },
-        { label: "Connexion", value: `${getAppUrl()}/connexion` },
+        { label: "Email", value: email, underline: true },
       ]}
       paragraphs={[
-        "Si une verification de compte est requise, pensez egalement a consulter l'email de confirmation de connexion envoye par le service d'authentification.",
+        "Si une vérification de compte est requise, pensez également à consulter l'email envoyé par le service d'authentification.",
         "Vous pouvez ensuite vous connecter et retrouver vos rendez-vous depuis votre espace compte.",
       ]}
-      ctaLabel="Ouvrir la connexion"
-      ctaHref={`${getAppUrl()}/connexion`}
+      linkLabel="Connexion"
+      linkHref={`${getAppUrl()}/connexion`}
       reference={reference}
     />
   );
@@ -142,16 +132,17 @@ export function ProvisionalAppointmentEmail({
 }: ProvisionalAppointmentEmailProps) {
   return (
     <MailLayout
-      title="Confirmation de prise de rendez-vous"
-      intro={`Bonjour ${firstName}, votre demande pour "${categoryTitle}" a bien ete enregistree a titre provisoire.`}
+      title="Confirmation de prise de rendez-vous (provisoire)"
+      greeting={`Bonjour ${firstName},`}
+      lead={`Votre demande pour « ${categoryTitle} » a bien été enregistrée à titre provisoire.`}
       details={[
-        { label: "Categorie", value: categoryTitle },
-        { label: "Date et heure", value: startsAtLabel },
-        { label: "Statut", value: "En attente de validation" },
+        { label: "Catégorie", value: categoryTitle, underline: true },
+        { label: "Date et heure", value: startsAtLabel, underline: true },
+        { label: "Statut", value: "En attente de validation", underline: true },
       ]}
-      paragraphs={["Votre demande reste provisoire tant qu'un administrateur ne l'a pas validee."]}
-      ctaLabel="Voir le site"
-      ctaHref={getAppUrl()}
+      paragraphs={["Votre demande reste provisoire tant qu'un administrateur ne l'a pas validée."]}
+      linkLabel="Site"
+      linkHref={getAppUrl()}
       reference={reference}
     />
   );
@@ -173,15 +164,16 @@ export function ValidatedAppointmentEmail({
   return (
     <MailLayout
       title="Confirmation de rendez-vous"
-      intro={`Bonjour ${firstName}, votre rendez-vous pour "${categoryTitle}" est valide.`}
+      greeting={`Bonjour ${firstName},`}
+      lead={`Votre rendez-vous pour « ${categoryTitle} » est validé.`}
       details={[
-        { label: "Categorie", value: categoryTitle },
-        { label: "Date et heure", value: startsAtLabel },
-        { label: "Statut", value: "Valide" },
+        { label: "Catégorie", value: categoryTitle, underline: true },
+        { label: "Date et heure", value: startsAtLabel, underline: true },
+        { label: "Statut", value: "Validé", underline: true },
       ]}
       paragraphs={["Conservez cet email. Vous pouvez retrouver l'historique de vos rendez-vous depuis votre espace compte."]}
-      ctaLabel="Acceder a mon compte"
-      ctaHref={`${getAppUrl()}/compte`}
+      linkLabel="Mon compte"
+      linkHref={`${getAppUrl()}/compte`}
       reference={reference}
     />
   );
@@ -204,16 +196,17 @@ export function AppointmentCancellationEmail({
 }: AppointmentCancellationEmailProps) {
   return (
     <MailLayout
-      title="Confirmation annulation rendez-vous"
-      intro={`Bonjour ${firstName}, l'annulation de votre rendez-vous pour "${categoryTitle}" a bien ete prise en compte.`}
+      title="Confirmation d'annulation de rendez-vous"
+      greeting={`Bonjour ${firstName},`}
+      lead={`L'annulation de votre rendez-vous pour « ${categoryTitle} » a bien été prise en compte.`}
       details={[
-        { label: "Categorie", value: categoryTitle },
-        { label: "Date et heure", value: startsAtLabel },
-        { label: "Motif", value: reason },
+        { label: "Catégorie", value: categoryTitle, underline: true },
+        { label: "Date et heure", value: startsAtLabel, underline: true },
+        { label: "Motif", value: reason, underline: true },
       ]}
-      paragraphs={["Si besoin, vous pouvez reserver un nouveau creneau directement depuis le site."]}
-      ctaLabel="Prendre un nouveau rendez-vous"
-      ctaHref={getAppUrl()}
+      paragraphs={["Si besoin, vous pouvez réserver un nouveau créneau directement depuis le site."]}
+      linkLabel="Prendre un nouveau rendez-vous"
+      linkHref={getAppUrl()}
       reference={reference}
     />
   );
@@ -236,16 +229,17 @@ export function RefusedAppointmentEmail({
 }: RefusedAppointmentEmailProps) {
   return (
     <MailLayout
-      title="Demande de rendez-vous refusee"
-      intro={`Bonjour ${firstName}, votre demande pour "${categoryTitle}" n'a pas pu etre validee.`}
+      title="Demande de rendez-vous refusée"
+      greeting={`Bonjour ${firstName},`}
+      lead={`Votre demande pour « ${categoryTitle} » n'a pas pu être validée.`}
       details={[
-        { label: "Categorie", value: categoryTitle },
-        { label: "Date et heure", value: startsAtLabel },
-        { label: "Motif", value: reason },
+        { label: "Catégorie", value: categoryTitle, underline: true },
+        { label: "Date et heure", value: startsAtLabel, underline: true },
+        { label: "Motif", value: reason, underline: true },
       ]}
-      paragraphs={["Vous pouvez choisir un autre creneau si vous souhaitez refaire une demande."]}
-      ctaLabel="Choisir un autre creneau"
-      ctaHref={getAppUrl()}
+      paragraphs={["Vous pouvez choisir un autre créneau si vous souhaitez refaire une demande."]}
+      linkLabel="Choisir un autre créneau"
+      linkHref={getAppUrl()}
       reference={reference}
     />
   );
