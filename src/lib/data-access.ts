@@ -937,6 +937,11 @@ export async function saveSiteSettings(input: {
   maintenanceMessage: string;
   maintenanceAllowedIps: string[];
   enableWhatsappWidget: boolean;
+  globalBlackoutPeriods: Array<{
+    startDate: string;
+    endDate: string;
+    message?: string;
+  }>;
 }) {
   const supabase = getSupabaseAdminClient();
 
@@ -971,6 +976,26 @@ export async function saveSiteSettings(input: {
 
     if (error) {
       throw new Error(error.message);
+    }
+  }
+
+  const { error: clearBlackoutsError } = await supabase.from("global_blackout_periods").delete().gte("start_date", "0001-01-01");
+
+  if (clearBlackoutsError) {
+    throw new Error(clearBlackoutsError.message);
+  }
+
+  if (input.globalBlackoutPeriods.length > 0) {
+    const { error: insertBlackoutsError } = await supabase.from("global_blackout_periods").insert(
+      input.globalBlackoutPeriods.map((period) => ({
+        start_date: period.startDate,
+        end_date: period.endDate,
+        message: period.message?.trim() ? period.message.trim() : null,
+      })),
+    );
+
+    if (insertBlackoutsError) {
+      throw new Error(insertBlackoutsError.message);
     }
   }
 

@@ -141,6 +141,11 @@ export function getBookingState(category: AppointmentCategory, siteSettings: Sit
     };
   }
 
+  const upcomingGlobalBlackout = siteSettings.globalBlackoutPeriods.find((period) => {
+    const end = parseISO(period.endDate);
+    return end >= startOfDay(new Date());
+  });
+
   const upcomingBlackout = category.blackoutPeriods.find((period) => {
     const start = parseISO(period.startDate);
     return start >= startOfDay(new Date());
@@ -149,6 +154,10 @@ export function getBookingState(category: AppointmentCategory, siteSettings: Sit
   return {
     available: true,
     title: "Réservation disponible",
-    message: upcomingBlackout?.message ?? category.customMessage ?? "Choisissez le créneau qui vous convient.",
+    message:
+      upcomingGlobalBlackout?.message ??
+      upcomingBlackout?.message ??
+      category.customMessage ??
+      "Choisissez le créneau qui vous convient.",
   };
 }

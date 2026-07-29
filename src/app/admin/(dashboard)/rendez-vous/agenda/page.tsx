@@ -1,4 +1,4 @@
-import { AppointmentsTable } from "@/components/admin/appointments-table";
+import { AdminAgendaCalendar } from "@/components/admin/admin-agenda-calendar";
 import { getAgendaAppointmentsView } from "@/lib/data-access";
 
 export default async function AgendaAppointmentsPage() {
@@ -15,7 +15,7 @@ export default async function AgendaAppointmentsPage() {
       </div>
 
       <div className="mt-6">
-        <AppointmentsTable appointments={appointments} />
+        <AdminAgendaCalendar appointments={appointments} />
       </div>
     </section>
   );

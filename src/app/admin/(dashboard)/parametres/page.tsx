@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 
+import { GlobalBlackoutPeriodsEditor } from "@/components/admin/global-blackout-periods-editor";
 import { getSiteSettings } from "@/lib/data-access";
 import { extractClientIpFromHeaders } from "@/lib/maintenance";
 
@@ -90,25 +91,7 @@ export default async function SettingsPage({
           </div>
         </div>
 
-        <div className="rounded-[22px] border border-slate-200 p-5">
-          <p className="text-sm font-semibold text-slate-900">Périodes d&apos;indisponibilité globales</p>
-          <ul className="mt-4 space-y-3 text-sm leading-7 text-slate-600">
-            {settings.globalBlackoutPeriods.length === 0 ? (
-              <li className="rounded-2xl border border-dashed border-slate-300 px-4 py-3 text-slate-500">
-                Aucune indisponibilité globale configurée.
-              </li>
-            ) : (
-              settings.globalBlackoutPeriods.map((period) => (
-                <li key={period.id} className="rounded-2xl border border-slate-200 px-4 py-3">
-                  <p className="font-medium text-slate-900">
-                    {period.startDate} → {period.endDate}
-                  </p>
-                  <p className="mt-2">{period.message}</p>
-                </li>
-              ))
-            )}
-          </ul>
-        </div>
+        <GlobalBlackoutPeriodsEditor periods={settings.globalBlackoutPeriods} />
 
         <div className="xl:col-span-2">
           <button

@@ -21,6 +21,19 @@ import { sendAdminCreatedSignupEmail, sendValidatedAppointmentEmail } from "@/li
 import { adminAppointmentSchema, categoryAdminSchema, settingsSchema } from "@/lib/validators";
 import { formatDateTimeFr } from "@/lib/utils";
 
+function parseGlobalBlackoutPeriods(formData: FormData) {
+  const startDates = formData.getAll("blackoutStartDate").map((value) => String(value).trim());
+  const endDates = formData.getAll("blackoutEndDate").map((value) => String(value).trim());
+  const messages = formData.getAll("blackoutMessage").map((value) => String(value).trim());
+  const rowCount = Math.max(startDates.length, endDates.length, messages.length);
+
+  return Array.from({ length: rowCount }, (_, index) => ({
+    startDate: startDates[index] ?? "",
+    endDate: endDates[index] ?? "",
+    message: messages[index] ?? "",
+  })).filter((period) => period.startDate || period.endDate || period.message);
+}
+
 export async function saveCategoryAction(formData: FormData) {
   const session = await getAdminSession();
 
@@ -92,6 +105,7 @@ export async function saveSettingsAction(formData: FormData) {
     maintenanceMessage: formData.get("maintenanceMessage"),
     maintenanceAllowedIps: formData.get("maintenanceAllowedIps"),
     enableWhatsappWidget: formData.get("enableWhatsappWidget") === "on",
+    globalBlackoutPeriods: parseGlobalBlackoutPeriods(formData),
   });
 
   if (!parsed.success) {

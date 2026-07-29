@@ -28,6 +28,12 @@ export async function PublicFooter() {
           <div
             className="elfsight-app-662a0ae1-203a-46c9-b266-de8e2f78d432"
             data-elfsight-app-lazy
+            style={{
+              position: "fixed",
+              left: "16px",
+              bottom: "16px",
+              zIndex: 60,
+            }}
           />
         </>
       ) : null}
