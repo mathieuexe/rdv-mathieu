@@ -960,8 +960,14 @@ export async function saveCategory(input: {
   customMessage?: string;
   thumbnailImageUrl?: string;
   bannerImageUrl?: string;
-  startTime: string;
-  endTime: string;
+  availabilityRules: Array<{
+    weekday: "lundi" | "mardi" | "mercredi" | "jeudi" | "vendredi" | "samedi" | "dimanche";
+    enabled: boolean;
+    startTime: string;
+    endTime: string;
+    breakStart?: string;
+    breakEnd?: string;
+  }>;
 }) {
   const supabase = getSupabaseAdminClient();
 
@@ -969,8 +975,8 @@ export async function saveCategory(input: {
     throw new Error("L'enregistrement des catégories est indisponible tant que Supabase n'est pas configuré.");
   }
 
-  if (input.startTime >= input.endTime) {
-    throw new Error("L'heure de début doit être inférieure à l'heure de fin.");
+  if (!input.availabilityRules.some((rule) => rule.enabled)) {
+    throw new Error("Sélectionnez au moins un jour de disponibilité.");
   }
 
   const categoryPayload = {
@@ -1007,22 +1013,77 @@ export async function saveCategory(input: {
     throw new Error("La catégorie n'a pas pu être enregistrée.");
   }
 
-  const weekdayValues = [1, 2, 3, 4, 5];
-
   const { error: deleteRulesError } = await supabase.from("category_availability_rules").delete().eq("category_id", categoryRow.id);
 
   if (deleteRulesError) {
     throw new Error(deleteRulesError.message);
   }
 
-  const { error: insertRulesError } = await supabase.from("category_availability_rules").insert(
-    weekdayValues.map((weekday) => ({
-      category_id: categoryRow.id,
-      weekday,
-      start_time: `${input.startTime}:00`,
-      end_time: `${input.endTime}:00`,
-    })),
-  );
+  const weekdayMap = {
+    dimanche: 0,
+    lundi: 1,
+    mardi: 2,
+    mercredi: 3,
+    jeudi: 4,
+    vendredi: 5,
+    samedi: 6,
+  } as const;
+
+  const availabilityRows = input.availabilityRules.flatMap((rule) => {
+    if (!rule.enabled) {
+      return [];
+    }
+
+    if (rule.startTime >= rule.endTime) {
+      throw new Error(`Le jour ${rule.weekday} contient une plage horaire invalide.`);
+    }
+
+    const hasBreakStart = Boolean(rule.breakStart);
+    const hasBreakEnd = Boolean(rule.breakEnd);
+
+    if (hasBreakStart !== hasBreakEnd) {
+      throw new Error(`Le jour ${rule.weekday} doit contenir les deux heures de pause repas ou aucune.`);
+    }
+
+    if (!hasBreakStart || !hasBreakEnd) {
+      return [
+        {
+          category_id: categoryRow.id,
+          weekday: weekdayMap[rule.weekday],
+          start_time: `${rule.startTime}:00`,
+          end_time: `${rule.endTime}:00`,
+        },
+      ];
+    }
+
+    if (rule.breakStart! >= rule.breakEnd!) {
+      throw new Error(`Le jour ${rule.weekday} contient une pause repas invalide.`);
+    }
+
+    if (rule.breakStart! <= rule.startTime || rule.breakEnd! >= rule.endTime) {
+      throw new Error(`La pause repas du jour ${rule.weekday} doit être comprise entre le début et la fin.`);
+    }
+
+    return [
+      {
+        category_id: categoryRow.id,
+        weekday: weekdayMap[rule.weekday],
+        start_time: `${rule.startTime}:00`,
+        end_time: `${rule.breakStart}:00`,
+      },
+      {
+        category_id: categoryRow.id,
+        weekday: weekdayMap[rule.weekday],
+        start_time: `${rule.breakEnd}:00`,
+        end_time: `${rule.endTime}:00`,
+      },
+    ];
+  });
+
+  const { error: insertRulesError } =
+    availabilityRows.length > 0
+      ? await supabase.from("category_availability_rules").insert(availabilityRows)
+      : { error: null };
 
   if (insertRulesError) {
     throw new Error(insertRulesError.message);

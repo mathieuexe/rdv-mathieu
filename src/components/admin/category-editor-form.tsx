@@ -4,6 +4,16 @@ import { useRef, useState } from "react";
 
 import type { AppointmentCategory } from "@/types/domain";
 
+const weekdayOptions = [
+  { key: "lundi", label: "Lundi" },
+  { key: "mardi", label: "Mardi" },
+  { key: "mercredi", label: "Mercredi" },
+  { key: "jeudi", label: "Jeudi" },
+  { key: "vendredi", label: "Vendredi" },
+  { key: "samedi", label: "Samedi" },
+  { key: "dimanche", label: "Dimanche" },
+] as const;
+
 const thumbnailConfig = {
   width: 320,
   height: 320,
@@ -69,8 +79,23 @@ interface CategoryEditorFormProps {
   error?: string;
 }
 
+function getDayDefaults(category: AppointmentCategory | null | undefined, weekday: (typeof weekdayOptions)[number]["key"]) {
+  const rule = category?.availabilityRules.find((item) => item.weekday === weekday);
+  const windows = rule?.windows ?? [];
+  const sortedWindows = [...windows].sort((a, b) => a.start.localeCompare(b.start));
+  const firstWindow = sortedWindows[0];
+  const secondWindow = sortedWindows[1];
+
+  return {
+    enabled: sortedWindows.length > 0,
+    startTime: firstWindow?.start ?? "09:00",
+    endTime: sortedWindows[sortedWindows.length - 1]?.end ?? "18:00",
+    breakStart: sortedWindows.length >= 2 ? firstWindow?.end ?? "" : "",
+    breakEnd: sortedWindows.length >= 2 ? secondWindow?.start ?? "" : "",
+  };
+}
+
 export function CategoryEditorForm({ action, category, title, returnPath, saved, error }: CategoryEditorFormProps) {
-  const defaultWindow = category?.availabilityRules[0]?.windows[0];
   const [thumbnailPreview, setThumbnailPreview] = useState(category?.thumbnailImageUrl ?? "");
   const [bannerPreview, setBannerPreview] = useState(category?.bannerImageUrl ?? "");
   const [imageError, setImageError] = useState("");
@@ -128,7 +153,7 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
         <p className="text-sm uppercase tracking-[0.2em] text-slate-400">Éditeur</p>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">{title}</h1>
         <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
-          Renseignez le titre, la description, la durée, les heures de disponibilité et le type de rendez-vous.
+          Renseignez le titre, la description, la durée, le planning hebdomadaire et le type de rendez-vous.
         </p>
       </div>
 
@@ -215,32 +240,82 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
             </label>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <label className="block space-y-2 text-sm font-medium text-slate-700">
-              <span>Heure de debut</span>
-              <input
-                name="startTime"
-                type="time"
-                lang="fr-FR"
-                step={900}
-                defaultValue={defaultWindow?.start ?? "09:00"}
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition duration-150 focus:border-slate-950 focus:bg-white"
-              />
-              <p className="text-xs text-slate-500">Format français 24h : HH:MM</p>
-            </label>
+          <div className="rounded-[24px] border border-slate-200 bg-slate-50/60 p-5">
+            <p className="text-sm font-semibold text-slate-900">Planning hebdomadaire</p>
+            <p className="mt-2 text-sm leading-7 text-slate-600">
+              Sélectionnez les jours ouverts, les heures de disponibilité et, si besoin, une pause repas qui deviendra
+              une période indisponible pour le client.
+            </p>
 
-            <label className="block space-y-2 text-sm font-medium text-slate-700">
-              <span>Heure de fin</span>
-              <input
-                name="endTime"
-                type="time"
-                lang="fr-FR"
-                step={900}
-                defaultValue={defaultWindow?.end ?? "18:00"}
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition duration-150 focus:border-slate-950 focus:bg-white"
-              />
-              <p className="text-xs text-slate-500">Format français 24h : HH:MM</p>
-            </label>
+            <div className="mt-5 space-y-4">
+              {weekdayOptions.map((day) => {
+                const defaults = getDayDefaults(category, day.key);
+
+                return (
+                  <div key={day.key} className="rounded-2xl border border-slate-200 bg-white p-4">
+                    <div className="grid gap-4 xl:grid-cols-[190px_repeat(4,minmax(0,1fr))] xl:items-end">
+                      <label className="flex items-center gap-3 text-sm font-medium text-slate-800">
+                        <input type="checkbox" name={`availabilityEnabled_${day.key}`} defaultChecked={defaults.enabled} />
+                        <span>{day.label}</span>
+                      </label>
+
+                      <label className="space-y-2 text-sm font-medium text-slate-700">
+                        <span>Début</span>
+                        <input
+                          name={`availabilityStart_${day.key}`}
+                          type="time"
+                          lang="fr-FR"
+                          step={900}
+                          defaultValue={defaults.startTime}
+                          className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition duration-150 focus:border-slate-950 focus:bg-white"
+                        />
+                      </label>
+
+                      <label className="space-y-2 text-sm font-medium text-slate-700">
+                        <span>Fin</span>
+                        <input
+                          name={`availabilityEnd_${day.key}`}
+                          type="time"
+                          lang="fr-FR"
+                          step={900}
+                          defaultValue={defaults.endTime}
+                          className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition duration-150 focus:border-slate-950 focus:bg-white"
+                        />
+                      </label>
+
+                      <label className="space-y-2 text-sm font-medium text-slate-700">
+                        <span>Pause repas début</span>
+                        <input
+                          name={`breakStart_${day.key}`}
+                          type="time"
+                          lang="fr-FR"
+                          step={900}
+                          defaultValue={defaults.breakStart}
+                          className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition duration-150 focus:border-slate-950 focus:bg-white"
+                        />
+                      </label>
+
+                      <label className="space-y-2 text-sm font-medium text-slate-700">
+                        <span>Pause repas fin</span>
+                        <input
+                          name={`breakEnd_${day.key}`}
+                          type="time"
+                          lang="fr-FR"
+                          step={900}
+                          defaultValue={defaults.breakEnd}
+                          className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition duration-150 focus:border-slate-950 focus:bg-white"
+                        />
+                      </label>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <p className="mt-4 text-xs text-slate-500">
+              Format français 24h : HH:MM. Si une pause repas est renseignée, elle doit rester comprise entre l&apos;heure
+              de début et l&apos;heure de fin.
+            </p>
           </div>
 
           <div className="rounded-[24px] border border-slate-200 bg-slate-50/60 p-5">
@@ -348,7 +423,7 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
           <div className="rounded-[24px] border border-slate-200 bg-slate-50/60 p-5 text-sm leading-7 text-slate-600">
             <p className="font-semibold text-slate-900">Disponibilités de la catégorie</p>
             <p className="mt-3">
-              Les heures enregistrées sont appliquées du lundi au vendredi. Vous pourrez les affiner ensuite si besoin.
+              Chaque jour peut être activé séparément, avec une plage horaire dédiée et une pause repas facultative.
             </p>
           </div>
         </div>

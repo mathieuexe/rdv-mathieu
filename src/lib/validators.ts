@@ -48,13 +48,65 @@ export const categoryAdminSchema = z
     customMessage: z.string().trim().max(500).optional().or(z.literal("")),
     thumbnailImageDataUrl: z.string().trim().max(5_000_000).optional().or(z.literal("")),
     bannerImageDataUrl: z.string().trim().max(8_000_000).optional().or(z.literal("")),
-    startTime: z.string().trim().regex(/^\d{2}:\d{2}$/, "L'heure de debut est requise."),
-    endTime: z.string().trim().regex(/^\d{2}:\d{2}$/, "L'heure de fin est requise."),
+    availabilityRules: z
+      .array(
+        z
+          .object({
+            weekday: z.enum(["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]),
+            enabled: z.boolean(),
+            startTime: z.string().trim().regex(/^\d{2}:\d{2}$/, "L'heure de début est requise."),
+            endTime: z.string().trim().regex(/^\d{2}:\d{2}$/, "L'heure de fin est requise."),
+            breakStart: z.string().trim().regex(/^\d{2}:\d{2}$/, "L'heure de début de la pause est invalide.").optional().or(z.literal("")),
+            breakEnd: z.string().trim().regex(/^\d{2}:\d{2}$/, "L'heure de fin de la pause est invalide.").optional().or(z.literal("")),
+          })
+          .superRefine((rule, ctx) => {
+            if (!rule.enabled) {
+              return;
+            }
+
+            if (rule.startTime >= rule.endTime) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ["endTime"],
+                message: "L'heure de fin doit être postérieure à l'heure de début.",
+              });
+            }
+
+            const hasBreakStart = Boolean(rule.breakStart);
+            const hasBreakEnd = Boolean(rule.breakEnd);
+
+            if (hasBreakStart !== hasBreakEnd) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ["breakEnd"],
+                message: "Renseignez les deux heures de pause repas ou laissez les deux champs vides.",
+              });
+            }
+
+            if (hasBreakStart && hasBreakEnd) {
+              if (rule.breakStart! >= rule.breakEnd!) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  path: ["breakEnd"],
+                  message: "La fin de la pause repas doit être postérieure à son début.",
+                });
+              }
+
+              if (rule.breakStart! <= rule.startTime || rule.breakEnd! >= rule.endTime) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  path: ["breakStart"],
+                  message: "La pause repas doit être comprise strictement entre l'heure de début et l'heure de fin.",
+                });
+              }
+            }
+          }),
+      )
+      .refine((rules) => rules.some((rule) => rule.enabled), {
+        message: "Sélectionnez au moins un jour de disponibilité.",
+      }),
   })
-  .refine((data) => data.startTime < data.endTime, {
-    path: ["endTime"],
-    message: "L'heure de fin doit etre posterieure a l'heure de debut.",
-  });
+  ;
 
 export const settingsSchema = z
   .object({

@@ -53,6 +53,27 @@ export interface AdminUserActionState {
   message?: string;
 }
 
+const categoryWeekdays = [
+  "lundi",
+  "mardi",
+  "mercredi",
+  "jeudi",
+  "vendredi",
+  "samedi",
+  "dimanche",
+] as const;
+
+function parseCategoryAvailabilityRules(formData: FormData) {
+  return categoryWeekdays.map((weekday) => ({
+    weekday,
+    enabled: formData.get(`availabilityEnabled_${weekday}`) === "on",
+    startTime: String(formData.get(`availabilityStart_${weekday}`) ?? "").trim(),
+    endTime: String(formData.get(`availabilityEnd_${weekday}`) ?? "").trim(),
+    breakStart: String(formData.get(`breakStart_${weekday}`) ?? "").trim(),
+    breakEnd: String(formData.get(`breakEnd_${weekday}`) ?? "").trim(),
+  }));
+}
+
 export async function saveCategoryAction(formData: FormData) {
   const session = await getAdminSession();
 
@@ -72,8 +93,7 @@ export async function saveCategoryAction(formData: FormData) {
     customMessage: formData.get("customMessage"),
     thumbnailImageDataUrl: formData.get("thumbnailImageDataUrl"),
     bannerImageDataUrl: formData.get("bannerImageDataUrl"),
-    startTime: formData.get("startTime"),
-    endTime: formData.get("endTime"),
+    availabilityRules: parseCategoryAvailabilityRules(formData),
   });
 
   if (!parsed.success) {
@@ -95,8 +115,7 @@ export async function saveCategoryAction(formData: FormData) {
       customMessage: parsed.data.customMessage || undefined,
       thumbnailImageUrl: parsed.data.thumbnailImageDataUrl || undefined,
       bannerImageUrl: parsed.data.bannerImageDataUrl || undefined,
-      startTime: parsed.data.startTime,
-      endTime: parsed.data.endTime,
+      availabilityRules: parsed.data.availabilityRules,
     });
 
     revalidatePath("/admin");
