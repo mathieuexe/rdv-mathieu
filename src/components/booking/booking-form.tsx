@@ -2,7 +2,16 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CalendarDays, CheckCircle2, Clock3, LoaderCircle, MapPinned } from "lucide-react";
+import {
+  CalendarDays,
+  CheckSquare,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  Globe,
+  LoaderCircle,
+  Video,
+} from "lucide-react";
 
 import { groupSlotsByDay } from "@/lib/booking";
 import { cn, formatAppointmentMode, formatDateTimeFr } from "@/lib/utils";
@@ -221,61 +230,63 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, init
   }
 
   return (
-    <div className="mx-auto max-w-[1100px] space-y-6">
-      <section className="overflow-hidden rounded-[28px] border border-neutral-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.06)]">
-        <div className="grid lg:grid-cols-[250px_minmax(0,1fr)_220px]">
-          <aside className="border-b border-neutral-200 bg-[#fafaf9] p-6 lg:border-b-0 lg:border-r">
-            <a href="/" className="text-sm text-neutral-500 underline underline-offset-4">
+    <div className="mx-auto max-w-[1120px] space-y-6">
+      <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg">
+        <div className="grid lg:grid-cols-[280px_minmax(0,1fr)_240px]">
+          <aside className="border-b border-gray-200 bg-white p-6 lg:border-r lg:border-b-0 lg:p-8">
+            <a href="/" className="text-sm text-gray-500 underline underline-offset-4">
               Retour à l'accueil
             </a>
-            <div className="mt-6 flex size-14 items-center justify-center rounded-full bg-neutral-900 text-sm font-semibold text-white">
+            <div className="mt-6 flex size-16 items-center justify-center rounded-full bg-gray-100 text-sm font-semibold text-gray-900">
               {initials || "RDV"}
             </div>
-            <p className="mt-4 text-sm text-neutral-500">{category.title}</p>
-            <h1 className="mt-2 text-3xl font-semibold text-neutral-950">{category.title}</h1>
+            <p className="mt-4 text-lg font-bold text-gray-950">{category.title}</p>
+            <p className="mt-2 text-sm leading-6 text-gray-500">{category.description}</p>
 
-            <div className="mt-4 flex items-center gap-2 text-sm text-neutral-600">
-              <Clock3 className="size-4" />
-              <span>{category.durationMinutes} min</span>
+            <div className="mt-6 space-y-3 text-sm text-gray-500">
+              <div className="flex items-start gap-3">
+                <CheckSquare className="mt-0.5 size-4 shrink-0 text-gray-500" />
+                <span>{helperMessage}</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <Clock className="size-4 shrink-0 text-gray-500" />
+                <span>{category.durationMinutes} min</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <Video className="size-4 shrink-0 text-gray-500" />
+                <span>{formatAppointmentMode(category.appointmentMode)}</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <Globe className="size-4 shrink-0 text-gray-500" />
+                <span>Europe, Paris (24h)</span>
+              </div>
             </div>
 
-            <div className="mt-2 flex items-center gap-2 text-sm text-neutral-600">
-              <MapPinned className="size-4" />
-              <span>{formatAppointmentMode(category.appointmentMode)}</span>
-            </div>
-
-            <p className="mt-5 text-sm leading-7 text-neutral-600">{category.description}</p>
-
-            <div className="mt-6 rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-600">
-              <p className="font-medium text-neutral-900">Lien direct</p>
+            <div className="mt-6 rounded-2xl border border-gray-200 bg-gray-50 px-4 py-4 text-sm text-gray-500">
+              <p className="font-medium text-gray-900">Lien direct</p>
               <p className="mt-1 break-all">/rdv/{categorySlug}</p>
-            </div>
-
-            <div className="mt-4 rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-600">
-              <p className="font-medium text-neutral-900">Information</p>
-              <p className="mt-1">{helperMessage}</p>
             </div>
           </aside>
 
           <section
             className={cn(
-              "border-b border-neutral-200 p-6 lg:border-b-0",
+              "border-b border-gray-200 p-6 lg:border-b-0 lg:p-8",
               currentStep === 1 ? "lg:border-r" : "lg:col-span-2",
             )}
           >
             {currentStep === 1 ? (
               <>
                 <div className="flex items-center gap-3">
-                  <CalendarDays className="size-5 text-neutral-700" />
+                  <CalendarDays className="size-5 text-gray-500" />
                   <div>
-                    <p className="text-lg font-semibold text-neutral-950">Sélectionnez la date et l'heure</p>
-                    <p className="text-sm text-neutral-500">Choisissez d'abord un jour, puis un créneau disponible.</p>
+                    <p className="text-lg font-semibold text-gray-950">Sélectionnez la date et l'heure</p>
+                    <p className="text-sm text-gray-500">Choisissez d'abord un jour, puis un créneau disponible.</p>
                   </div>
                 </div>
 
                 <div className="mt-6">
                   <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium uppercase tracking-[0.14em] text-neutral-500">
+                    <p className="text-sm font-semibold capitalize text-gray-900">
                       {formatMonthLabel(monthKeys[visibleMonthIndex] ?? visibleMonthKey)}
                     </p>
                     <div className="flex items-center gap-2">
@@ -283,9 +294,9 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, init
                         type="button"
                         onClick={() => setVisibleMonthKey(monthKeys[Math.max(0, visibleMonthIndex - 1)] ?? visibleMonthKey)}
                         disabled={visibleMonthIndex === 0}
-                        className="flex size-8 items-center justify-center rounded-full border border-neutral-200 text-neutral-600 disabled:cursor-not-allowed disabled:opacity-40"
+                        className="flex size-9 items-center justify-center rounded-full border border-gray-200 text-gray-500 transition-all duration-150 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
                       >
-                        ‹
+                        <ChevronLeft className="size-4" />
                       </button>
                       <button
                         type="button"
@@ -293,20 +304,20 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, init
                           setVisibleMonthKey(monthKeys[Math.min(monthKeys.length - 1, visibleMonthIndex + 1)] ?? visibleMonthKey)
                         }
                         disabled={visibleMonthIndex >= monthKeys.length - 1}
-                        className="flex size-8 items-center justify-center rounded-full border border-neutral-200 text-neutral-600 disabled:cursor-not-allowed disabled:opacity-40"
+                        className="flex size-9 items-center justify-center rounded-full border border-gray-200 text-gray-500 transition-all duration-150 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
                       >
-                        ›
+                        <ChevronRight className="size-4" />
                       </button>
                     </div>
                   </div>
 
-                  <div className="mt-6 grid grid-cols-7 gap-y-4 text-center text-xs uppercase tracking-[0.12em] text-neutral-400">
+                  <div className="mt-6 grid grid-cols-7 gap-2 text-center text-xs uppercase tracking-wide text-gray-400">
                     {weekdayHeaders.map((label) => (
                       <div key={label}>{label}</div>
                     ))}
                   </div>
 
-                  <div className="mt-4 grid grid-cols-7 gap-y-3 text-center">
+                  <div className="mt-4 grid grid-cols-7 gap-2 text-center">
                     {calendarCells.map((cell) => {
                       if (cell.dayNumber === null) {
                         return <div key={cell.key} className="h-10" />;
@@ -323,10 +334,10 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, init
                             disabled={isDisabled}
                             onClick={() => setSelectedDateKey(cell.key)}
                             className={cn(
-                              "flex size-10 items-center justify-center rounded-full text-sm transition",
-                              isDisabled && "cursor-not-allowed text-neutral-300",
-                              !isDisabled && !isSelected && "text-neutral-700 hover:bg-neutral-100",
-                              isSelected && "bg-sky-500 text-white",
+                              "flex size-10 items-center justify-center rounded-lg text-sm transition-all duration-150",
+                              isDisabled && "cursor-not-allowed text-gray-300",
+                              !isDisabled && !isSelected && "bg-gray-100 text-gray-700 hover:bg-gray-200",
+                              isSelected && "bg-black text-white shadow-sm",
                             )}
                           >
                             {cell.dayNumber}
@@ -336,14 +347,16 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, init
                     })}
                   </div>
 
-                  <div className="mt-8 text-sm text-neutral-500">Heure d'Europe, Paris (24h)</div>
+                  <div className="mt-8 inline-flex rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-500">
+                    Heure d&apos;Europe, Paris (24h)
+                  </div>
                 </div>
               </>
             ) : currentStep === 2 ? (
-              <div className="mx-auto max-w-2xl space-y-4">
+              <div className="mx-auto max-w-2xl space-y-5">
                 <div className="space-y-1">
-                  <p className="text-lg font-semibold text-neutral-950">Vos informations</p>
-                  <p className="text-sm text-neutral-500">
+                  <p className="text-lg font-semibold text-gray-950">Vos informations</p>
+                  <p className="text-sm text-gray-500">
                     {selectedSlot
                       ? `Créneau choisi : ${formatDateTimeFr(selectedSlot, { dateStyle: "full", timeStyle: "short" })}`
                       : "Complétez vos informations pour continuer."}
@@ -351,58 +364,58 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, init
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <label className="space-y-2 text-sm font-medium text-neutral-700">
+                  <label className="space-y-2 text-sm font-medium text-gray-700">
                     <span>Prénom</span>
                     <input
                       value={firstName}
                       onChange={(event) => setFirstName(event.target.value)}
-                      className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 outline-none transition focus:border-neutral-900 focus:bg-white"
+                      className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 outline-none transition-all duration-150 focus:border-black"
                     />
                   </label>
 
-                  <label className="space-y-2 text-sm font-medium text-neutral-700">
+                  <label className="space-y-2 text-sm font-medium text-gray-700">
                     <span>Nom</span>
                     <input
                       value={lastName}
                       onChange={(event) => setLastName(event.target.value)}
-                      className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 outline-none transition focus:border-neutral-900 focus:bg-white"
+                      className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 outline-none transition-all duration-150 focus:border-black"
                     />
                   </label>
                 </div>
 
-                <label className="space-y-2 text-sm font-medium text-neutral-700">
+                <label className="space-y-2 text-sm font-medium text-gray-700">
                   <span>Email</span>
                   <input
                     type="email"
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
-                    className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 outline-none transition focus:border-neutral-900 focus:bg-white"
+                    className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 outline-none transition-all duration-150 focus:border-black"
                   />
                 </label>
 
                 {initialUser?.email ? (
-                  <p className="text-xs text-neutral-500">
+                  <p className="text-xs text-gray-500">
                     Les champs préremplis peuvent être corrigés avant la confirmation du rendez-vous.
                   </p>
                 ) : null}
 
-                <label className="space-y-2 text-sm font-medium text-neutral-700">
+                <label className="space-y-2 text-sm font-medium text-gray-700">
                   <span>Téléphone</span>
                   <input
                     type="tel"
                     value={phone}
                     onChange={(event) => setPhone(event.target.value)}
-                    className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 outline-none transition focus:border-neutral-900 focus:bg-white"
+                    className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 outline-none transition-all duration-150 focus:border-black"
                   />
                 </label>
 
-                <label className="space-y-2 text-sm font-medium text-neutral-700">
+                <label className="space-y-2 text-sm font-medium text-gray-700">
                   <span>Message optionnel</span>
                   <textarea
                     rows={4}
                     value={message}
                     onChange={(event) => setMessage(event.target.value)}
-                    className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 outline-none transition focus:border-neutral-900 focus:bg-white"
+                    className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 outline-none transition-all duration-150 focus:border-black"
                   />
                 </label>
 
@@ -415,30 +428,30 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, init
                       setCurrentStep(1);
                       setError("");
                     }}
-                    className="inline-flex flex-1 items-center justify-center rounded-full border border-neutral-200 px-5 py-3 text-sm font-semibold text-neutral-700 transition hover:bg-neutral-50"
+                    className="inline-flex flex-1 items-center justify-center rounded-lg border border-gray-200 px-5 py-3 text-sm font-semibold text-gray-700 transition-all duration-150 hover:bg-gray-50"
                   >
                     Modifier le créneau
                   </button>
                   <button
                     type="button"
                     onClick={handleContinueToRecap}
-                    className="inline-flex flex-1 items-center justify-center rounded-full bg-neutral-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-neutral-800"
+                    className="inline-flex flex-1 items-center justify-center rounded-lg bg-black px-5 py-3 text-sm font-semibold text-white transition-all duration-150 hover:bg-gray-900"
                   >
                     Continuer
                   </button>
                 </div>
               </div>
             ) : (
-              <div className="mx-auto max-w-2xl space-y-4">
-                <div className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-4">
-                  <p className="text-sm font-semibold text-neutral-900">Récapitulatif</p>
-                  <dl className="mt-4 space-y-3 text-sm text-neutral-600">
+              <div className="mx-auto max-w-2xl space-y-5">
+                <div className="rounded-2xl border border-gray-200 bg-gray-50 px-5 py-5">
+                  <p className="text-sm font-semibold text-gray-900">Récapitulatif</p>
+                  <dl className="mt-4 space-y-3 text-sm text-gray-600">
                     <div>
-                      <dt className="font-medium text-neutral-900">Catégorie</dt>
+                      <dt className="font-medium text-gray-900">Catégorie</dt>
                       <dd>{category.title}</dd>
                     </div>
                     <div>
-                      <dt className="font-medium text-neutral-900">Date et heure</dt>
+                      <dt className="font-medium text-gray-900">Date et heure</dt>
                       <dd>
                         {selectedSlotDetails
                           ? formatDateTimeFr(selectedSlotDetails.start, { dateStyle: "full", timeStyle: "short" })
@@ -446,30 +459,30 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, init
                       </dd>
                     </div>
                     <div>
-                      <dt className="font-medium text-neutral-900">Nom</dt>
+                      <dt className="font-medium text-gray-900">Nom</dt>
                       <dd>{firstName} {lastName}</dd>
                     </div>
                     <div>
-                      <dt className="font-medium text-neutral-900">Email</dt>
+                      <dt className="font-medium text-gray-900">Email</dt>
                       <dd>{email}</dd>
                     </div>
                     <div>
-                      <dt className="font-medium text-neutral-900">Téléphone</dt>
+                      <dt className="font-medium text-gray-900">Téléphone</dt>
                       <dd>{phone}</dd>
                     </div>
                     <div>
-                      <dt className="font-medium text-neutral-900">Message</dt>
+                      <dt className="font-medium text-gray-900">Message</dt>
                       <dd>{message.trim() || "Aucun message"}</dd>
                     </div>
                   </dl>
                 </div>
 
-                <div className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-4 text-sm text-neutral-800">
+                <div className="rounded-2xl border border-gray-200 bg-gray-50 px-5 py-5 text-sm text-gray-800">
                   <div className="flex items-center gap-2 font-medium">
-                    <CheckCircle2 className="size-4 text-neutral-700" />
+                    <CheckSquare className="size-4 text-gray-500" />
                     <span>Confirmation</span>
                   </div>
-                  <p className="mt-2 text-neutral-600">
+                  <p className="mt-2 text-gray-600">
                     En confirmant, votre demande sera enregistrée puis transmise pour validation.
                   </p>
                 </div>
@@ -483,7 +496,7 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, init
                       setCurrentStep(2);
                       setError("");
                     }}
-                    className="inline-flex flex-1 items-center justify-center rounded-full border border-neutral-200 px-5 py-3 text-sm font-semibold text-neutral-700 transition hover:bg-neutral-50"
+                    className="inline-flex flex-1 items-center justify-center rounded-lg border border-gray-200 px-5 py-3 text-sm font-semibold text-gray-700 transition-all duration-150 hover:bg-gray-50"
                   >
                     Modifier les informations
                   </button>
@@ -491,7 +504,7 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, init
                     type="button"
                     onClick={handleSubmit}
                     disabled={isSubmitting}
-                    className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-neutral-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:bg-neutral-300"
+                    className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-black px-5 py-3 text-sm font-semibold text-white transition-all duration-150 hover:bg-gray-900 disabled:cursor-not-allowed disabled:bg-gray-300"
                   >
                     {isSubmitting ? <LoaderCircle className="size-4 animate-spin" /> : null}
                     <span>{isSubmitting ? "Confirmation..." : "Confirmer la demande"}</span>
@@ -502,7 +515,15 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, init
           </section>
 
           {currentStep === 1 ? (
-            <section className="p-6">
+            <section className="p-6 lg:p-8">
+              <div className="mb-5 flex items-center justify-between gap-3">
+                <p className="text-sm font-semibold text-gray-900">Créneaux horaires</p>
+                <div className="inline-flex rounded-full bg-gray-100 p-1 text-xs font-medium text-gray-500">
+                  <span className="rounded-full px-3 py-1 text-gray-500">12h</span>
+                  <span className="rounded-full bg-white px-3 py-1 text-gray-900 shadow-sm">24h</span>
+                </div>
+              </div>
+
               <div className="max-h-[460px] space-y-3 overflow-y-auto pr-1">
                 {selectedDay ? (
                   selectedDay.dateSlots.map((slot) => {
@@ -515,11 +536,11 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, init
                         disabled={slot.isBlocked}
                         onClick={() => handleSelectSlot(slot.start)}
                         className={cn(
-                          "flex w-full items-center justify-center rounded-xl border px-4 py-3 text-sm font-medium transition",
+                          "flex w-full items-center justify-center rounded-lg border border-gray-200 px-4 py-3 text-sm font-medium transition-all duration-150",
                           slot.isBlocked
-                            ? "cursor-not-allowed border-neutral-200 bg-neutral-100 text-neutral-400"
-                            : "border-neutral-200 bg-white text-neutral-700 hover:border-neutral-900 hover:text-neutral-950",
-                          active && "border-sky-500 bg-sky-500 text-white",
+                            ? "cursor-not-allowed bg-gray-50 text-gray-300"
+                            : "bg-white text-gray-700 hover:border-black hover:bg-gray-50 hover:text-gray-950",
+                          active && "border-black bg-black text-white hover:bg-black hover:text-white",
                         )}
                       >
                         {slot.label}
@@ -527,7 +548,7 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, init
                     );
                   })
                 ) : (
-                  <div className="rounded-2xl border border-dashed border-neutral-300 px-4 py-6 text-sm text-neutral-500">
+                  <div className="rounded-2xl border border-dashed border-gray-200 px-4 py-6 text-sm text-gray-500">
                     {hasAnyAvailableSlot
                       ? "Sélectionnez une date dans le calendrier."
                       : "Aucun créneau n'est disponible pour le moment."}

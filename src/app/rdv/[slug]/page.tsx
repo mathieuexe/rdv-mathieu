@@ -40,7 +40,7 @@ export default async function BookingCategoryPage({
   const session = await getPublicUserSession();
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#f6f5f2] text-black">
+    <div className="flex min-h-screen flex-col bg-gray-50 text-black">
       <PublicHeader />
 
       <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
