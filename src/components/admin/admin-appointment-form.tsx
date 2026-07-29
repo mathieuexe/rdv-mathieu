@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { CalendarDays, Clock3, MapPinned } from "lucide-react";
 
+import { CalendarLegend } from "@/components/shared/calendar-legend";
 import { groupSlotsByDay } from "@/lib/booking";
 import { cn, formatAppointmentMode } from "@/lib/utils";
 import type { AppointmentCategory, BookingSlot, UserProfileRecord } from "@/types/domain";
@@ -123,6 +124,7 @@ export function AdminAppointmentForm({ categories, registeredClients, action, er
   const visibleMonthIndex = Math.max(0, monthKeys.findIndex((monthKey) => monthKey === visibleMonthKey));
   const calendarCells = getCalendarCells(monthKeys[visibleMonthIndex] ?? visibleMonthKey);
   const hasAnyAvailableSlot = dayEntries.some((entry) => entry.availableCount > 0);
+  const todayKey = new Date().toISOString().slice(0, 10);
   const selectedClient = useMemo(
     () => registeredClients.find((client) => client.userId === linkedUserId) ?? null,
     [registeredClients, linkedUserId],
@@ -403,6 +405,11 @@ export function AdminAppointmentForm({ categories, registeredClients, action, er
                       const entry = dayEntries.find((item) => item.dateKey === cell.key);
                       const isSelected = selectedDateKey === cell.key;
                       const isDisabled = !entry || entry.availableCount === 0;
+                      const isPastDay = cell.key < todayKey;
+                      const isBlackoutDay =
+                        !!entry &&
+                        entry.availableCount === 0 &&
+                        entry.dateSlots.some((slot) => slot.reason?.toLowerCase().includes("indispon"));
 
                       return (
                         <div key={cell.key} className="flex justify-center">
@@ -412,7 +419,9 @@ export function AdminAppointmentForm({ categories, registeredClients, action, er
                             onClick={() => setSelectedDateKey(cell.key)}
                             className={cn(
                               "flex size-10 items-center justify-center rounded-xl text-sm transition duration-150",
-                              isDisabled && "cursor-not-allowed text-slate-300",
+                              isDisabled && isPastDay && "cursor-not-allowed bg-slate-100 text-slate-400",
+                              isDisabled && !isPastDay && !isBlackoutDay && "cursor-not-allowed text-slate-300",
+                              isDisabled && isBlackoutDay && "cursor-not-allowed bg-rose-100 text-rose-700",
                               !isDisabled && !isSelected && "bg-white text-slate-700 hover:bg-blue-50",
                               isSelected && "bg-blue-600 text-white",
                             )}
@@ -425,6 +434,7 @@ export function AdminAppointmentForm({ categories, registeredClients, action, er
                   </div>
 
                   <div className="mt-8 text-sm text-slate-500">Heure d&apos;Europe, Paris (24h)</div>
+                  <CalendarLegend className="mt-5" />
                 </div>
               </div>
 

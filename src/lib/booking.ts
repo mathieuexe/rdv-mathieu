@@ -1,4 +1,4 @@
-import { addDays, addMinutes, endOfDay, format, isAfter, isBefore, isEqual, parseISO, startOfDay } from "date-fns";
+import { addDays, addMinutes, format, parseISO, startOfDay } from "date-fns";
 
 import type {
   AppointmentCategory,
@@ -23,12 +23,20 @@ function getWeekdayLabel(date: Date) {
   return weekdays[date.getDay()];
 }
 
-function isWithinBlackout(date: Date, periods: BlackoutPeriod[]) {
-  return periods.find((period) => {
-    const start = startOfDay(parseISO(period.startDate));
-    const end = endOfDay(parseISO(period.endDate));
+function getBlackoutStart(period: BlackoutPeriod) {
+  return parseISO(`${period.startDate}T${period.startTime}:00`);
+}
 
-    return (isAfter(date, start) || isEqual(date, start)) && (isBefore(date, end) || isEqual(date, end));
+function getBlackoutEnd(period: BlackoutPeriod) {
+  return parseISO(`${period.endDate}T${period.endTime}:00`);
+}
+
+function findOverlappingBlackout(start: Date, end: Date, periods: BlackoutPeriod[]) {
+  return periods.find((period) => {
+    const blackoutStart = getBlackoutStart(period);
+    const blackoutEnd = getBlackoutEnd(period);
+
+    return start < blackoutEnd && end > blackoutStart;
   });
 }
 
@@ -66,9 +74,6 @@ export function buildBookingSlots({
       continue;
     }
 
-    const globalBlackout = isWithinBlackout(currentDate, siteSettings.globalBlackoutPeriods);
-    const categoryBlackout = isWithinBlackout(currentDate, category.blackoutPeriods);
-
     for (const rule of dayRules) {
       for (const window of rule.windows) {
         const [startHour, startMinute] = window.start.split(":").map(Number);
@@ -85,6 +90,8 @@ export function buildBookingSlots({
           const slotEnd = addMinutes(slotStart, category.durationMinutes);
 
           const isPast = slotStart <= now;
+          const globalBlackout = findOverlappingBlackout(slotStart, slotEnd, siteSettings.globalBlackoutPeriods);
+          const categoryBlackout = findOverlappingBlackout(slotStart, slotEnd, category.blackoutPeriods);
           const busyAppointment = appointments.find(
             (appointment) =>
               (appointment.status === "en_attente" || appointment.status === "accepte") &&
@@ -142,13 +149,13 @@ export function getBookingState(category: AppointmentCategory, siteSettings: Sit
   }
 
   const upcomingGlobalBlackout = siteSettings.globalBlackoutPeriods.find((period) => {
-    const end = parseISO(period.endDate);
-    return end >= startOfDay(new Date());
+    const end = getBlackoutEnd(period);
+    return end >= new Date();
   });
 
   const upcomingBlackout = category.blackoutPeriods.find((period) => {
-    const start = parseISO(period.startDate);
-    return start >= startOfDay(new Date());
+    const end = getBlackoutEnd(period);
+    return end >= new Date();
   });
 
   return {

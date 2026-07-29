@@ -67,13 +67,19 @@ export const settingsSchema = z
         z
           .object({
             startDate: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/, "La date de début est requise."),
+            startTime: z.string().trim().regex(/^\d{2}:\d{2}$/, "L'heure de début est requise."),
             endDate: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/, "La date de fin est requise."),
+            endTime: z.string().trim().regex(/^\d{2}:\d{2}$/, "L'heure de fin est requise."),
             message: z.string().trim().max(300, "La raison publique est trop longue.").optional().or(z.literal("")),
           })
-          .refine((data) => data.startDate <= data.endDate, {
-            path: ["endDate"],
-            message: "La date de fin doit être postérieure ou égale à la date de début.",
-          }),
+          .refine(
+            (data) =>
+              `${data.startDate}T${data.startTime}` <= `${data.endDate}T${data.endTime}`,
+            {
+              path: ["endTime"],
+              message: "La fin de l'indisponibilité doit être postérieure ou égale au début.",
+            },
+          ),
       )
       .max(30, "Vous ne pouvez pas enregistrer plus de 30 périodes d'indisponibilité."),
   })

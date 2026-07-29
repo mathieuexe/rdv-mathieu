@@ -1,6 +1,6 @@
 export type AppointmentMode = "telephone" | "physique" | "visioconference";
 
-export type AppointmentStatus = "en_attente" | "accepte" | "refuse" | "annule_client";
+export type AppointmentStatus = "en_attente" | "accepte" | "refuse" | "annule_client" | "annule_admin";
 
 export type Weekday =
   | "lundi"
@@ -24,7 +24,9 @@ export interface CategoryAvailabilityRule {
 export interface BlackoutPeriod {
   id: string;
   startDate: string;
+  startTime: string;
   endDate: string;
+  endTime: string;
   message?: string;
 }
 

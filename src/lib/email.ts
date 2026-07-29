@@ -4,6 +4,7 @@ import { render } from "@react-email/render";
 import { Resend } from "resend";
 
 import {
+  AdminBlackoutCancellationEmail,
   AdminCreatedSignupEmail,
   AppointmentCancellationEmail,
   ProvisionalAppointmentEmail,
@@ -21,6 +22,7 @@ type AppMailTemplateKey =
   | "prise_rdv_provisoire"
   | "rendez_vous_valide"
   | "rendez_vous_annule"
+  | "rendez_vous_annule_indisponibilite"
   | "rendez_vous_refuse";
 
 interface TransactionalEmailPayload {
@@ -417,6 +419,40 @@ export async function sendAppointmentCancellationEmail(input: {
         firstName: input.firstName,
         categoryTitle: input.categoryTitle,
         startsAtLabel: input.startsAtLabel,
+        reason: input.reason,
+        reference,
+      }),
+  });
+}
+
+export async function sendBlackoutAppointmentCancellationEmail(input: {
+  to: string;
+  firstName: string;
+  categoryTitle: string;
+  appointmentDateLabel: string;
+  appointmentTimeLabel: string;
+  reason?: string;
+  appointmentId: string;
+}) {
+  return sendTransactionalEmail({
+    to: input.to,
+    subject: "Annulation de votre rendez-vous",
+    templateKey: "rendez_vous_annule_indisponibilite",
+    sourceType: "rendez_vous_annule_indisponibilite",
+    sourceLabel: "Annulation automatique pour indisponibilité",
+    appointmentId: input.appointmentId,
+    metadata: {
+      categoryTitle: input.categoryTitle,
+      appointmentDateLabel: input.appointmentDateLabel,
+      appointmentTimeLabel: input.appointmentTimeLabel,
+      reason: input.reason,
+    },
+    buildTemplate: (reference) =>
+      AdminBlackoutCancellationEmail({
+        firstName: input.firstName,
+        categoryTitle: input.categoryTitle,
+        appointmentDateLabel: input.appointmentDateLabel,
+        appointmentTimeLabel: input.appointmentTimeLabel,
         reason: input.reason,
         reference,
       }),

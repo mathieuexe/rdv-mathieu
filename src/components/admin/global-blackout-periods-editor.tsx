@@ -8,7 +8,9 @@ import type { BlackoutPeriod } from "@/types/domain";
 interface EditableBlackoutPeriod {
   key: string;
   startDate: string;
+  startTime: string;
   endDate: string;
+  endTime: string;
   message: string;
 }
 
@@ -20,7 +22,9 @@ function createEmptyPeriod(): EditableBlackoutPeriod {
   return {
     key: crypto.randomUUID(),
     startDate: "",
+    startTime: "00:00",
     endDate: "",
+    endTime: "23:59",
     message: "",
   };
 }
@@ -31,7 +35,9 @@ export function GlobalBlackoutPeriodsEditor({ periods }: GlobalBlackoutPeriodsEd
       ? periods.map((period) => ({
           key: period.id,
           startDate: period.startDate,
+          startTime: period.startTime,
           endDate: period.endDate,
+          endTime: period.endTime,
           message: period.message ?? "",
         }))
       : [],
@@ -93,7 +99,7 @@ export function GlobalBlackoutPeriodsEditor({ periods }: GlobalBlackoutPeriodsEd
                 </button>
               </div>
 
-              <div className="mt-4 grid gap-4 md:grid-cols-2">
+              <div className="mt-4 grid gap-4 lg:grid-cols-2">
                 <label className="space-y-2 text-sm font-medium text-slate-700">
                   <span>Date de début</span>
                   <input
@@ -106,12 +112,34 @@ export function GlobalBlackoutPeriodsEditor({ periods }: GlobalBlackoutPeriodsEd
                 </label>
 
                 <label className="space-y-2 text-sm font-medium text-slate-700">
+                  <span>Heure de début</span>
+                  <input
+                    type="time"
+                    name="blackoutStartTime"
+                    value={item.startTime}
+                    onChange={(event) => updateItem(item.key, "startTime", event.target.value)}
+                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-slate-950"
+                  />
+                </label>
+
+                <label className="space-y-2 text-sm font-medium text-slate-700">
                   <span>Date de fin</span>
                   <input
                     type="date"
                     name="blackoutEndDate"
                     value={item.endDate}
                     onChange={(event) => updateItem(item.key, "endDate", event.target.value)}
+                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-slate-950"
+                  />
+                </label>
+
+                <label className="space-y-2 text-sm font-medium text-slate-700">
+                  <span>Heure de fin</span>
+                  <input
+                    type="time"
+                    name="blackoutEndTime"
+                    value={item.endTime}
+                    onChange={(event) => updateItem(item.key, "endTime", event.target.value)}
                     className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-slate-950"
                   />
                 </label>

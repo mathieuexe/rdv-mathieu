@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 
 import { groupSlotsByDay } from "@/lib/booking";
+import { CalendarLegend } from "@/components/shared/calendar-legend";
 import { cn, formatAppointmentMode, formatDateTimeFr } from "@/lib/utils";
 import type { AppointmentCategory, BookingSlot } from "@/types/domain";
 
@@ -98,6 +99,7 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
   const visibleMonthIndex = Math.max(0, monthKeys.findIndex((monthKey) => monthKey === visibleMonthKey));
   const calendarCells = getCalendarCells(monthKeys[visibleMonthIndex] ?? visibleMonthKey);
   const hasAnyAvailableSlot = dayEntries.some((entry) => entry.availableCount > 0);
+  const todayKey = new Date().toISOString().slice(0, 10);
   const initials = category.title
     .split(" ")
     .filter(Boolean)
@@ -321,6 +323,11 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                       const entry = dayEntries.find((item) => item.dateKey === cell.key);
                       const isSelected = activeDateKey === cell.key;
                       const isDisabled = !entry || entry.availableCount === 0;
+                      const isPastDay = cell.key < todayKey;
+                      const isBlackoutDay =
+                        !!entry &&
+                        entry.availableCount === 0 &&
+                        entry.dateSlots.some((slot) => slot.reason?.toLowerCase().includes("indispon"));
 
                       return (
                         <div key={cell.key} className="flex justify-center">
@@ -330,7 +337,9 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                             onClick={() => handleSelectDate(cell.key)}
                             className={cn(
                               "flex size-10 items-center justify-center rounded-lg text-sm transition-all duration-150",
-                              isDisabled && "cursor-not-allowed text-gray-300",
+                            isDisabled && isPastDay && "cursor-not-allowed bg-gray-100 text-gray-400",
+                            isDisabled && !isPastDay && !isBlackoutDay && "cursor-not-allowed text-gray-300",
+                            isDisabled && isBlackoutDay && "cursor-not-allowed bg-red-100 text-red-700",
                               !isDisabled && !isSelected && "bg-gray-100 text-gray-700 hover:bg-gray-200",
                               isSelected && "bg-black text-white shadow-sm",
                             )}
@@ -345,6 +354,7 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                   <div className="mt-8 inline-flex rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-500">
                     Heure d&apos;Europe, Paris (24h)
                   </div>
+                  <CalendarLegend className="mt-5" />
                 </div>
               </>
             ) : activeStep === 2 ? (

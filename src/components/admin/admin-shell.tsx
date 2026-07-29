@@ -11,6 +11,7 @@ import {
   Search,
   Settings2,
   Shapes,
+  Users,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -34,6 +35,7 @@ const navigationSections = [
     title: "Configuration",
     items: [
       { href: "/admin/categories", label: "Catégories", icon: Shapes, description: "Types de rendez-vous" },
+      { href: "/admin/utilisateurs", label: "Utilisateur", icon: Users, description: "Dossiers clients" },
       { href: "/admin/checker-ref-mail", label: "Checker ref mail", icon: Search, description: "Historique email" },
       { href: "/admin/parametres", label: "Paramètres", icon: Settings2, description: "Site et maintenance" },
     ],

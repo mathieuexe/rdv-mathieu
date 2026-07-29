@@ -19,7 +19,7 @@ export function formatAppointmentMode(mode: "telephone" | "physique" | "visiocon
   return "Visioconférence";
 }
 
-export function formatAppointmentStatus(status: "en_attente" | "accepte" | "refuse" | "annule_client") {
+export function formatAppointmentStatus(status: "en_attente" | "accepte" | "refuse" | "annule_client" | "annule_admin") {
   if (status === "en_attente") {
     return "En attente";
   }
@@ -30,6 +30,10 @@ export function formatAppointmentStatus(status: "en_attente" | "accepte" | "refu
 
   if (status === "annule_client") {
     return "Annulé par le client";
+  }
+
+  if (status === "annule_admin") {
+    return "Annulé par l'administration";
   }
 
   return "Refusé";

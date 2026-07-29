@@ -181,7 +181,15 @@ export default async function AdminDashboardPage() {
                   siteSettings.globalBlackoutPeriods.map((period) => (
                     <li key={period.id} className="rounded-2xl border border-slate-200 px-4 py-3">
                       <p className="font-medium text-slate-900">
-                        {period.startDate} → {period.endDate}
+                        {formatDateTimeFr(new Date(`${period.startDate}T${period.startTime}:00`), {
+                          dateStyle: "medium",
+                          timeStyle: "short",
+                        })}{" "}
+                        →{" "}
+                        {formatDateTimeFr(new Date(`${period.endDate}T${period.endTime}:00`), {
+                          dateStyle: "medium",
+                          timeStyle: "short",
+                        })}
                       </p>
                       <p className="mt-1">{period.message}</p>
                     </li>

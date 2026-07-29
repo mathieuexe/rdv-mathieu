@@ -113,4 +113,36 @@ describe("buildBookingSlots", () => {
 
     expect(Object.keys(grouped).length).toBeGreaterThan(0);
   });
+
+  it("bloque uniquement les créneaux couverts par une indisponibilité globale horaire", () => {
+    const partialBlackoutStart = getNextWeekdayAtTime(1, 9, 30);
+    const partialBlackoutEnd = getNextWeekdayAtTime(1, 10, 0);
+    const slots = buildBookingSlots({
+      category: testCategories[0],
+      siteSettings: {
+        ...testSiteSettings,
+        globalBlackoutPeriods: [
+          {
+            id: "global-blackout-1",
+            startDate: partialBlackoutStart.toISOString().slice(0, 10),
+            startTime: "09:30",
+            endDate: partialBlackoutEnd.toISOString().slice(0, 10),
+            endTime: "10:00",
+            message: "Indisponibilité ponctuelle",
+          },
+        ],
+      },
+      appointments: [],
+      daysToShow: 10,
+    });
+
+    const slotAtNine = slots.find((slot) => slot.label === "09:00" && slot.start.slice(0, 10) === partialBlackoutStart.toISOString().slice(0, 10));
+    const slotAtNineThirty = slots.find(
+      (slot) => slot.label === "09:30" && slot.start.slice(0, 10) === partialBlackoutStart.toISOString().slice(0, 10),
+    );
+
+    expect(slotAtNine?.isBlocked).toBe(false);
+    expect(slotAtNineThirty?.isBlocked).toBe(true);
+    expect(slotAtNineThirty?.reason).toContain("Indisponibilité ponctuelle");
+  });
 });

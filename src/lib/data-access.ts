@@ -48,9 +48,30 @@ function mapBlackoutPeriod(row: Record<string, unknown>): BlackoutPeriod {
   return {
     id: String(row.id),
     startDate: String(row.start_date),
+    startTime: typeof row.start_time === "string" ? String(row.start_time).slice(0, 5) : "00:00",
     endDate: String(row.end_date),
+    endTime: typeof row.end_time === "string" ? String(row.end_time).slice(0, 5) : "23:59",
     message: typeof row.message === "string" ? row.message : undefined,
   };
+}
+
+function getBlackoutStart(period: BlackoutPeriod) {
+  return parseISO(`${period.startDate}T${period.startTime}:00`);
+}
+
+function getBlackoutEnd(period: BlackoutPeriod) {
+  return parseISO(`${period.endDate}T${period.endTime}:00`);
+}
+
+function findOverlappingBlackoutPeriod(startIso: string, endIso: string, periods: BlackoutPeriod[]) {
+  const start = parseISO(startIso);
+  const end = parseISO(endIso);
+
+  return periods.find((period) => {
+    const blackoutStart = getBlackoutStart(period);
+    const blackoutEnd = getBlackoutEnd(period);
+    return start < blackoutEnd && end > blackoutStart;
+  });
 }
 
 function mapCategoryRow(
@@ -215,7 +236,7 @@ export async function getSiteSettings() {
   if (supabase) {
     const [{ data: settingsRow }, { data: blackoutRows }] = await Promise.all([
       supabase.from("site_settings").select("*").limit(1).maybeSingle(),
-      supabase.from("global_blackout_periods").select("*").order("start_date"),
+      supabase.from("global_blackout_periods").select("*").order("start_date").order("start_time"),
     ]);
 
     if (settingsRow) {
@@ -534,6 +555,25 @@ export async function getUserProfiles() {
   return (data ?? []).map((row) => mapUserProfileRow(row as Record<string, unknown>));
 }
 
+export async function getAdminUserDetail(userId: string) {
+  const profile = await getUserProfileByUserId(userId);
+
+  if (!profile) {
+    return null;
+  }
+
+  const [appointments, logs] = await Promise.all([
+    getUserAppointmentsForAccount({ userId: profile.userId, email: profile.email }),
+    getUserAccountActivityLogs(profile.userId, 200),
+  ]);
+
+  return {
+    profile,
+    appointments,
+    logs,
+  };
+}
+
 export async function updateUserProfileByUserId(input: {
   userId: string;
   email: string;
@@ -834,6 +874,71 @@ export async function cancelUserAppointmentById(
   return data ? mapAppointmentRow(data as Record<string, unknown>) : null;
 }
 
+export async function cancelAppointmentsOverlappingGlobalBlackouts(defaultReason: string) {
+  const supabase = getSupabaseAdminClient();
+
+  if (!supabase) {
+    return [];
+  }
+
+  const [settings, categories] = await Promise.all([getSiteSettings(), getCategories()]);
+
+  if (settings.globalBlackoutPeriods.length === 0) {
+    return [];
+  }
+
+  const { data, error } = await supabase
+    .from("appointments")
+    .select("*")
+    .in("status", ["en_attente", "accepte"])
+    .order("starts_at", { ascending: true });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  const appointments = (data ?? []).map((row) => mapAppointmentRow(row as Record<string, unknown>));
+  const overlappingAppointments = appointments
+    .map((appointment) => ({
+      appointment,
+      blackout: findOverlappingBlackoutPeriod(appointment.startsAt, appointment.endsAt, settings.globalBlackoutPeriods),
+      category: categories.find((category) => category.id === appointment.categoryId),
+    }))
+    .filter((item) => item.blackout);
+
+  const cancelledAppointments = [];
+
+  for (const item of overlappingAppointments) {
+    const reason = item.blackout?.message?.trim() || defaultReason;
+    const { data: updated, error: updateError } = await supabase
+      .from("appointments")
+      .update({
+        status: "annule_admin",
+        cancel_reason: reason,
+        rejection_reason: null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", item.appointment.id)
+      .in("status", ["en_attente", "accepte"])
+      .select("*")
+      .maybeSingle();
+
+    if (updateError) {
+      throw new Error(updateError.message);
+    }
+
+    if (updated) {
+      cancelledAppointments.push({
+        appointment: mapAppointmentRow(updated as Record<string, unknown>),
+        category: item.category,
+        reason,
+      });
+    }
+  }
+
+  return cancelledAppointments;
+}
+
 export async function getPendingAppointmentsView() {
   const appointments = await getAppointmentsView();
   return appointments.filter((appointment) => appointment.status === "en_attente");
@@ -939,7 +1044,9 @@ export async function saveSiteSettings(input: {
   enableWhatsappWidget: boolean;
   globalBlackoutPeriods: Array<{
     startDate: string;
+    startTime: string;
     endDate: string;
+    endTime: string;
     message?: string;
   }>;
 }) {
@@ -989,7 +1096,9 @@ export async function saveSiteSettings(input: {
     const { error: insertBlackoutsError } = await supabase.from("global_blackout_periods").insert(
       input.globalBlackoutPeriods.map((period) => ({
         start_date: period.startDate,
+        start_time: period.startTime,
         end_date: period.endDate,
+        end_time: period.endTime,
         message: period.message?.trim() ? period.message.trim() : null,
       })),
     );

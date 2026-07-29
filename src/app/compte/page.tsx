@@ -19,6 +19,8 @@ function getStatusLabel(status: string) {
       return "Refusé";
     case "annule_client":
       return "Annulé";
+    case "annule_admin":
+      return "Annulé par l'administration";
     default:
       return status;
   }
@@ -33,7 +35,7 @@ function getStatusClass(status: string) {
     return "border-red-200 bg-red-50 text-red-700";
   }
 
-  if (status === "annule_client") {
+  if (status === "annule_client" || status === "annule_admin") {
     return "border-neutral-200 bg-neutral-100 text-neutral-700";
   }
 
@@ -51,6 +53,10 @@ function getStatusDescription(status: string) {
 
   if (status === "annule_client") {
     return "Ce rendez-vous a été annulé depuis votre espace.";
+  }
+
+  if (status === "annule_admin") {
+    return "Ce rendez-vous a été annulé par l'administration à la suite d'une indisponibilité.";
   }
 
   return "Votre demande attend encore la validation de l'administration.";
@@ -81,7 +87,9 @@ export default async function AccountPage() {
   });
   const acceptedCount = appointments.filter((appointment) => appointment.status === "accepte").length;
   const pendingCount = appointments.filter((appointment) => appointment.status === "en_attente").length;
-  const cancelledCount = appointments.filter((appointment) => appointment.status === "annule_client").length;
+  const cancelledCount = appointments.filter(
+    (appointment) => appointment.status === "annule_client" || appointment.status === "annule_admin",
+  ).length;
   const nextAppointment =
     appointments
       .filter((appointment) => appointment.status === "accepte")
@@ -135,7 +143,7 @@ export default async function AccountPage() {
         <article className="rounded-[28px] border border-neutral-200 bg-white p-6 shadow-[0_18px_45px_rgba(15,23,42,0.04)]">
           <p className="text-sm uppercase tracking-[0.18em] text-neutral-500">Annulés</p>
           <p className="mt-4 text-3xl font-semibold text-neutral-950">{cancelledCount}</p>
-          <p className="mt-2 text-sm text-neutral-600">Rendez-vous annulés depuis votre compte.</p>
+          <p className="mt-2 text-sm text-neutral-600">Rendez-vous annulés côté client ou administration.</p>
         </article>
       </section>
 
@@ -152,7 +160,7 @@ export default async function AccountPage() {
             const ModeIcon = getModeIcon(mode);
             const isAccepted = appointment.status === "accepte";
             const isRefused = appointment.status === "refuse";
-            const isCancelled = appointment.status === "annule_client";
+            const isCancelled = appointment.status === "annule_client" || appointment.status === "annule_admin";
 
             return (
               <article

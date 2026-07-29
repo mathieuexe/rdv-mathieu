@@ -278,6 +278,46 @@ export function AppointmentCancellationEmail({
   );
 }
 
+interface AdminBlackoutCancellationEmailProps {
+  firstName: string;
+  categoryTitle: string;
+  appointmentDateLabel: string;
+  appointmentTimeLabel: string;
+  reason?: string;
+  reference: string;
+}
+
+export function AdminBlackoutCancellationEmail({
+  firstName,
+  categoryTitle,
+  appointmentDateLabel,
+  appointmentTimeLabel,
+  reason,
+  reference,
+}: AdminBlackoutCancellationEmailProps) {
+  return (
+    <MailLayout
+      title="Annulation de rendez-vous"
+      greeting={`Bonjour ${firstName},`}
+      lead="Je vous informe que votre rendez-vous a été annulé en raison d'une indisponibilité."
+      details={[
+        { label: "Date", value: appointmentDateLabel, underline: true },
+        { label: "Heure", value: appointmentTimeLabel, underline: true },
+        { label: "Type de rendez-vous", value: categoryTitle, underline: true },
+        ...(reason ? [{ label: "Motif", value: reason, underline: true }] : []),
+      ]}
+      paragraphs={[
+        `Vous aviez un rendez-vous le ${appointmentDateLabel} à ${appointmentTimeLabel} pour « ${categoryTitle} », mais je ne pourrai malheureusement pas l'honorer et il a donc été annulé.`,
+        "Je vous présente mes sincères excuses pour la gêne occasionnée.",
+        "Je vous invite à reprendre un rendez-vous sur un autre créneau disponible directement depuis le site.",
+      ]}
+      linkLabel="Prendre un nouveau rendez-vous"
+      linkHref={getAppUrl()}
+      reference={reference}
+    />
+  );
+}
+
 interface RefusedAppointmentEmailProps {
   firstName: string;
   categoryTitle: string;

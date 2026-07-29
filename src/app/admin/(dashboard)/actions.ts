@@ -8,30 +8,49 @@ import { getAdminSession } from "@/lib/auth";
 import { extractClientContextFromHeaders } from "@/lib/account-activity";
 import { extractClientIpFromHeaders, mergeAllowedIps, splitAllowedIpsInput } from "@/lib/maintenance";
 import {
+  cancelAppointmentsOverlappingGlobalBlackouts,
   createAccountActivityLog,
   createAdminAppointment,
   createManagedUserAccount,
   deleteManagedUserAccount,
+  getAdminUserDetail,
   getCategoryById,
   saveCategory,
   saveSiteSettings,
+  setUserPasswordChangeRequirement,
   updateManagedUserAccount,
 } from "@/lib/data-access";
-import { sendAdminCreatedSignupEmail, sendValidatedAppointmentEmail } from "@/lib/email";
+import {
+  sendAdminCreatedSignupEmail,
+  sendBlackoutAppointmentCancellationEmail,
+  sendValidatedAppointmentEmail,
+} from "@/lib/email";
 import { adminAppointmentSchema, categoryAdminSchema, settingsSchema } from "@/lib/validators";
 import { formatDateTimeFr } from "@/lib/utils";
 
+const AUTOMATIC_BLACKOUT_CANCELLATION_REASON =
+  "Annulation automatique en raison d'une période d'indisponibilité.";
+
 function parseGlobalBlackoutPeriods(formData: FormData) {
   const startDates = formData.getAll("blackoutStartDate").map((value) => String(value).trim());
+  const startTimes = formData.getAll("blackoutStartTime").map((value) => String(value).trim());
   const endDates = formData.getAll("blackoutEndDate").map((value) => String(value).trim());
+  const endTimes = formData.getAll("blackoutEndTime").map((value) => String(value).trim());
   const messages = formData.getAll("blackoutMessage").map((value) => String(value).trim());
-  const rowCount = Math.max(startDates.length, endDates.length, messages.length);
+  const rowCount = Math.max(startDates.length, startTimes.length, endDates.length, endTimes.length, messages.length);
 
   return Array.from({ length: rowCount }, (_, index) => ({
     startDate: startDates[index] ?? "",
+    startTime: startTimes[index] ?? "",
     endDate: endDates[index] ?? "",
+    endTime: endTimes[index] ?? "",
     message: messages[index] ?? "",
-  })).filter((period) => period.startDate || period.endDate || period.message);
+  })).filter((period) => period.startDate || period.startTime || period.endDate || period.endTime || period.message);
+}
+
+export interface AdminUserActionState {
+  status: "idle" | "error" | "success";
+  message?: string;
 }
 
 export async function saveCategoryAction(formData: FormData) {
@@ -116,15 +135,63 @@ export async function saveSettingsAction(formData: FormData) {
   try {
     const requestHeaders = await headers();
     const currentIp = formData.get("allowCurrentIp") === "on" ? extractClientIpFromHeaders(requestHeaders) : null;
+    const clientContext = extractClientContextFromHeaders(requestHeaders);
 
     await saveSiteSettings({
       ...parsed.data,
       maintenanceAllowedIps: mergeAllowedIps(splitAllowedIpsInput(parsed.data.maintenanceAllowedIps), [currentIp]),
     });
+
+    const cancelledAppointments = await cancelAppointmentsOverlappingGlobalBlackouts(AUTOMATIC_BLACKOUT_CANCELLATION_REASON);
+
+    for (const cancelled of cancelledAppointments) {
+      const startsAtDate = new Date(cancelled.appointment.startsAt);
+
+      await sendBlackoutAppointmentCancellationEmail({
+        to: cancelled.appointment.email,
+        firstName: cancelled.appointment.firstName,
+        categoryTitle: cancelled.category?.title ?? "Rendez-vous",
+        appointmentDateLabel: formatDateTimeFr(startsAtDate, { dateStyle: "full" }),
+        appointmentTimeLabel: formatDateTimeFr(startsAtDate, { timeStyle: "short" }),
+        reason: cancelled.reason,
+        appointmentId: cancelled.appointment.id,
+      });
+
+      if (cancelled.appointment.linkedUserId) {
+        await createAccountActivityLog({
+          userId: cancelled.appointment.linkedUserId,
+          actionType: "annulation_rendez_vous",
+          actionLabel: "Annulation automatique pour indisponibilité",
+          description: `Le rendez-vous prévu le ${formatDateTimeFr(cancelled.appointment.startsAt, {
+            dateStyle: "full",
+            timeStyle: "short",
+          })} a été annulé automatiquement en raison d'une indisponibilité.`,
+          appointmentId: cancelled.appointment.id,
+          ipAddress: clientContext.ipAddress,
+          country: clientContext.country,
+          region: clientContext.region,
+          city: clientContext.city,
+          deviceType: clientContext.deviceType,
+          operatingSystem: clientContext.operatingSystem,
+          browser: clientContext.browser,
+          userAgent: clientContext.userAgent,
+          metadata: {
+            categoryTitle: cancelled.category?.title ?? null,
+            cancelReason: cancelled.reason,
+            cancelledBy: "admin_blackout",
+          },
+        });
+      }
+    }
+
     revalidatePath("/admin");
     revalidatePath("/admin/parametres");
+    revalidatePath("/admin/rendez-vous");
+    revalidatePath("/admin/rendez-vous/agenda");
     revalidatePath("/maintenance");
     revalidatePath("/");
+    revalidatePath("/compte");
+    revalidatePath("/compte/logs");
   } catch (error) {
     const message = encodeURIComponent(error instanceof Error ? error.message : "Impossible d'enregistrer les parametres.");
     redirect(`/admin/parametres?error=${message}`);
@@ -266,4 +333,161 @@ export async function createAdminAppointmentAction(formData: FormData) {
   revalidatePath("/compte");
   revalidatePath("/compte/logs");
   redirect("/admin/rendez-vous?saved=1");
+}
+
+export async function updateAdminUserProfileAction(
+  _state: AdminUserActionState,
+  formData: FormData,
+): Promise<AdminUserActionState> {
+  const session = await getAdminSession();
+
+  if (!session.isAuthenticated) {
+    return {
+      status: "error",
+      message: "Accès non autorisé.",
+    };
+  }
+
+  const userId = String(formData.get("userId") ?? "").trim();
+  const firstName = String(formData.get("firstName") ?? "").trim();
+  const lastName = String(formData.get("lastName") ?? "").trim();
+  const email = String(formData.get("email") ?? "").trim();
+  const phone = String(formData.get("phone") ?? "").trim();
+
+  if (!userId || firstName.length < 2 || lastName.length < 2 || !email.includes("@") || phone.length < 8) {
+    return {
+      status: "error",
+      message: "Veuillez vérifier les informations du formulaire.",
+    };
+  }
+
+  try {
+    const previous = await getAdminUserDetail(userId);
+
+    if (!previous) {
+      return {
+        status: "error",
+        message: "Utilisateur introuvable.",
+      };
+    }
+
+    await updateManagedUserAccount({
+      userId,
+      firstName,
+      lastName,
+      email,
+      phone,
+    });
+
+    const requestHeaders = await headers();
+    const clientContext = extractClientContextFromHeaders(requestHeaders);
+    const changedFields = [
+      previous.profile.firstName !== firstName ? "prénom" : null,
+      previous.profile.lastName !== lastName ? "nom" : null,
+      previous.profile.email !== email ? "email" : null,
+      (previous.profile.phone ?? "") !== phone ? "téléphone" : null,
+    ].filter(Boolean);
+
+    await createAccountActivityLog({
+      userId,
+      actionType: "mise_a_jour_profil",
+      actionLabel: "Mise à jour du profil par l'administration",
+      description:
+        changedFields.length > 0
+          ? `L'administration a modifié les champs suivants : ${changedFields.join(", ")}.`
+          : "L'administration a enregistré le profil sans changement détecté.",
+      ipAddress: clientContext.ipAddress,
+      country: clientContext.country,
+      region: clientContext.region,
+      city: clientContext.city,
+      deviceType: clientContext.deviceType,
+      operatingSystem: clientContext.operatingSystem,
+      browser: clientContext.browser,
+      userAgent: clientContext.userAgent,
+      metadata: {
+        changedFields,
+        updatedFrom: "admin",
+      },
+    });
+
+    revalidatePath("/admin/utilisateurs");
+    revalidatePath(`/admin/utilisateurs/${userId}`);
+    revalidatePath("/compte");
+    revalidatePath("/compte/parametres");
+
+    return {
+      status: "success",
+      message: "Le dossier utilisateur a bien été mis à jour.",
+    };
+  } catch (error) {
+    return {
+      status: "error",
+      message: error instanceof Error ? error.message : "Impossible de mettre à jour l'utilisateur.",
+    };
+  }
+}
+
+export async function updateAdminUserSecurityAction(
+  _state: AdminUserActionState,
+  formData: FormData,
+): Promise<AdminUserActionState> {
+  const session = await getAdminSession();
+
+  if (!session.isAuthenticated) {
+    return {
+      status: "error",
+      message: "Accès non autorisé.",
+    };
+  }
+
+  const userId = String(formData.get("userId") ?? "").trim();
+
+  if (!userId) {
+    return {
+      status: "error",
+      message: "Utilisateur introuvable.",
+    };
+  }
+
+  try {
+    const requiresPasswordChange = formData.get("requiresPasswordChange") === "on";
+    await setUserPasswordChangeRequirement(userId, requiresPasswordChange);
+    const requestHeaders = await headers();
+    const clientContext = extractClientContextFromHeaders(requestHeaders);
+
+    await createAccountActivityLog({
+      userId,
+      actionType: "mise_a_jour_securite",
+      actionLabel: "Mise à jour de la sécurité par l'administration",
+      description: requiresPasswordChange
+        ? "L'administration a demandé un changement de mot de passe lors de la prochaine connexion."
+        : "L'administration a retiré l'obligation de changer le mot de passe.",
+      ipAddress: clientContext.ipAddress,
+      country: clientContext.country,
+      region: clientContext.region,
+      city: clientContext.city,
+      deviceType: clientContext.deviceType,
+      operatingSystem: clientContext.operatingSystem,
+      browser: clientContext.browser,
+      userAgent: clientContext.userAgent,
+      metadata: {
+        updatedFrom: "admin",
+        requiresPasswordChange,
+      },
+    });
+
+    revalidatePath("/admin/utilisateurs");
+    revalidatePath(`/admin/utilisateurs/${userId}`);
+    revalidatePath("/compte/securite");
+
+    return {
+      status: "success",
+      message: "Les paramètres de sécurité ont bien été mis à jour.",
+    };
+  } catch (error) {
+    return {
+      status: "error",
+      message: error instanceof Error ? error.message : "Impossible de mettre à jour la sécurité du compte.",
+    };
+  }
 }
