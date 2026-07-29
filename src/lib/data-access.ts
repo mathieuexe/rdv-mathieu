@@ -995,7 +995,7 @@ export async function createAdminAppointment(input: {
     throw new Error("Catégorie introuvable.");
   }
 
-  const payload = await getCategorySlots(input.categorySlug);
+  const payload = await getCategorySlots(input.categorySlug, { bypassMaintenance: true });
 
   if (!payload) {
     throw new Error("Créneaux indisponibles.");
