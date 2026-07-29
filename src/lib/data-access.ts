@@ -23,6 +23,7 @@ const defaultSiteSettings: SiteSettings = {
   maintenanceMode: false,
   maintenanceMessage: "",
   maintenanceAllowedIps: [],
+  enableWhatsappWidget: false,
   globalBlackoutPeriods: [],
 };
 
@@ -187,6 +188,7 @@ export async function getSiteSettings() {
             ? settingsRow.maintenance_message
             : "",
         maintenanceAllowedIps: normalizeAllowedIps(settingsRow.maintenance_allowed_ips),
+        enableWhatsappWidget: Boolean(settingsRow.enable_whatsapp_widget),
         globalBlackoutPeriods: (blackoutRows ?? []).map((row) => mapBlackoutPeriod(row as Record<string, unknown>)),
       };
 
@@ -711,6 +713,7 @@ export async function saveSiteSettings(input: {
   maintenanceMode: boolean;
   maintenanceMessage: string;
   maintenanceAllowedIps: string[];
+  enableWhatsappWidget: boolean;
 }) {
   const supabase = getSupabaseAdminClient();
 
@@ -727,6 +730,7 @@ export async function saveSiteSettings(input: {
         maintenance_mode: input.maintenanceMode,
         maintenance_message: input.maintenanceMessage,
         maintenance_allowed_ips: input.maintenanceAllowedIps,
+        enable_whatsapp_widget: input.enableWhatsappWidget,
         updated_at: new Date().toISOString(),
       })
       .eq("id", existing.id);
@@ -739,6 +743,7 @@ export async function saveSiteSettings(input: {
       maintenance_mode: input.maintenanceMode,
       maintenance_message: input.maintenanceMessage,
       maintenance_allowed_ips: input.maintenanceAllowedIps,
+      enable_whatsapp_widget: input.enableWhatsappWidget,
     });
 
     if (error) {

@@ -34,8 +34,8 @@ export async function PublicHeader({ currentPath }: PublicHeaderProps) {
   return (
     <header className="border-b border-black/10 bg-white">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-5 text-black">
-        <Link href="/" className="text-sm font-semibold tracking-[0.18em] uppercase">
-          RDV Mathieu
+        <Link href="/" className="text-base font-bold normal-case [font-family:var(--font-cal-sans),sans-serif]">
+          Rdv.mathieucerenzia.fr
         </Link>
 
         <nav className="flex items-center gap-4 text-sm">

@@ -47,6 +47,7 @@ export interface SiteSettings {
   maintenanceMode: boolean;
   maintenanceMessage: string;
   maintenanceAllowedIps: string[];
+  enableWhatsappWidget: boolean;
   globalBlackoutPeriods: BlackoutPeriod[];
 }
 

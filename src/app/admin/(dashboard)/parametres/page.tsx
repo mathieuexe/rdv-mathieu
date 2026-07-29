@@ -46,6 +46,16 @@ export default async function SettingsPage({
             </label>
           </div>
 
+          <div className="rounded-[22px] border border-slate-200 bg-slate-50/60 p-5">
+            <label className="flex items-center gap-3 text-sm font-medium text-slate-800">
+              <input type="checkbox" name="enableWhatsappWidget" defaultChecked={settings.enableWhatsappWidget} />
+              <span>Afficher le widget WhatsApp en bas à gauche du site</span>
+            </label>
+            <p className="mt-3 text-xs leading-6 text-slate-500">
+              Ce widget Elfsight est affiché sur les pages publiques uniquement. Vous pouvez le désactiver ici à tout moment.
+            </p>
+          </div>
+
           <label className="block space-y-2 text-sm font-medium text-slate-700">
             <span>Message de maintenance</span>
             <textarea

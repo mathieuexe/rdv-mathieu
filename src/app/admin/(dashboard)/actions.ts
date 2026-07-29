@@ -37,6 +37,8 @@ export async function saveCategoryAction(formData: FormData) {
     redirect(`${returnPath}?error=${message}`);
   }
 
+  let successPath = returnPath;
+
   try {
     const category = await saveCategory({
       categoryId: parsed.data.categoryId || undefined,
@@ -57,12 +59,13 @@ export async function saveCategoryAction(formData: FormData) {
     revalidatePath("/admin/categories");
     revalidatePath("/");
 
-    const successPath = parsed.data.categoryId ? returnPath : `/admin/categories/${category.id}`;
-    redirect(`${successPath}?saved=1`);
+    successPath = parsed.data.categoryId ? returnPath : `/admin/categories/${category.id}`;
   } catch (error) {
     const message = encodeURIComponent(error instanceof Error ? error.message : "Impossible d'enregistrer la categorie.");
     redirect(`${returnPath}?error=${message}`);
   }
+
+  redirect(`${successPath}?saved=1`);
 }
 
 export async function saveSettingsAction(formData: FormData) {
@@ -76,6 +79,7 @@ export async function saveSettingsAction(formData: FormData) {
     maintenanceMode: formData.get("maintenanceMode") === "on",
     maintenanceMessage: formData.get("maintenanceMessage"),
     maintenanceAllowedIps: formData.get("maintenanceAllowedIps"),
+    enableWhatsappWidget: formData.get("enableWhatsappWidget") === "on",
   });
 
   if (!parsed.success) {
@@ -95,11 +99,12 @@ export async function saveSettingsAction(formData: FormData) {
     revalidatePath("/admin/parametres");
     revalidatePath("/maintenance");
     revalidatePath("/");
-    redirect("/admin/parametres?saved=1");
   } catch (error) {
     const message = encodeURIComponent(error instanceof Error ? error.message : "Impossible d'enregistrer les parametres.");
     redirect(`/admin/parametres?error=${message}`);
   }
+
+  redirect("/admin/parametres?saved=1");
 }
 
 export async function createAdminAppointmentAction(formData: FormData) {

@@ -24,6 +24,7 @@ interface BookingFormProps {
   categorySlug: string;
   slots: BookingSlot[];
   helperMessage: string;
+  isAuthenticated?: boolean;
   initialUser?: {
     firstName?: string;
     lastName?: string;
@@ -58,7 +59,7 @@ function getCalendarCells(monthKey: string) {
   ];
 }
 
-export function BookingForm({ category, categorySlug, slots, helperMessage, initialUser }: BookingFormProps) {
+export function BookingForm({ category, categorySlug, slots, helperMessage, isAuthenticated, initialUser }: BookingFormProps) {
   const router = useRouter();
   const groupedSlots = useMemo(() => groupSlotsByDay(slots), [slots]);
   const dayEntries = useMemo(
@@ -237,7 +238,7 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, init
             {category.bannerImageUrl ? (
               <div className="-m-6 mb-6 overflow-hidden border-b border-gray-200 bg-gray-100 rounded-t-2xl lg:-m-8 lg:mb-8 lg:rounded-tr-none">
                 <div className="h-[240px] w-full">
-                  <img src={category.bannerImageUrl} alt="" className="h-full w-full object-cover" />
+                  <img src={category.bannerImageUrl} alt="" className="h-full w-full object-cover object-center" />
                 </div>
               </div>
             ) : (
@@ -415,6 +416,24 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, init
                     className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 outline-none transition-all duration-150 focus:border-black"
                   />
                 </label>
+
+                {!isAuthenticated ? (
+                  <div className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-4 text-sm leading-7 text-gray-600">
+                    <p className="font-medium text-gray-900">Avez-vous un compte ?</p>
+                    <p className="mt-2">
+                      Ce n&apos;est pas obligatoire. Cela sert uniquement à retrouver l&apos;historique de vos rendez-vous et à
+                      annuler un rendez-vous en ligne si besoin.
+                    </p>
+                    <div className="mt-3 flex flex-wrap gap-4">
+                      <a href="/connexion" className="font-medium text-gray-900 underline underline-offset-4">
+                        Connectez-vous
+                      </a>
+                      <a href="/inscription" className="font-medium text-gray-900 underline underline-offset-4">
+                        Inscrivez-vous
+                      </a>
+                    </div>
+                  </div>
+                ) : null}
 
                 <label className="space-y-2 text-sm font-medium text-gray-700">
                   <span>Message optionnel</span>

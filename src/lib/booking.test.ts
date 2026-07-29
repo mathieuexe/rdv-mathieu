@@ -24,6 +24,7 @@ const testSiteSettings: SiteSettings = {
   maintenanceMode: false,
   maintenanceMessage: "",
   maintenanceAllowedIps: [],
+  enableWhatsappWidget: false,
   globalBlackoutPeriods: [],
 };
 

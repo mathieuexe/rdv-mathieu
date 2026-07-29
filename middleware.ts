@@ -48,6 +48,7 @@ export async function middleware(request: NextRequest) {
     maintenanceMode: Boolean(settingsRow?.maintenance_mode),
     maintenanceMessage: typeof settingsRow?.maintenance_message === "string" ? settingsRow.maintenance_message : "",
     maintenanceAllowedIps: normalizeAllowedIps(settingsRow?.maintenance_allowed_ips),
+    enableWhatsappWidget: Boolean(settingsRow?.enable_whatsapp_widget),
     globalBlackoutPeriods: [],
   };
 

@@ -60,6 +60,7 @@ export default async function BookingCategoryPage({
               categorySlug={payload.category.slug}
               slots={payload.slots}
               helperMessage={bookingState.message}
+              isAuthenticated={session.isAuthenticated}
               initialUser={
                 session.isAuthenticated
                   ? {
