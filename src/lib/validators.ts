@@ -46,6 +46,8 @@ export const categoryAdminSchema = z
     description: z.string().trim().min(10, "La description est requise."),
     isOnline: z.boolean(),
     customMessage: z.string().trim().max(500).optional().or(z.literal("")),
+    thumbnailImageDataUrl: z.string().trim().max(5_000_000).optional().or(z.literal("")),
+    bannerImageDataUrl: z.string().trim().max(8_000_000).optional().or(z.literal("")),
     startTime: z.string().trim().regex(/^\d{2}:\d{2}$/, "L'heure de debut est requise."),
     endTime: z.string().trim().regex(/^\d{2}:\d{2}$/, "L'heure de fin est requise."),
   })

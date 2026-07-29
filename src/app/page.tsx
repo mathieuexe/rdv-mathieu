@@ -25,12 +25,26 @@ export default async function Home() {
           ) : (
             <ul className="mt-8 space-y-3">
               {categories.map((category) => (
-                <li key={category.id} className="rounded-2xl border border-neutral-200 px-4 py-4">
+                <li key={category.id} className="overflow-hidden rounded-2xl border border-neutral-200 bg-white">
+                  {category.bannerImageUrl ? (
+                    <div className="aspect-[8/3] w-full overflow-hidden border-b border-neutral-200 bg-neutral-100">
+                      <img src={category.bannerImageUrl} alt="" className="h-full w-full object-cover" />
+                    </div>
+                  ) : null}
+
+                  <div className="px-4 py-4">
+                    {category.thumbnailImageUrl ? (
+                      <div className="mb-3 flex size-14 items-center justify-center overflow-hidden rounded-full border border-neutral-200 bg-neutral-100">
+                        <img src={category.thumbnailImageUrl} alt="" className="h-full w-full object-cover" />
+                      </div>
+                    ) : null}
+
                   <p className="text-base font-semibold">{category.title}</p>
-                  <p className="mt-1 text-sm text-neutral-600">URL directe : /rdv/{category.slug}</p>
-                  <Link href={`/rdv/${category.slug}`} className="mt-3 inline-flex underline underline-offset-4">
-                    Accéder à cette catégorie
-                  </Link>
+                    <p className="mt-1 text-sm text-neutral-600">{category.description}</p>
+                    <Link href={`/rdv/${category.slug}`} className="mt-3 inline-flex underline underline-offset-4">
+                      Accéder à cette catégorie
+                    </Link>
+                  </div>
                 </li>
               ))}
             </ul>

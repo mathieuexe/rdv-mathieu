@@ -37,6 +37,8 @@ export interface AppointmentCategory {
   appointmentMode: AppointmentMode;
   isOnline: boolean;
   customMessage?: string;
+  thumbnailImageUrl?: string;
+  bannerImageUrl?: string;
   availabilityRules: CategoryAvailabilityRule[];
   blackoutPeriods: BlackoutPeriod[];
 }

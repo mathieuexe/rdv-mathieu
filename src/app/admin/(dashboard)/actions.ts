@@ -26,6 +26,8 @@ export async function saveCategoryAction(formData: FormData) {
     description: formData.get("description"),
     isOnline: formData.get("isOnline") === "on",
     customMessage: formData.get("customMessage"),
+    thumbnailImageDataUrl: formData.get("thumbnailImageDataUrl"),
+    bannerImageDataUrl: formData.get("bannerImageDataUrl"),
     startTime: formData.get("startTime"),
     endTime: formData.get("endTime"),
   });
@@ -45,6 +47,8 @@ export async function saveCategoryAction(formData: FormData) {
       description: parsed.data.description,
       isOnline: parsed.data.isOnline,
       customMessage: parsed.data.customMessage || undefined,
+      thumbnailImageUrl: parsed.data.thumbnailImageDataUrl || undefined,
+      bannerImageUrl: parsed.data.bannerImageDataUrl || undefined,
       startTime: parsed.data.startTime,
       endTime: parsed.data.endTime,
     });

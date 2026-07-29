@@ -237,8 +237,18 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, init
             <a href="/" className="text-sm text-gray-500 underline underline-offset-4">
               Retour à l'accueil
             </a>
-            <div className="mt-6 flex size-16 items-center justify-center rounded-full bg-gray-100 text-sm font-semibold text-gray-900">
-              {initials || "RDV"}
+            {category.bannerImageUrl ? (
+              <div className="mt-6 aspect-[8/3] w-full overflow-hidden rounded-2xl border border-gray-200 bg-gray-100">
+                <img src={category.bannerImageUrl} alt="" className="h-full w-full object-cover" />
+              </div>
+            ) : null}
+
+            <div className="mt-6 flex size-16 items-center justify-center overflow-hidden rounded-full border border-gray-200 bg-gray-100 text-sm font-semibold text-gray-900">
+              {category.thumbnailImageUrl ? (
+                <img src={category.thumbnailImageUrl} alt="" className="h-full w-full object-cover" />
+              ) : (
+                initials || "RDV"
+              )}
             </div>
             <p className="mt-4 text-lg font-bold text-gray-950">{category.title}</p>
             <p className="mt-2 text-sm leading-6 text-gray-500">{category.description}</p>
@@ -262,10 +272,6 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, init
               </div>
             </div>
 
-            <div className="mt-6 rounded-2xl border border-gray-200 bg-gray-50 px-4 py-4 text-sm text-gray-500">
-              <p className="font-medium text-gray-900">Lien direct</p>
-              <p className="mt-1 break-all">/rdv/{categorySlug}</p>
-            </div>
           </aside>
 
           <section

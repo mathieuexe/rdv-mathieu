@@ -34,12 +34,27 @@ export default async function CategoriesPage() {
           categories.map((category) => (
             <article
               key={category.id}
-              className="rounded-[16px] border border-slate-200 p-6"
+              className="overflow-hidden rounded-[16px] border border-slate-200"
             >
+              {category.bannerImageUrl ? (
+                <div className="aspect-[8/3] w-full overflow-hidden border-b border-slate-200 bg-slate-100">
+                  <img src={category.bannerImageUrl} alt="" className="h-full w-full object-cover" />
+                </div>
+              ) : null}
+
+              <div className="p-6">
               <div className="flex items-start justify-between gap-4">
-                <div>
+                <div className="flex items-start gap-4">
+                  {category.thumbnailImageUrl ? (
+                    <div className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-slate-100">
+                      <img src={category.thumbnailImageUrl} alt="" className="h-full w-full object-cover" />
+                    </div>
+                  ) : null}
+
+                  <div>
                   <h2 className="text-xl font-semibold text-slate-950">{category.title}</h2>
                   <p className="mt-2 text-sm text-slate-600">{category.description}</p>
+                  </div>
                 </div>
                 <span
                   className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${
@@ -62,8 +77,8 @@ export default async function CategoriesPage() {
                   </p>
                 </div>
                 <div className="rounded-xl border border-slate-200 px-4 py-3">
-                  <p className="text-xs uppercase tracking-[0.18em] text-slate-500">URL</p>
-                  <p className="mt-2 text-sm font-semibold text-slate-900">/rdv/{category.slug}</p>
+                  <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Slug</p>
+                  <p className="mt-2 text-sm font-semibold text-slate-900">{category.slug}</p>
                 </div>
               </div>
 
@@ -73,12 +88,11 @@ export default async function CategoriesPage() {
               </div>
 
               <div className="mt-6 flex items-center justify-between border-t border-slate-200 pt-4">
-                <Link href={`/rdv/${category.slug}`} className="text-sm font-semibold text-blue-700">
-                  Ouvrir l'URL directe
-                </Link>
+                <span className="text-sm text-slate-500">Visuels et paramètres de la catégorie</span>
                 <Link href={`/admin/categories/${category.id}`} className="text-sm font-semibold text-slate-950">
                   Modifier
                 </Link>
+              </div>
               </div>
             </article>
           ))

@@ -67,6 +67,8 @@ function mapCategoryRow(
     appointmentMode: row.appointment_mode as AppointmentCategory["appointmentMode"],
     isOnline: Boolean(row.is_online),
     customMessage: typeof row.custom_message === "string" ? row.custom_message : undefined,
+    thumbnailImageUrl: typeof row.thumbnail_image_url === "string" ? row.thumbnail_image_url : undefined,
+    bannerImageUrl: typeof row.banner_image_url === "string" ? row.banner_image_url : undefined,
     availabilityRules: categoryRules.reduce<AppointmentCategory["availabilityRules"]>((acc, rule) => {
       const weekdayValue = Number(rule.weekday);
       const weekdayMap = ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"];
@@ -456,6 +458,8 @@ export async function saveCategory(input: {
   description: string;
   isOnline: boolean;
   customMessage?: string;
+  thumbnailImageUrl?: string;
+  bannerImageUrl?: string;
   startTime: string;
   endTime: string;
 }) {
@@ -477,6 +481,8 @@ export async function saveCategory(input: {
     description: input.description,
     is_online: input.isOnline,
     custom_message: input.customMessage ?? null,
+    thumbnail_image_url: input.thumbnailImageUrl ?? null,
+    banner_image_url: input.bannerImageUrl ?? null,
     updated_at: new Date().toISOString(),
   };
 
