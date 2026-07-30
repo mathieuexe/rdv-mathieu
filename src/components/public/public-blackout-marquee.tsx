@@ -29,13 +29,13 @@ export function PublicBlackoutMarquee({ periods }: PublicBlackoutMarqueeProps) {
   });
 
   return (
-    <div className="bg-slate-900 border-b border-slate-800 overflow-hidden text-white relative z-40">
-      <div className="flex items-center px-4 py-2 sm:px-6">
-        <div className="flex items-center justify-center shrink-0 mr-4 text-rose-400 bg-slate-800 rounded-full p-1.5 relative z-10">
-          <AlertTriangle className="size-4" />
+    <div className="bg-rose-600 border-b border-rose-700 overflow-hidden text-white relative z-40">
+      <div className="flex items-center px-4 py-2.5 sm:px-6">
+        <div className="flex items-center justify-center shrink-0 mr-3 sm:mr-4 text-rose-600 bg-white rounded-full p-1 sm:p-1.5 relative z-10 shadow-sm">
+          <AlertTriangle className="size-3.5 sm:size-4" />
         </div>
         <div className="flex-1 overflow-hidden relative">
-          <div className="animate-marquee whitespace-nowrap flex gap-12 items-center">
+          <div className="animate-marquee whitespace-nowrap flex gap-8 sm:gap-12 items-center">
             {upcomingPeriods.map((period, index) => {
               const start = parseISO(`${period.startDate}T${period.startTime}:00`);
               const end = parseISO(`${period.endDate}T${period.endTime}:00`);
@@ -43,16 +43,20 @@ export function PublicBlackoutMarquee({ periods }: PublicBlackoutMarqueeProps) {
               const formattedStart = format(start, "d MMMM", { locale: fr });
               const formattedEnd = format(end, "d MMMM", { locale: fr });
               const isOngoing = isBefore(start, now) && isAfter(end, now);
+              const isSameDay = formattedStart === formattedEnd;
 
               return (
-                <span key={index} className="text-sm font-medium inline-flex items-center">
-                  <span className={`px-2 py-0.5 rounded text-xs font-bold mr-2 ${isOngoing ? "bg-rose-500/20 text-rose-300" : "bg-blue-500/20 text-blue-300"}`}>
+                <span key={index} className="text-xs sm:text-sm font-medium inline-flex items-center">
+                  <span className="px-2 py-0.5 rounded text-[10px] sm:text-xs font-bold mr-2 bg-white/20 text-white">
                     {isOngoing ? "En cours" : "À venir"}
                   </span>
                   <span>
-                    Indisponibilité du {formattedStart} au {formattedEnd}
+                    {isSameDay 
+                      ? `Indisponibilité le ${formattedStart}`
+                      : `Indisponibilité du ${formattedStart} au ${formattedEnd}`
+                    }
                   </span>
-                  {period.message ? <span className="ml-2 text-slate-400">— {period.message}</span> : null}
+                  {period.message ? <span className="ml-2 text-rose-100">— {period.message}</span> : null}
                 </span>
               );
             })}
@@ -65,16 +69,20 @@ export function PublicBlackoutMarquee({ periods }: PublicBlackoutMarqueeProps) {
               const formattedStart = format(start, "d MMMM", { locale: fr });
               const formattedEnd = format(end, "d MMMM", { locale: fr });
               const isOngoing = isBefore(start, now) && isAfter(end, now);
+              const isSameDay = formattedStart === formattedEnd;
 
               return (
-                <span key={`dup-${index}`} className="text-sm font-medium inline-flex items-center" aria-hidden="true">
-                  <span className={`px-2 py-0.5 rounded text-xs font-bold mr-2 ${isOngoing ? "bg-rose-500/20 text-rose-300" : "bg-blue-500/20 text-blue-300"}`}>
+                <span key={`dup-${index}`} className="text-xs sm:text-sm font-medium inline-flex items-center" aria-hidden="true">
+                  <span className="px-2 py-0.5 rounded text-[10px] sm:text-xs font-bold mr-2 bg-white/20 text-white">
                     {isOngoing ? "En cours" : "À venir"}
                   </span>
                   <span>
-                    Indisponibilité du {formattedStart} au {formattedEnd}
+                    {isSameDay 
+                      ? `Indisponibilité le ${formattedStart}`
+                      : `Indisponibilité du ${formattedStart} au ${formattedEnd}`
+                    }
                   </span>
-                  {period.message ? <span className="ml-2 text-slate-400">— {period.message}</span> : null}
+                  {period.message ? <span className="ml-2 text-rose-100">— {period.message}</span> : null}
                 </span>
               );
             })}
