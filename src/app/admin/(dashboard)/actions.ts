@@ -510,3 +510,81 @@ export async function updateAdminUserSecurityAction(
     };
   }
 }
+
+export async function banAdminUserAction(
+  _state: AdminUserActionState,
+  formData: FormData,
+): Promise<AdminUserActionState> {
+  const session = await getAdminSession();
+
+  if (!session.isAuthenticated) {
+    return { status: "error", message: "Accès non autorisé." };
+  }
+
+  const userId = String(formData.get("userId") ?? "").trim();
+  const isBanned = formData.get("isBanned") === "true";
+  const banReason = String(formData.get("banReason") ?? "").trim();
+
+  if (!userId) {
+    return { status: "error", message: "Utilisateur introuvable." };
+  }
+
+  try {
+    const { getSupabaseAdminClient } = await import("@/lib/supabase/admin");
+    const supabaseAdmin = getSupabaseAdminClient();
+    
+    if (!supabaseAdmin) throw new Error("Erreur de connexion base de données.");
+
+    const { error } = await supabaseAdmin
+      .from("user_profiles")
+      .update({
+        is_banned: isBanned,
+        ban_reason: isBanned ? banReason : null,
+      })
+      .eq("user_id", userId);
+
+    if (error) throw error;
+
+    revalidatePath("/admin/utilisateurs");
+    revalidatePath(`/admin/utilisateurs/${userId}`);
+    
+    return {
+      status: "success",
+      message: isBanned ? "Utilisateur banni avec succès." : "Utilisateur débloqué avec succès.",
+    };
+  } catch (error) {
+    return {
+      status: "error",
+      message: "Impossible de modifier le statut de l'utilisateur.",
+    };
+  }
+}
+
+export async function deleteAdminUserAction(
+  _state: AdminUserActionState,
+  formData: FormData,
+): Promise<AdminUserActionState> {
+  const session = await getAdminSession();
+
+  if (!session.isAuthenticated) {
+    return { status: "error", message: "Accès non autorisé." };
+  }
+
+  const userId = String(formData.get("userId") ?? "").trim();
+
+  if (!userId) {
+    return { status: "error", message: "Utilisateur introuvable." };
+  }
+
+  try {
+    await deleteManagedUserAccount(userId);
+  } catch (error) {
+    return {
+      status: "error",
+      message: "Impossible de supprimer le compte.",
+    };
+  }
+  
+  revalidatePath("/admin/utilisateurs");
+  redirect("/admin/utilisateurs");
+}

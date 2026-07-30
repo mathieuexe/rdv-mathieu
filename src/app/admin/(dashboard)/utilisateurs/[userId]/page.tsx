@@ -1,10 +1,16 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { LaptopMinimal, MapPinned, MonitorSmartphone, ShieldCheck, User, Calendar, History, Settings, KeyRound } from "lucide-react";
+import { AlertTriangle, LaptopMinimal, MapPinned, MonitorSmartphone, ShieldCheck, User, Calendar, History, Settings, KeyRound, Ban, Trash2 } from "lucide-react";
 
-import { updateAdminUserProfileAction, updateAdminUserSecurityAction } from "@/app/admin/(dashboard)/actions";
+import { 
+  updateAdminUserProfileAction, 
+  updateAdminUserSecurityAction,
+  banAdminUserAction,
+  deleteAdminUserAction
+} from "@/app/admin/(dashboard)/actions";
 import { AdminUserProfileForm } from "@/components/admin/admin-user-profile-form";
 import { AdminUserSecurityForm } from "@/components/admin/admin-user-security-form";
+import { AdminUserDangerForm } from "@/components/admin/admin-user-danger-form";
 import { getAdminUserDetail } from "@/lib/data-access";
 import { formatAppointmentStatus, formatDateTimeFr } from "@/lib/utils";
 
@@ -122,6 +128,21 @@ export default async function AdminUserDetailPage({
                 {profile.requiresPasswordChange ? "Changement de mot de passe requis" : "Normal"}
               </div>
               <AdminUserSecurityForm user={profile} action={updateAdminUserSecurityAction} />
+            </div>
+          </section>
+
+          {/* Danger Zone */}
+          <section className="rounded-lg border border-rose-200 bg-white shadow-sm overflow-hidden">
+            <div className="flex items-center gap-2 border-b border-rose-100 bg-rose-50 px-4 py-3">
+              <AlertTriangle className="size-4 text-rose-600" />
+              <h2 className="font-semibold text-rose-800">Zone de danger</h2>
+            </div>
+            <div className="p-4 md:p-6">
+              <AdminUserDangerForm 
+                user={profile} 
+                banAction={banAdminUserAction} 
+                deleteAction={deleteAdminUserAction} 
+              />
             </div>
           </section>
 

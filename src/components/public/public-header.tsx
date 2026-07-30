@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, LogOut } from "lucide-react";
 
+import { logoutAccountAction } from "@/app/compte/actions";
 import { getPublicUserSession } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
@@ -62,6 +63,16 @@ export async function PublicHeader({ currentPath }: PublicHeaderProps) {
                   <Link href="/compte/logs" className="block rounded-md px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 hover:text-slate-900">
                     Logs d&apos;activité
                   </Link>
+                  <div className="my-1 h-px bg-slate-100" />
+                  <form action={logoutAccountAction}>
+                    <button
+                      type="submit"
+                      className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium text-rose-600 transition-colors hover:bg-rose-50"
+                    >
+                      <LogOut className="size-4" />
+                      Se déconnecter
+                    </button>
+                  </form>
                 </div>
               </div>
               {session.isAdmin ? (

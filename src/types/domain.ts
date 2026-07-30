@@ -83,6 +83,8 @@ export interface UserProfileRecord {
   role: string;
   createdAt: string;
   updatedAt: string;
+  isBanned: boolean;
+  banReason?: string;
 }
 
 export type AccountActivityType =

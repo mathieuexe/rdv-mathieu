@@ -38,6 +38,10 @@ export default async function BookingCategoryPage({
   const bookingState = getBookingState(payload.category, payload.siteSettings);
   const session = await getPublicUserSession();
 
+  if (session.isBanned) {
+    redirect("/bloque");
+  }
+
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
       <PublicHeader />

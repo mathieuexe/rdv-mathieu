@@ -13,8 +13,14 @@ export default async function AdminLoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-white px-6 py-10 text-black">
+    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-6 py-10 text-slate-900">
       <div className="w-full max-w-md">
+        <div className="mb-8 text-center">
+          <h1 className="text-2xl font-bold text-slate-900">Administration</h1>
+          <p className="mt-2 text-sm text-slate-500">
+            Connectez-vous pour accéder à votre espace de gestion.
+          </p>
+        </div>
         <LoginForm action={loginAction} />
       </div>
     </main>

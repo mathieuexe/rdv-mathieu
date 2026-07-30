@@ -13,6 +13,10 @@ export default async function AccountSecurityPage() {
     redirect("/connexion");
   }
 
+  if (session.isBanned) {
+    redirect("/bloque");
+  }
+
   if (!session.requiresPasswordChange) {
     redirect("/compte");
   }

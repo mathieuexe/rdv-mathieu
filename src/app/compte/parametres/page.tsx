@@ -14,6 +14,10 @@ export default async function AccountSettingsPage() {
     redirect("/connexion");
   }
 
+  if (session.isBanned) {
+    redirect("/bloque");
+  }
+
   const profile = await getUserProfileByUserId(session.userId);
 
   if (!profile) {

@@ -167,6 +167,8 @@ function mapUserProfileRow(row: Record<string, unknown>): UserProfileRecord {
     lastName: String(row.last_name ?? ""),
     phone: typeof row.phone === "string" ? row.phone : undefined,
     requiresPasswordChange: Boolean(row.requires_password_change),
+    isBanned: Boolean(row.is_banned),
+    banReason: typeof row.ban_reason === "string" ? row.ban_reason : undefined,
     role: String(row.role ?? "Prospect"),
     createdAt: String(row.created_at ?? new Date().toISOString()),
     updatedAt: String(row.updated_at ?? new Date().toISOString()),

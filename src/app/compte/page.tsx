@@ -52,6 +52,14 @@ export default async function AccountPage() {
     redirect("/connexion");
   }
 
+  if (session.isBanned) {
+    redirect("/bloque");
+  }
+
+  if (session.requiresPasswordChange) {
+    redirect("/compte/securite");
+  }
+
   const appointments = await getUserAppointmentsForAccount({
     userId: session.userId,
     email: session.email,
