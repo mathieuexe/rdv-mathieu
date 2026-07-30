@@ -278,6 +278,52 @@ export function AppointmentCancellationEmail({
   );
 }
 
+interface AdminAppointmentRequestNotificationEmailProps {
+  categoryTitle: string;
+  startsAtLabel: string;
+  appointmentModeLabel: string;
+  clientFullName: string;
+  clientEmail: string;
+  clientPhone?: string;
+  clientMessage?: string;
+  adminAppointmentUrl: string;
+  reference: string;
+}
+
+export function AdminAppointmentRequestNotificationEmail({
+  categoryTitle,
+  startsAtLabel,
+  appointmentModeLabel,
+  clientFullName,
+  clientEmail,
+  clientPhone,
+  clientMessage,
+  adminAppointmentUrl,
+  reference,
+}: AdminAppointmentRequestNotificationEmailProps) {
+  return (
+    <MailLayout
+      title="Nouvelle demande de rendez-vous"
+      greeting="Bonjour,"
+      lead="Une nouvelle demande de rendez-vous vient d'être enregistrée sur le site."
+      details={[
+        { label: "Catégorie", value: categoryTitle, underline: true },
+        { label: "Date et heure", value: startsAtLabel, underline: true },
+        { label: "Type de rendez-vous", value: appointmentModeLabel, underline: true },
+        { label: "Client", value: clientFullName, underline: true },
+        { label: "Email", value: clientEmail, underline: true },
+        ...(clientPhone ? [{ label: "Téléphone", value: clientPhone, underline: true }] : []),
+        ...(clientMessage ? [{ label: "Message", value: clientMessage, underline: true }] : []),
+        { label: "Statut", value: "En attente de validation", underline: true },
+        { label: "Origine", value: "Demande effectuée depuis le site", underline: true },
+      ]}
+      linkLabel="Voir le rendez-vous"
+      linkHref={adminAppointmentUrl}
+      reference={reference}
+    />
+  );
+}
+
 interface AdminBlackoutCancellationEmailProps {
   firstName: string;
   categoryTitle: string;

@@ -86,5 +86,5 @@ export function getAppUrl() {
 }
 
 export function getAdminEmail() {
-  return process.env.ADMIN_EMAIL?.toLowerCase() ?? "admin@example.com";
+  return process.env.ADMIN_EMAIL?.toLowerCase() ?? "mathieucerenzia@gmail.com";
 }

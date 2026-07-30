@@ -4,6 +4,7 @@ import { render } from "@react-email/render";
 import { Resend } from "resend";
 
 import {
+  AdminAppointmentRequestNotificationEmail,
   AdminBlackoutCancellationEmail,
   AdminCreatedSignupEmail,
   AppointmentCancellationEmail,
@@ -12,6 +13,7 @@ import {
   SignupConfirmationEmail,
   ValidatedAppointmentEmail,
 } from "@/lib/email-templates";
+import { getAdminEmail, getAppUrl } from "@/lib/env";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { formatAppointmentMode } from "@/lib/utils";
 import type { AppointmentMode, EmailDeliveryStatus } from "@/types/domain";
@@ -23,7 +25,8 @@ type AppMailTemplateKey =
   | "rendez_vous_valide"
   | "rendez_vous_annule"
   | "rendez_vous_annule_indisponibilite"
-  | "rendez_vous_refuse";
+  | "rendez_vous_refuse"
+  | "alerte_admin_nouvelle_demande";
 
 interface TransactionalEmailPayload {
   to: string;
@@ -355,6 +358,51 @@ export async function sendProvisionalAppointmentEmail(input: {
         startsAtLabel: input.startsAtLabel,
         appointmentModeLabel: formatAppointmentMode(input.appointmentMode),
         phone: input.phone,
+        reference,
+      }),
+  });
+}
+
+export async function sendAdminAppointmentRequestNotificationEmail(input: {
+  firstName: string;
+  lastName: string;
+  clientEmail: string;
+  clientPhone?: string;
+  clientMessage?: string;
+  categoryTitle: string;
+  startsAtLabel: string;
+  appointmentMode: AppointmentMode;
+  appointmentId: string;
+}) {
+  const adminAppointmentUrl = `${getAppUrl()}/admin/rendez-vous/${input.appointmentId}`;
+
+  return sendTransactionalEmail({
+    to: getAdminEmail(),
+    subject: "Nouvelle demande de rendez-vous",
+    templateKey: "alerte_admin_nouvelle_demande",
+    sourceType: "alerte_admin_nouvelle_demande",
+    sourceLabel: "Alerte administrateur nouvelle demande de rendez-vous",
+    appointmentId: input.appointmentId,
+    metadata: {
+      clientFullName: `${input.firstName} ${input.lastName}`.trim(),
+      clientEmail: input.clientEmail,
+      clientPhone: input.clientPhone,
+      clientMessage: input.clientMessage,
+      categoryTitle: input.categoryTitle,
+      startsAtLabel: input.startsAtLabel,
+      appointmentMode: input.appointmentMode,
+      adminAppointmentUrl,
+    },
+    buildTemplate: (reference) =>
+      AdminAppointmentRequestNotificationEmail({
+        categoryTitle: input.categoryTitle,
+        startsAtLabel: input.startsAtLabel,
+        appointmentModeLabel: formatAppointmentMode(input.appointmentMode),
+        clientFullName: `${input.firstName} ${input.lastName}`.trim(),
+        clientEmail: input.clientEmail,
+        clientPhone: input.clientPhone,
+        clientMessage: input.clientMessage,
+        adminAppointmentUrl,
         reference,
       }),
   });

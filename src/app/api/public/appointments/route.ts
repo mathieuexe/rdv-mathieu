@@ -2,7 +2,7 @@ import { createAppointmentRequest, getCategorySlots } from "@/lib/data-access";
 import { extractClientContextFromHeaders } from "@/lib/account-activity";
 import { createAccountActivityLog } from "@/lib/data-access";
 import { getPublicUserSession } from "@/lib/auth";
-import { sendProvisionalAppointmentEmail } from "@/lib/email";
+import { sendAdminAppointmentRequestNotificationEmail, sendProvisionalAppointmentEmail } from "@/lib/email";
 import { isMaintenanceBypassedForHeaders } from "@/lib/maintenance";
 import { formatDateTimeFr } from "@/lib/utils";
 import { appointmentRequestSchema } from "@/lib/validators";
@@ -49,14 +49,27 @@ export async function POST(request: Request) {
       requestedByUserId:
         session.isAuthenticated && session.userId && session.email === parsed.data.email.toLowerCase() ? session.userId : undefined,
     });
+    const startsAtLabel = formatDateTimeFr(result.appointment.startsAt, { dateStyle: "full", timeStyle: "short" });
 
     await sendProvisionalAppointmentEmail({
       to: result.appointment.email,
       firstName: result.appointment.firstName,
       categoryTitle: result.category.title,
-      startsAtLabel: formatDateTimeFr(result.appointment.startsAt, { dateStyle: "full", timeStyle: "short" }),
+      startsAtLabel,
       appointmentMode: result.category.appointmentMode,
       phone: result.appointment.phone,
+      appointmentId: result.appointment.id,
+    });
+
+    await sendAdminAppointmentRequestNotificationEmail({
+      firstName: result.appointment.firstName,
+      lastName: result.appointment.lastName,
+      clientEmail: result.appointment.email,
+      clientPhone: result.appointment.phone,
+      clientMessage: result.appointment.clientMessage,
+      categoryTitle: result.category.title,
+      startsAtLabel,
+      appointmentMode: result.category.appointmentMode,
       appointmentId: result.appointment.id,
     });
 
