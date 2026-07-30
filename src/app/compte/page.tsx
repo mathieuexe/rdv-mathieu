@@ -53,7 +53,7 @@ export default async function AccountPage() {
   }
 
   if (session.isBanned) {
-    redirect("/bloque");
+    redirect("/");
   }
 
   if (session.requiresPasswordChange) {

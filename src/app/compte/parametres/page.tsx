@@ -15,7 +15,7 @@ export default async function AccountSettingsPage() {
   }
 
   if (session.isBanned) {
-    redirect("/bloque");
+    redirect("/");
   }
 
   const profile = await getUserProfileByUserId(session.userId);

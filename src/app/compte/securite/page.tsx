@@ -14,7 +14,7 @@ export default async function AccountSecurityPage() {
   }
 
   if (session.isBanned) {
-    redirect("/bloque");
+    redirect("/");
   }
 
   if (!session.requiresPasswordChange) {

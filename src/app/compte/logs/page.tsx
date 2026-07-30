@@ -32,7 +32,7 @@ export default async function AccountLogsPage() {
   }
 
   if (session.isBanned) {
-    redirect("/bloque");
+    redirect("/");
   }
 
   const logs = await getUserAccountActivityLogs(session.userId);

@@ -39,7 +39,7 @@ export default async function BookingCategoryPage({
   const session = await getPublicUserSession();
 
   if (session.isBanned) {
-    redirect("/bloque");
+    redirect("/");
   }
 
   return (
