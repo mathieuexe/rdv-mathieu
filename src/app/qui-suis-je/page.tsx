@@ -65,7 +65,7 @@ export default function AboutPage() {
                 </div>
               </div>
 
-              <div className="relative mx-auto w-full max-w-md lg:max-w-none">
+              <div className="relative mx-auto w-full max-w-sm lg:max-w-[320px]">
                 <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-slate-200 shadow-xl border border-slate-200">
                   <img
                     src="/images/mathieu.jpeg"
