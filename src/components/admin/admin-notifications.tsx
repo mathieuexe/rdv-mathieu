@@ -197,6 +197,16 @@ export function AdminNotifications() {
     await supabase.from("admin_notifications").update({ is_read: true }).eq("is_read", false);
   };
 
+  const deleteAllNotifications = async () => {
+    const supabase = getSupabaseBrowserClient();
+    if (!supabase) return;
+
+    setNotifications([]);
+    setUnreadCount(0);
+
+    await supabase.from("admin_notifications").delete().neq("id", "0"); // deletes all
+  };
+
   const getIconForType = (type: NotificationType) => {
     switch (type) {
       case "new_user":
@@ -229,15 +239,24 @@ export function AdminNotifications() {
         <div className="absolute right-0 mt-2 w-80 sm:w-96 origin-top-right rounded-xl border border-slate-200 bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
           <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
             <h3 className="text-sm font-semibold text-slate-900">Notifications</h3>
-            {unreadCount > 0 && (
-              <button
-                onClick={markAllAsRead}
-                className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700"
-              >
-                <Check className="size-3" />
-                Tout marquer comme lu
-              </button>
-            )}
+            <div className="flex items-center gap-3">
+              {unreadCount > 0 && (
+                <button
+                  onClick={markAllAsRead}
+                  className="text-xs font-medium text-blue-600 hover:text-blue-700 hover:underline"
+                >
+                  Tout lu
+                </button>
+              )}
+              {notifications.length > 0 && (
+                <button
+                  onClick={deleteAllNotifications}
+                  className="text-xs font-medium text-rose-600 hover:text-rose-700 hover:underline"
+                >
+                  Tout supprimer
+                </button>
+              )}
+            </div>
           </div>
           <div className="max-h-[400px] overflow-y-auto">
             {notifications.length === 0 ? (
@@ -254,7 +273,7 @@ export function AdminNotifications() {
                       !notification.is_read ? "bg-blue-50/50" : ""
                     )}
                   >
-                    <div className="mt-0.5 shrink-0 rounded-full border border-slate-200 bg-white p-1.5 shadow-sm">
+                    <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white shadow-sm">
                       {getIconForType(notification.type)}
                     </div>
                     <div className="flex-1 min-w-0">

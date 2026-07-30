@@ -6,11 +6,13 @@ import {
   updateAdminUserProfileAction, 
   updateAdminUserSecurityAction,
   banAdminUserAction,
-  deleteAdminUserAction
+  deleteAdminUserAction,
+  sendCustomEmailAction
 } from "@/app/admin/(dashboard)/actions";
 import { AdminUserProfileForm } from "@/components/admin/admin-user-profile-form";
 import { AdminUserSecurityForm } from "@/components/admin/admin-user-security-form";
 import { AdminUserDangerForm } from "@/components/admin/admin-user-danger-form";
+import { AdminUserEmailDialog } from "@/components/admin/admin-user-email-dialog";
 import { getAdminUserDetail } from "@/lib/data-access";
 import { formatAppointmentStatus, formatDateTimeFr, formatPhone } from "@/lib/utils";
 
@@ -78,7 +80,10 @@ export default async function AdminUserDetailPage({
         <div className="flex flex-wrap gap-6 md:gap-12">
           <div>
             <p className="text-xs text-slate-500">Email</p>
-            <p className="text-sm font-medium text-slate-900">{profile.email}</p>
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-medium text-slate-900">{profile.email}</p>
+              <AdminUserEmailDialog userEmail={profile.email} userFirstName={profile.firstName} action={sendCustomEmailAction} />
+            </div>
           </div>
           {profile.phone && (
             <div>

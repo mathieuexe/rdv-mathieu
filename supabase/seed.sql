@@ -24,7 +24,7 @@ values
     'visioconference',
     'consultation-30min',
     true,
-    'Merci d''indiquer en quelques mots l''objet du rendez-vous.'
+    NULL
   ),
   (
     '22222222-2222-2222-2222-222222222222',

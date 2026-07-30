@@ -24,6 +24,7 @@ import {
   sendAdminCreatedSignupEmail,
   sendBlackoutAppointmentCancellationEmail,
   sendValidatedAppointmentEmail,
+  sendAdminCustomEmailToUser
 } from "@/lib/email";
 import { adminAppointmentSchema, categoryAdminSchema, settingsSchema } from "@/lib/validators";
 import { formatDateTimeFr } from "@/lib/utils";
@@ -709,5 +710,35 @@ export async function duplicateCategoryAction(
       status: "error",
       message: error instanceof Error ? error.message : "Impossible de dupliquer la catégorie.",
     };
+  }
+}
+
+export async function sendCustomEmailAction(formData: FormData) {
+  const session = await getAdminSession();
+
+  if (!session.isAuthenticated) {
+    return { error: "Accès non autorisé." };
+  }
+
+  const email = String(formData.get("email") ?? "").trim();
+  const firstName = String(formData.get("firstName") ?? "").trim();
+  const subject = String(formData.get("subject") ?? "").trim();
+  const message = String(formData.get("message") ?? "").trim();
+
+  if (!email || !subject || !message) {
+    return { error: "Tous les champs sont requis." };
+  }
+
+  try {
+    await sendAdminCustomEmailToUser({
+      to: email,
+      firstName,
+      subject,
+      message,
+    });
+    
+    return { success: true };
+  } catch (error) {
+    return { error: "Impossible d'envoyer l'email." };
   }
 }

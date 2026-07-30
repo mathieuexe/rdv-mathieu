@@ -17,6 +17,7 @@ interface MailLayoutProps {
   linkLabel?: string;
   linkHref?: string;
   reference: string;
+  children?: React.ReactNode;
 }
 
 function MailLayout({
@@ -30,6 +31,7 @@ function MailLayout({
   linkLabel,
   linkHref,
   reference,
+  children,
 }: MailLayoutProps) {
   return (
     <div
@@ -103,6 +105,8 @@ function MailLayout({
             </p>
           </div>
         ))}
+
+        {children}
 
         {linkLabel && linkHref ? (
           <div style={{ margin: "32px 0 0" }}>
@@ -404,6 +408,33 @@ export function AdminBlackoutCancellationEmail({
       linkHref={getAppUrl()}
       reference={reference}
     />
+  );
+}
+
+interface CustomAdminEmailProps {
+  firstName: string;
+  subject: string;
+  message: string;
+  reference: string;
+}
+
+export function CustomAdminEmail({
+  firstName,
+  subject,
+  message,
+  reference,
+}: CustomAdminEmailProps) {
+  return (
+    <MailLayout
+      title={subject}
+      greeting={`Bonjour ${firstName},`}
+      lead=""
+      reference={reference}
+    >
+      <div style={{ whiteSpace: "pre-wrap", color: "#475569", margin: "0 0 16px" }}>
+        {message}
+      </div>
+    </MailLayout>
   );
 }
 

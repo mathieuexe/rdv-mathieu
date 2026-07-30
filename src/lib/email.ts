@@ -12,6 +12,7 @@ import {
   RefusedAppointmentEmail,
   SignupConfirmationEmail,
   ValidatedAppointmentEmail,
+  CustomAdminEmail,
 } from "@/lib/email-templates";
 import { getAppUrl } from "@/lib/env";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
@@ -26,7 +27,8 @@ type AppMailTemplateKey =
   | "rendez_vous_annule"
   | "rendez_vous_annule_indisponibilite"
   | "rendez_vous_refuse"
-  | "alerte_admin_nouvelle_demande";
+  | "alerte_admin_nouvelle_demande"
+  | "admin_message_personnalise";
 
 interface TransactionalEmailPayload {
   to: string;
@@ -507,6 +509,32 @@ export async function sendBlackoutAppointmentCancellationEmail(input: {
         appointmentDateLabel: input.appointmentDateLabel,
         appointmentTimeLabel: input.appointmentTimeLabel,
         reason: input.reason,
+        reference,
+      }),
+  });
+}
+
+export async function sendAdminCustomEmailToUser(input: {
+  to: string;
+  firstName: string;
+  subject: string;
+  message: string;
+}) {
+  return sendTransactionalEmail({
+    to: input.to,
+    subject: input.subject,
+    templateKey: "admin_message_personnalise",
+    sourceType: "admin_message",
+    sourceLabel: "Message envoyé depuis l'administration",
+    metadata: {
+      subject: input.subject,
+      message: input.message,
+    },
+    buildTemplate: (reference) =>
+      CustomAdminEmail({
+        firstName: input.firstName,
+        subject: input.subject,
+        message: input.message,
         reference,
       }),
   });

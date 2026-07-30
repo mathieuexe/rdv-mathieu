@@ -244,7 +244,16 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
                     Slug{" "}
                     {category?.slug && (
                       <span className="font-normal text-slate-500">
-                        (Lien : rdv.mathieucerenzia.fr/rdv/{category.slug})
+                        (Lien :{" "}
+                        <a 
+                          href={`https://rdv.mathieucerenzia.fr/rdv/${category.slug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline"
+                        >
+                          rdv.mathieucerenzia.fr/rdv/{category.slug}
+                        </a>
+                        )
                       </span>
                     )}
                   </span>
@@ -463,7 +472,7 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
                   rows={3}
                   defaultValue={category?.bookingBlockMessage}
                   placeholder="Les réservations pour cette catégorie sont temporairement suspendues..."
-                  className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 />
               </label>
             </div>
@@ -480,7 +489,7 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
                 rows={5}
                 defaultValue={category?.customMessage}
                 placeholder="Instructions, congés, informations utiles..."
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               />
             </div>
           </section>
