@@ -33,68 +33,88 @@ function MailLayout({
     <div
       style={{
         margin: 0,
-        padding: "0",
-        backgroundColor: "#ffffff",
-        color: "#111111",
+        padding: "40px 0",
+        backgroundColor: "#f8fafc", // slate-50
+        color: "#0f172a", // slate-900
         textAlign: "left",
         fontFamily:
-          'Gilroy, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-        lineHeight: 1.7,
+          'Inter, "Gilroy", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+        lineHeight: 1.6,
         fontSize: "15px",
       }}
     >
       <div
         style={{
-          maxWidth: "720px",
+          maxWidth: "600px",
           margin: "0 auto",
-          padding: "8px 0",
-          textAlign: "left",
+          padding: "32px",
+          backgroundColor: "#ffffff",
+          borderRadius: "12px",
+          boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)",
+          border: "1px solid #e2e8f0", // slate-200
         }}
       >
-        <p style={{ margin: "0 0 18px", fontSize: "13px", color: "#555555" }}>
+        <p style={{ margin: "0 0 24px", fontSize: "12px", color: "#64748b", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 600 }}>
           Prise de rendez-vous - Mathieu CERENZIA
         </p>
-        <p style={{ margin: 0, fontSize: "18px", lineHeight: "1.5", color: "#111111", fontWeight: 700 }}>{title}</p>
-        <p style={{ margin: "18px 0 0", color: "#111111" }}>{greeting}</p>
-        <p style={{ margin: "10px 0 0", color: "#111111" }}>{lead}</p>
+        
+        <h1 style={{ margin: "0 0 24px", fontSize: "24px", lineHeight: "1.3", color: "#0f172a", fontWeight: 700 }}>
+          {title}
+        </h1>
+        
+        <p style={{ margin: "0 0 16px", color: "#334155", fontWeight: 500 }}>{greeting}</p>
+        <p style={{ margin: "0 0 24px", color: "#475569" }}>{lead}</p>
 
         {details.length > 0 ? (
-          <div style={{ marginTop: "18px" }}>
-            {details.map((detail) => (
-              <p key={detail.label} style={{ margin: detail === details[0] ? "0" : "8px 0 0", color: "#111111" }}>
-                <strong>{detail.label} :</strong>{" "}
-                <span style={detail.underline ? { textDecoration: "underline" } : undefined}>{detail.value}</span>
+          <div style={{ margin: "0 0 24px", padding: "20px", backgroundColor: "#f8fafc", borderRadius: "8px", border: "1px solid #f1f5f9" }}>
+            {details.map((detail, index) => (
+              <p key={detail.label} style={{ margin: index === 0 ? "0" : "12px 0 0", color: "#334155", fontSize: "14px" }}>
+                <strong style={{ color: "#0f172a" }}>{detail.label} :</strong>{" "}
+                <span style={detail.underline ? { textDecoration: "underline", textUnderlineOffset: "4px" } : undefined}>{detail.value}</span>
               </p>
             ))}
           </div>
         ) : null}
 
         {paragraphs.map((paragraph) => (
-          <p key={paragraph} style={{ margin: "14px 0 0", color: "#111111" }}>
+          <p key={paragraph} style={{ margin: "0 0 16px", color: "#475569" }}>
             {paragraph}
           </p>
         ))}
 
         {highlightedParagraphs.map((paragraph) => (
-          <p key={paragraph} style={{ margin: "14px 0 0", color: "#dc2626", fontWeight: 700 }}>
-            {paragraph}
-          </p>
+          <div key={paragraph} style={{ margin: "24px 0", padding: "16px", backgroundColor: "#fef2f2", borderLeft: "4px solid #ef4444", borderRadius: "0 8px 8px 0" }}>
+            <p style={{ margin: 0, color: "#991b1b", fontWeight: 600 }}>
+              {paragraph}
+            </p>
+          </div>
         ))}
 
         {linkLabel && linkHref ? (
-          <p style={{ margin: "18px 0 0", color: "#111111" }}>
-            <strong>{linkLabel} :</strong>{" "}
-            <a href={linkHref} style={{ color: "#111111", textDecoration: "underline" }}>
-              {linkHref}
+          <div style={{ margin: "32px 0 0" }}>
+            <a 
+              href={linkHref} 
+              style={{ 
+                display: "inline-block", 
+                backgroundColor: "#2563eb", // blue-600
+                color: "#ffffff", 
+                textDecoration: "none", 
+                padding: "12px 24px", 
+                borderRadius: "6px", 
+                fontWeight: 600,
+                fontSize: "14px"
+              }}
+            >
+              {linkLabel}
             </a>
-          </p>
+          </div>
         ) : null}
 
-        <div style={{ marginTop: "24px", paddingTop: "16px", borderTop: "1px solid #dddddd" }}>
-          <p style={{ margin: 0, fontSize: "13px", color: "#555555" }}>
-            Mail envoyé automatiquement, merci de ne pas y répondre.
+        <div style={{ marginTop: "40px", paddingTop: "24px", borderTop: "1px solid #e2e8f0" }}>
+          <p style={{ margin: "0 0 8px", fontSize: "12px", color: "#94a3b8" }}>
+            Cet email a été envoyé automatiquement, merci de ne pas y répondre.
           </p>
-          <p style={{ margin: "6px 0 0", fontSize: "13px", color: "#555555" }}>Réf mail : {reference}</p>
+          <p style={{ margin: 0, fontSize: "12px", color: "#cbd5e1" }}>Réf : {reference}</p>
         </div>
       </div>
     </div>

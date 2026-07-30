@@ -14,6 +14,7 @@ import {
   Users,
 } from "lucide-react";
 
+import { AdminNotifications } from "@/components/admin/admin-notifications";
 import { cn } from "@/lib/utils";
 
 const navigationSections = [
@@ -128,14 +129,18 @@ export function AdminShell({ children }: AdminShellProps) {
             <span className="text-slate-500">App /</span> {currentSection.label}
           </div>
           
-          {/* Mobile menu link if needed - hidden on desktop */}
-          <Link
-             href="/"
-             className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 lg:hidden"
-           >
-             Site
-             <ArrowUpRight className="size-3" />
-          </Link>
+          <div className="flex items-center gap-4">
+            <AdminNotifications />
+            
+            {/* Mobile menu link if needed - hidden on desktop */}
+            <Link
+               href="/"
+               className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 lg:hidden"
+             >
+               Site
+               <ArrowUpRight className="size-3" />
+            </Link>
+          </div>
         </header>
 
         {/* Page Content */}

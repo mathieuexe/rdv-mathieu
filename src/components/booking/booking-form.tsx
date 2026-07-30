@@ -14,7 +14,6 @@ import {
 } from "lucide-react";
 
 import { groupSlotsByDay } from "@/lib/booking";
-import { CalendarLegend } from "@/components/shared/calendar-legend";
 import { cn, formatAppointmentMode, formatDateTimeFr } from "@/lib/utils";
 import type { AppointmentCategory, BookingSlot } from "@/types/domain";
 
@@ -354,7 +353,6 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                   <div className="mt-8 inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-500">
                     Heure d&apos;Europe, Paris (24h)
                   </div>
-                  <CalendarLegend className="mt-5" />
                 </div>
               </>
             ) : activeStep === 2 ? (
