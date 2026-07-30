@@ -130,12 +130,18 @@ export function buildBookingSlots({
 }
 
 export function groupSlotsByDay(slots: BookingSlot[]) {
-  return slots.reduce<Record<string, BookingSlot[]>>((groups, slot) => {
+  const groups = slots.reduce<Record<string, BookingSlot[]>>((acc, slot) => {
     const key = slot.start.slice(0, 10);
-    groups[key] ??= [];
-    groups[key].push(slot);
-    return groups;
+    acc[key] ??= [];
+    acc[key].push(slot);
+    return acc;
   }, {});
+
+  for (const key of Object.keys(groups)) {
+    groups[key].sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
+  }
+
+  return groups;
 }
 
 export function getBookingState(category: AppointmentCategory, siteSettings: SiteSettings) {
