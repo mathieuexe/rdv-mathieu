@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Search, ChevronRight } from "lucide-react";
 
+import { formatPhone } from "@/lib/utils";
 import type { UserProfileRecord } from "@/types/domain";
 
 interface AdminUsersTableProps {
@@ -67,7 +68,7 @@ export function AdminUsersTable({ users }: AdminUsersTableProps) {
 
                 <div className="min-w-0 pr-4">
                   <p className="truncate text-slate-700">{user.email}</p>
-                  <p className="mt-0.5 text-xs text-slate-500">{user.phone ?? "N/A"}</p>
+                  <p className="mt-0.5 text-xs text-slate-500">{formatPhone(user.phone) || "N/A"}</p>
                 </div>
 
                 <div>

@@ -19,7 +19,7 @@ export default async function Home() {
     <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
       <PublicHeader />
       
-      {settings.globalBlackoutPeriods && settings.globalBlackoutPeriods.length > 0 && (
+      {settings.enableBlackoutMarquee && settings.globalBlackoutPeriods && settings.globalBlackoutPeriods.length > 0 && (
         <PublicBlackoutMarquee periods={settings.globalBlackoutPeriods} />
       )}
 

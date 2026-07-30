@@ -90,6 +90,8 @@ export async function saveCategoryAction(formData: FormData) {
     appointmentMode: formData.get("appointmentMode"),
     description: formData.get("description"),
     isOnline: formData.get("isOnline") === "on",
+    isBookingBlocked: formData.get("isBookingBlocked") === "on",
+    bookingBlockMessage: formData.get("bookingBlockMessage"),
     customMessage: formData.get("customMessage"),
     thumbnailImageDataUrl: formData.get("thumbnailImageDataUrl"),
     bannerImageDataUrl: formData.get("bannerImageDataUrl"),
@@ -112,6 +114,8 @@ export async function saveCategoryAction(formData: FormData) {
       appointmentMode: parsed.data.appointmentMode,
       description: parsed.data.description,
       isOnline: parsed.data.isOnline,
+      isBookingBlocked: parsed.data.isBookingBlocked,
+      bookingBlockMessage: parsed.data.bookingBlockMessage || undefined,
       customMessage: parsed.data.customMessage || undefined,
       thumbnailImageUrl: parsed.data.thumbnailImageDataUrl || undefined,
       bannerImageUrl: parsed.data.bannerImageDataUrl || undefined,
@@ -122,7 +126,7 @@ export async function saveCategoryAction(formData: FormData) {
     revalidatePath("/admin/categories");
     revalidatePath("/");
 
-    successPath = parsed.data.categoryId ? returnPath : `/admin/categories/${category.id}`;
+    successPath = `/admin/categories/${category.slug}`;
   } catch (error) {
     const message = encodeURIComponent(error instanceof Error ? error.message : "Impossible d'enregistrer la categorie.");
     redirect(`${returnPath}?error=${message}`);
@@ -143,6 +147,7 @@ export async function saveSettingsAction(formData: FormData) {
     maintenanceMessage: formData.get("maintenanceMessage"),
     maintenanceAllowedIps: formData.get("maintenanceAllowedIps"),
     enableWhatsappWidget: formData.get("enableWhatsappWidget") === "on",
+    enableBlackoutMarquee: formData.get("enableBlackoutMarquee") === "on",
     globalBlackoutPeriods: parseGlobalBlackoutPeriods(formData),
   });
 
@@ -587,4 +592,122 @@ export async function deleteAdminUserAction(
   
   revalidatePath("/admin/utilisateurs");
   redirect("/admin/utilisateurs");
+}
+
+export async function deleteCategoryAction(
+  _state: AdminUserActionState,
+  formData: FormData,
+): Promise<AdminUserActionState> {
+  const session = await getAdminSession();
+
+  if (!session.isAuthenticated) {
+    return { status: "error", message: "Accès non autorisé." };
+  }
+
+  const categoryId = String(formData.get("categoryId") ?? "").trim();
+
+  if (!categoryId) {
+    return { status: "error", message: "Catégorie introuvable." };
+  }
+
+  try {
+    const { getSupabaseAdminClient } = await import("@/lib/supabase/admin");
+    const supabaseAdmin = getSupabaseAdminClient();
+    
+    if (!supabaseAdmin) throw new Error("Erreur de connexion base de données.");
+
+    // The categories table should have ON DELETE CASCADE for rules and blackouts,
+    // but if not, we might need to delete them first. Let's just try to delete the category.
+    // However, if there are appointments, it might fail. Let's catch the error.
+    const { error } = await supabaseAdmin
+      .from("categories")
+      .delete()
+      .eq("id", categoryId);
+
+    if (error) {
+      if (error.code === "23503") {
+         throw new Error("Impossible de supprimer cette catégorie car des rendez-vous y sont rattachés.");
+      }
+      throw error;
+    }
+
+    revalidatePath("/admin/categories");
+    revalidatePath("/");
+    
+    // We cannot redirect inside a try-catch returning a state easily, but since this is an action state
+    // we can return success and the client component will handle redirect or we can just return success
+    return {
+      status: "success",
+      message: "Catégorie supprimée avec succès.",
+    };
+  } catch (error) {
+    return {
+      status: "error",
+      message: error instanceof Error ? error.message : "Impossible de supprimer la catégorie.",
+    };
+  }
+}
+
+export async function duplicateCategoryAction(
+  _state: AdminUserActionState,
+  formData: FormData,
+): Promise<AdminUserActionState> {
+  const session = await getAdminSession();
+
+  if (!session.isAuthenticated) {
+    return { status: "error", message: "Accès non autorisé." };
+  }
+
+  const categoryId = String(formData.get("categoryId") ?? "").trim();
+
+  if (!categoryId) {
+    return { status: "error", message: "Catégorie introuvable." };
+  }
+
+  try {
+    const categoryToDuplicate = await getCategoryById(categoryId);
+    if (!categoryToDuplicate) {
+      throw new Error("La catégorie à dupliquer est introuvable.");
+    }
+
+    // Append "-copie" to slug, wait, if it exists it will fail.
+    // Just append a random string or timestamp.
+    const suffix = Math.floor(Math.random() * 10000).toString();
+    const newSlug = `${categoryToDuplicate.slug}-copie-${suffix}`;
+    const newTitle = `${categoryToDuplicate.title} (Copie)`;
+
+    const newCategory = await saveCategory({
+      title: newTitle,
+      slug: newSlug,
+      durationMinutes: categoryToDuplicate.durationMinutes,
+      appointmentMode: categoryToDuplicate.appointmentMode,
+      description: categoryToDuplicate.description,
+      isOnline: false, // Default to offline for copies
+      isBookingBlocked: categoryToDuplicate.isBookingBlocked,
+      bookingBlockMessage: categoryToDuplicate.bookingBlockMessage,
+      customMessage: categoryToDuplicate.customMessage,
+      thumbnailImageUrl: categoryToDuplicate.thumbnailImageUrl,
+      bannerImageUrl: categoryToDuplicate.bannerImageUrl,
+      availabilityRules: categoryToDuplicate.availabilityRules.map(rule => ({
+        weekday: rule.weekday,
+        enabled: rule.windows.length > 0,
+        startTime: rule.windows[0]?.start ?? "09:00",
+        endTime: rule.windows[rule.windows.length - 1]?.end ?? "18:00",
+        breakStart: rule.windows.length > 1 ? rule.windows[0]?.end : "",
+        breakEnd: rule.windows.length > 1 ? rule.windows[1]?.start : "",
+      })),
+    });
+
+    revalidatePath("/admin/categories");
+    
+    return {
+      status: "success",
+      message: newCategory.slug, // Pass the new slug so we can redirect to it
+    };
+  } catch (error) {
+    return {
+      status: "error",
+      message: error instanceof Error ? error.message : "Impossible de dupliquer la catégorie.",
+    };
+  }
 }

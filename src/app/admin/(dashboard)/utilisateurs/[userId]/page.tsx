@@ -12,7 +12,7 @@ import { AdminUserProfileForm } from "@/components/admin/admin-user-profile-form
 import { AdminUserSecurityForm } from "@/components/admin/admin-user-security-form";
 import { AdminUserDangerForm } from "@/components/admin/admin-user-danger-form";
 import { getAdminUserDetail } from "@/lib/data-access";
-import { formatAppointmentStatus, formatDateTimeFr } from "@/lib/utils";
+import { formatAppointmentStatus, formatDateTimeFr, formatPhone } from "@/lib/utils";
 
 function safeDecode(value?: string | null) {
   if (!value) return "";
@@ -83,7 +83,7 @@ export default async function AdminUserDetailPage({
           {profile.phone && (
             <div>
               <p className="text-xs text-slate-500">Téléphone</p>
-              <p className="text-sm font-medium text-slate-900">{profile.phone}</p>
+              <p className="text-sm font-medium text-slate-900">{formatPhone(profile.phone)}</p>
             </div>
           )}
           <div>

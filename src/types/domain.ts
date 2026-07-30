@@ -43,6 +43,8 @@ export interface AppointmentCategory {
   bannerImageUrl?: string;
   availabilityRules: CategoryAvailabilityRule[];
   blackoutPeriods: BlackoutPeriod[];
+  isBookingBlocked?: boolean;
+  bookingBlockMessage?: string;
 }
 
 export interface SiteSettings {
@@ -50,6 +52,7 @@ export interface SiteSettings {
   maintenanceMessage: string;
   maintenanceAllowedIps: string[];
   enableWhatsappWidget: boolean;
+  enableBlackoutMarquee: boolean;
   globalBlackoutPeriods: BlackoutPeriod[];
 }
 

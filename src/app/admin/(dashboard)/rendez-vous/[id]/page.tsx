@@ -3,7 +3,7 @@ import { Calendar, Mail, FileText, User, Tag, Clock, CheckCircle2, AlertCircle }
 
 import { AppointmentDecisionPanel } from "@/components/admin/appointment-decision-panel";
 import { getAppointmentById, getCategoryById } from "@/lib/data-access";
-import { formatAppointmentMode, formatAppointmentStatus, formatDateTimeFr } from "@/lib/utils";
+import { formatAppointmentMode, formatAppointmentStatus, formatDateTimeFr, formatPhone } from "@/lib/utils";
 
 export default async function AppointmentDetailPage({
   params,
@@ -83,7 +83,7 @@ export default async function AppointmentDetailPage({
                 </div>
                 <div>
                   <p className="text-xs text-slate-500">Téléphone</p>
-                  <p className="mt-1 text-sm font-medium text-slate-900">{appointment.phone || "Non renseigné"}</p>
+                  <p className="mt-1 text-sm font-medium text-slate-900">{formatPhone(appointment.phone) || "Non renseigné"}</p>
                 </div>
                 <div>
                   <p className="text-xs text-slate-500">Créé par</p>

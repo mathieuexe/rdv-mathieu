@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { Save, LoaderCircle } from "lucide-react";
+import { PhoneInput } from "@/components/ui/phone-input";
 
 import type { AccountProfileActionState } from "@/app/compte/actions";
 import type { UserProfileRecord } from "@/types/domain";
@@ -58,13 +59,11 @@ export function AccountProfileForm({ profile, action }: AccountProfileFormProps)
 
       <label className="block space-y-1.5 text-sm font-medium text-slate-700">
         <span>Numéro de téléphone</span>
-        <input
+        <PhoneInput
           name="phone"
-          type="tel"
           defaultValue={profile.phone ?? ""}
           required
           disabled={pending}
-          className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500"
         />
       </label>
 

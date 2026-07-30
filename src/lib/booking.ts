@@ -58,7 +58,7 @@ export function buildBookingSlots({
   appointments: AppointmentRecord[];
   daysToShow?: number;
 }): BookingSlot[] {
-  if (!category.isOnline || siteSettings.maintenanceMode) {
+  if (!category.isOnline || siteSettings.maintenanceMode || category.isBookingBlocked) {
     return [];
   }
 
@@ -145,6 +145,14 @@ export function getBookingState(category: AppointmentCategory, siteSettings: Sit
       available: false,
       title: "Catégorie indisponible",
       message: category.customMessage ?? "Cette catégorie est temporairement hors ligne.",
+    };
+  }
+
+  if (category.isBookingBlocked) {
+    return {
+      available: false,
+      title: "Réservation indisponible",
+      message: category.bookingBlockMessage || "La réservation est temporairement indisponible pour cette catégorie.",
     };
   }
 

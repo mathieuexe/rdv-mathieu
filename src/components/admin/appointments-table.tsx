@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 
-import { formatAppointmentStatus, formatDateTimeFr } from "@/lib/utils";
+import { formatAppointmentStatus, formatDateTimeFr, formatPhone } from "@/lib/utils";
 import type { AppointmentCategory, AppointmentRecord } from "@/types/domain";
 
 interface AppointmentWithCategory extends AppointmentRecord {
@@ -52,6 +52,9 @@ export function AppointmentsTable({ appointments }: AppointmentsTableProps) {
                   {appointment.firstName} {appointment.lastName}
                 </p>
                 <p className="mt-0.5 text-xs text-slate-500">{appointment.email}</p>
+                {appointment.phone && (
+                  <p className="mt-0.5 text-xs text-slate-500">{formatPhone(appointment.phone)}</p>
+                )}
               </td>
               <td className="px-5 py-3">{appointment.category?.title ?? "Catégorie supprimée"}</td>
               <td className="px-5 py-3 whitespace-nowrap">

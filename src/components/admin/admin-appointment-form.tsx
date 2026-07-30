@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { CalendarDays, Clock3, MapPinned } from "lucide-react";
 
 import { CalendarLegend } from "@/components/shared/calendar-legend";
+import { PhoneInput } from "@/components/ui/phone-input";
 import { groupSlotsByDay } from "@/lib/booking";
 import { cn, formatAppointmentMode } from "@/lib/utils";
 import type { AppointmentCategory, BookingSlot, UserProfileRecord } from "@/types/domain";
@@ -295,13 +296,11 @@ export function AdminAppointmentForm({ categories, registeredClients, action, er
 
               <label className="block space-y-1.5 text-sm font-medium text-slate-700">
                 <span>Téléphone</span>
-                <input
+                <PhoneInput
                   name="phone"
-                  type="tel"
                   required
                   value={phone}
-                  onChange={(event) => setPhone(event.target.value)}
-                  className="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  onChange={(val) => setPhone(val || "")}
                 />
               </label>
 

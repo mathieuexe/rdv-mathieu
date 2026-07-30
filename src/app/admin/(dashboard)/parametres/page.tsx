@@ -58,6 +58,10 @@ export default async function SettingsPage({
                   <input type="checkbox" name="enableWhatsappWidget" defaultChecked={settings.enableWhatsappWidget} className="size-4 rounded border-slate-300" />
                   <span>Afficher le widget WhatsApp public</span>
                 </label>
+                <label className="flex items-center gap-3 text-sm font-medium text-slate-900">
+                  <input type="checkbox" name="enableBlackoutMarquee" defaultChecked={settings.enableBlackoutMarquee} className="size-4 rounded border-slate-300" />
+                  <span>Afficher la barre d'indisponibilité ("À venir") sur la page d'accueil</span>
+                </label>
               </div>
 
               <label className="block space-y-1.5 text-sm font-medium text-slate-700">

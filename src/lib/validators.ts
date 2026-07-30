@@ -45,6 +45,8 @@ export const categoryAdminSchema = z
     appointmentMode: z.enum(["telephone", "physique", "visioconference"]),
     description: z.string().trim().min(10, "La description est requise."),
     isOnline: z.boolean(),
+    isBookingBlocked: z.boolean().optional(),
+    bookingBlockMessage: z.string().trim().max(500).optional().or(z.literal("")),
     customMessage: z.string().trim().max(500).optional().or(z.literal("")),
     thumbnailImageDataUrl: z.string().trim().max(5_000_000).optional().or(z.literal("")),
     bannerImageDataUrl: z.string().trim().max(8_000_000).optional().or(z.literal("")),
@@ -114,6 +116,7 @@ export const settingsSchema = z
     maintenanceMessage: z.string().trim(),
     maintenanceAllowedIps: z.string().trim().max(2000, "La liste des IP autorisées est trop longue."),
     enableWhatsappWidget: z.boolean(),
+    enableBlackoutMarquee: z.boolean().default(true),
     globalBlackoutPeriods: z
       .array(
         z

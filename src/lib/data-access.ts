@@ -24,6 +24,7 @@ const defaultSiteSettings: SiteSettings = {
   maintenanceMessage: "",
   maintenanceAllowedIps: [],
   enableWhatsappWidget: false,
+  enableBlackoutMarquee: true,
   globalBlackoutPeriods: [],
 };
 
@@ -94,6 +95,8 @@ function mapCategoryRow(
     customMessage: typeof row.custom_message === "string" ? row.custom_message : undefined,
     thumbnailImageUrl: typeof row.thumbnail_image_url === "string" ? row.thumbnail_image_url : undefined,
     bannerImageUrl: typeof row.banner_image_url === "string" ? row.banner_image_url : undefined,
+    isBookingBlocked: Boolean(row.is_booking_blocked),
+    bookingBlockMessage: typeof row.booking_block_message === "string" ? row.booking_block_message : undefined,
     availabilityRules: categoryRules.reduce<AppointmentCategory["availabilityRules"]>((acc, rule) => {
       const weekdayValue = Number(rule.weekday);
       const weekdayMap = ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"];
@@ -250,6 +253,7 @@ export async function getSiteSettings() {
             : "",
         maintenanceAllowedIps: normalizeAllowedIps(settingsRow.maintenance_allowed_ips),
         enableWhatsappWidget: Boolean(settingsRow.enable_whatsapp_widget),
+        enableBlackoutMarquee: settingsRow.enable_blackout_marquee !== false, // Default to true
         globalBlackoutPeriods: (blackoutRows ?? []).map((row) => mapBlackoutPeriod(row as Record<string, unknown>)),
       };
 
@@ -336,6 +340,28 @@ export async function getCategoryById(categoryId: string) {
   if (supabase) {
     const [{ data: categoryRow }, { data: ruleRows }, { data: blackoutRows }] = await Promise.all([
       supabase.from("categories").select("*").eq("id", categoryId).maybeSingle(),
+      supabase.from("category_availability_rules").select("*").order("weekday"),
+      supabase.from("category_blackout_periods").select("*").order("start_date"),
+    ]);
+
+    if (categoryRow) {
+      return mapCategoryRow(
+        categoryRow as Record<string, unknown>,
+        (ruleRows ?? []) as Array<Record<string, unknown>>,
+        (blackoutRows ?? []) as Array<Record<string, unknown>>,
+      );
+    }
+  }
+
+  return null;
+}
+
+export async function getAdminCategoryBySlug(slug: string) {
+  const supabase = getSupabaseAdminClient();
+
+  if (supabase) {
+    const [{ data: categoryRow }, { data: ruleRows }, { data: blackoutRows }] = await Promise.all([
+      supabase.from("categories").select("*").eq("slug", slug).maybeSingle(),
       supabase.from("category_availability_rules").select("*").order("weekday"),
       supabase.from("category_blackout_periods").select("*").order("start_date"),
     ]);
@@ -972,6 +998,8 @@ export async function saveCategory(input: {
   customMessage?: string;
   thumbnailImageUrl?: string;
   bannerImageUrl?: string;
+  isBookingBlocked?: boolean;
+  bookingBlockMessage?: string;
   availabilityRules: Array<{
     weekday: "lundi" | "mardi" | "mercredi" | "jeudi" | "vendredi" | "samedi" | "dimanche";
     enabled: boolean;
@@ -1001,6 +1029,8 @@ export async function saveCategory(input: {
     custom_message: input.customMessage ?? null,
     thumbnail_image_url: input.thumbnailImageUrl ?? null,
     banner_image_url: input.bannerImageUrl ?? null,
+    is_booking_blocked: input.isBookingBlocked ?? false,
+    booking_block_message: input.bookingBlockMessage ?? null,
     updated_at: new Date().toISOString(),
   };
 
@@ -1115,6 +1145,7 @@ export async function saveSiteSettings(input: {
   maintenanceMessage: string;
   maintenanceAllowedIps: string[];
   enableWhatsappWidget: boolean;
+  enableBlackoutMarquee: boolean;
   globalBlackoutPeriods: Array<{
     startDate: string;
     startTime: string;
@@ -1139,6 +1170,7 @@ export async function saveSiteSettings(input: {
         maintenance_message: input.maintenanceMessage,
         maintenance_allowed_ips: input.maintenanceAllowedIps,
         enable_whatsapp_widget: input.enableWhatsappWidget,
+        enable_blackout_marquee: input.enableBlackoutMarquee,
         updated_at: new Date().toISOString(),
       })
       .eq("id", existing.id);
@@ -1152,6 +1184,7 @@ export async function saveSiteSettings(input: {
       maintenance_message: input.maintenanceMessage,
       maintenance_allowed_ips: input.maintenanceAllowedIps,
       enable_whatsapp_widget: input.enableWhatsappWidget,
+      enable_blackout_marquee: input.enableBlackoutMarquee,
     });
 
     if (error) {

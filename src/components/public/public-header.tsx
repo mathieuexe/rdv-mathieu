@@ -4,6 +4,7 @@ import { ChevronDown, LogOut } from "lucide-react";
 import { logoutAccountAction } from "@/app/compte/actions";
 import { getPublicUserSession } from "@/lib/auth";
 import { cn } from "@/lib/utils";
+import { MobileMenu } from "./mobile-menu";
 
 interface PublicHeaderProps {
   currentPath?: string;
@@ -40,8 +41,11 @@ export async function PublicHeader({ currentPath }: PublicHeaderProps) {
           Rdv.mathieucerenzia.fr
         </Link>
 
-        <nav className="flex items-center gap-3 text-sm sm:gap-6">
-          <Link href="/qui-suis-je" className={cn(getLinkClass("/qui-suis-je", currentPath), "hidden md:inline-block")}>
+        <nav className="hidden md:flex items-center gap-3 text-sm sm:gap-6">
+          <Link href="/" className={getLinkClass("/", currentPath)}>
+            Accueil
+          </Link>
+          <Link href="/qui-suis-je" className={getLinkClass("/qui-suis-je", currentPath)}>
             Qui suis-je ?
           </Link>
           {session.isAuthenticated ? (
@@ -95,6 +99,10 @@ export async function PublicHeader({ currentPath }: PublicHeaderProps) {
             </div>
           )}
         </nav>
+        <MobileMenu 
+          isAuthenticated={session.isAuthenticated}
+          isAdmin={!!session.isAdmin}
+        />
       </div>
     </header>
   );

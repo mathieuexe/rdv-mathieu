@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Info, Calendar, Image as ImageIcon, Globe, MessageSquare, Save } from "lucide-react";
+import { Info, Calendar, Image as ImageIcon, Globe, MessageSquare, Save, Lock } from "lucide-react";
 
 import type { AppointmentCategory } from "@/types/domain";
 
@@ -240,7 +240,14 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
                 </label>
 
                 <label className="block space-y-1.5 text-sm font-medium text-slate-700">
-                  <span>Slug</span>
+                  <span>
+                    Slug{" "}
+                    {category?.slug && (
+                      <span className="font-normal text-slate-500">
+                        (Lien : rdv.mathieucerenzia.fr/rdv/{category.slug})
+                      </span>
+                    )}
+                  </span>
                   <input
                     name="slug"
                     defaultValue={category?.slug}
@@ -434,6 +441,30 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
               <label className="flex items-center gap-3 text-sm text-slate-700">
                 <input type="checkbox" name="isOnline" defaultChecked={category?.isOnline ?? true} className="size-4 rounded border-slate-300 text-blue-600" />
                 <span className="font-medium">Catégorie visible au public</span>
+              </label>
+            </div>
+          </section>
+
+          <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
+            <div className="flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3">
+              <Lock className="size-4 text-slate-600" />
+              <h2 className="font-semibold text-slate-800">Bloquer les réservations</h2>
+            </div>
+            <div className="p-4 space-y-4">
+              <label className="flex items-center gap-3 text-sm text-slate-700">
+                <input type="checkbox" name="isBookingBlocked" defaultChecked={category?.isBookingBlocked ?? false} className="size-4 rounded border-slate-300 text-rose-600" />
+                <span className="font-medium text-rose-600">Désactiver la prise de rendez-vous</span>
+              </label>
+              
+              <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+                <span>Message d&apos;indisponibilité (affiché au client)</span>
+                <textarea
+                  name="bookingBlockMessage"
+                  rows={3}
+                  defaultValue={category?.bookingBlockMessage}
+                  placeholder="Les réservations pour cette catégorie sont temporairement suspendues..."
+                  className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
               </label>
             </div>
           </section>

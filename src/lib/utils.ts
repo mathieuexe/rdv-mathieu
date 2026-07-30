@@ -1,10 +1,25 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { parsePhoneNumber } from "libphonenumber-js";
 
 const PARIS_TIME_ZONE = "Europe/Paris";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
+}
+
+export function formatPhone(phone: string | null | undefined): string {
+  if (!phone) return "";
+  try {
+    const phoneNumber = parsePhoneNumber(phone);
+    if (phoneNumber) {
+      // Pour forcer l'affichage avec des espaces (ex: +33 6 01 02 03 04)
+      return phoneNumber.formatInternational();
+    }
+  } catch (e) {
+    // ignore
+  }
+  return phone;
 }
 
 export function formatAppointmentMode(mode: "telephone" | "physique" | "visioconference") {

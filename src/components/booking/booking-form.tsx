@@ -14,7 +14,8 @@ import {
 } from "lucide-react";
 
 import { groupSlotsByDay } from "@/lib/booking";
-import { cn, formatAppointmentMode, formatDateTimeFr } from "@/lib/utils";
+import { cn, formatAppointmentMode, formatDateTimeFr, formatPhone } from "@/lib/utils";
+import { PhoneInput } from "@/components/ui/phone-input";
 import type { AppointmentCategory, BookingSlot } from "@/types/domain";
 
 const weekdayHeaders = ["LUN.", "MAR.", "MER.", "JEU.", "VEN.", "SAM.", "DIM."];
@@ -453,11 +454,9 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
 
                 <label className="space-y-2 text-sm font-medium text-slate-700">
                   <span>Téléphone</span>
-                  <input
-                    type="tel"
+                  <PhoneInput
                     value={phone}
-                    onChange={(event) => setPhone(event.target.value)}
-                    className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    onChange={(val) => setPhone(val || "")}
                   />
                 </label>
 
@@ -538,7 +537,7 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                     </div>
                     <div>
                       <dt className="font-medium text-slate-900">Téléphone</dt>
-                      <dd>{phone}</dd>
+                      <dd>{formatPhone(phone)}</dd>
                     </div>
                     <div>
                       <dt className="font-medium text-slate-900">Message</dt>

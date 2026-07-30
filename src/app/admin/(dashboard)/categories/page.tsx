@@ -3,6 +3,8 @@ import { Plus, TimerReset, Settings, CalendarRange, MapPin } from "lucide-react"
 
 import { getCategories } from "@/lib/data-access";
 import { formatAppointmentMode } from "@/lib/utils";
+import { CategoryActions } from "@/components/admin/category-actions";
+import { deleteCategoryAction, duplicateCategoryAction } from "../actions";
 
 export default async function CategoriesPage() {
   const categories = await getCategories();
@@ -98,14 +100,19 @@ export default async function CategoriesPage() {
                   </div>
                 </div>
 
-                <div className="mt-auto pt-6">
+                <div className="mt-auto pt-6 flex items-center gap-2">
                   <Link 
-                    href={`/admin/categories/${category.id}`} 
-                    className="flex w-full items-center justify-center gap-2 rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 hover:text-slate-900"
+                    href={`/admin/categories/${category.slug}`} 
+                    className="flex flex-1 items-center justify-center gap-2 rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 hover:text-slate-900"
                   >
                     <Settings className="size-4" />
                     Modifier la catégorie
                   </Link>
+                  <CategoryActions 
+                    categoryId={category.id} 
+                    duplicateAction={duplicateCategoryAction} 
+                    deleteAction={deleteCategoryAction} 
+                  />
                 </div>
               </div>
             </article>

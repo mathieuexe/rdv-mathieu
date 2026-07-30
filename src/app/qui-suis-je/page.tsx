@@ -1,4 +1,4 @@
-import { Globe, LayoutTemplate, Search, Terminal, Star, CheckCircle, MapPin, ArrowRight } from "lucide-react";
+import { Globe, LayoutTemplate, Search, Terminal, Star, CheckCircle, MapPin, ArrowRight, Server } from "lucide-react";
 
 import { PublicFooter } from "@/components/public/public-footer";
 import { PublicHeader } from "@/components/public/public-header";
@@ -68,7 +68,7 @@ export default function AboutPage() {
               <div className="relative mx-auto w-full max-w-md lg:max-w-none">
                 <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-slate-200 shadow-xl border border-slate-200">
                   <img
-                    src="/images/mathieu.jpg"
+                    src="/images/mathieu.jpeg"
                     alt="Mathieu CERENZIA"
                     className="h-full w-full object-cover"
                   />
@@ -93,7 +93,7 @@ export default function AboutPage() {
               </p>
             </div>
 
-            <div className="grid gap-8 sm:grid-cols-2">
+            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
               <div className="rounded-xl border border-slate-200 bg-slate-50 p-8 transition-shadow hover:shadow-md">
                 <div className="mb-4 inline-flex size-12 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
                   <Globe className="size-6" />
@@ -125,6 +125,16 @@ export default function AboutPage() {
               </div>
 
               <div className="rounded-xl border border-slate-200 bg-slate-50 p-8 transition-shadow hover:shadow-md">
+                <div className="mb-4 inline-flex size-12 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
+                  <Server className="size-6" />
+                </div>
+                <h3 className="mb-3 text-xl font-bold text-slate-900">Hébergement & Messagerie</h3>
+                <p className="text-slate-600 leading-relaxed">
+                  Hébergement de votre site internet, enregistrement et gestion des noms de domaine, création et configuration de votre messagerie professionnelle (Microsoft Exchange, Google Workspace).
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-8 transition-shadow hover:shadow-md sm:col-span-2 lg:col-span-1">
                 <div className="mb-4 inline-flex size-12 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
                   <Terminal className="size-6" />
                 </div>

@@ -4,6 +4,7 @@ import { useActionState } from "react";
 
 import type { AdminUserActionState } from "@/app/admin/(dashboard)/actions";
 import type { UserProfileRecord } from "@/types/domain";
+import { PhoneInput } from "@/components/ui/phone-input";
 
 const initialState: AdminUserActionState = {
   status: "idle",
@@ -56,12 +57,10 @@ export function AdminUserProfileForm({ user, action }: AdminUserProfileFormProps
 
       <label className="block space-y-2 text-sm font-medium text-slate-700">
         <span>Téléphone</span>
-        <input
+        <PhoneInput
           name="phone"
-          type="tel"
           defaultValue={user.phone ?? ""}
           disabled={pending}
-          className="w-full rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3 outline-none transition focus:border-slate-950 focus:bg-white"
         />
       </label>
 
