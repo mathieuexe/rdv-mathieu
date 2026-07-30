@@ -221,44 +221,44 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
 
   return (
     <div className="mx-auto max-w-[1120px] space-y-6">
-      <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg">
+      <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
         <div className="grid lg:grid-cols-[280px_minmax(0,1fr)_240px]">
-          <aside className="border-b border-gray-200 bg-white p-6 lg:border-r lg:border-b-0 lg:p-8">
+          <aside className="border-b border-slate-200 bg-white p-6 lg:border-r lg:border-b-0 lg:p-8">
             {category.bannerImageUrl ? (
-              <div className="-m-6 mb-6 overflow-hidden border-b border-gray-200 bg-gray-100 rounded-t-2xl lg:-m-8 lg:mb-8 lg:rounded-tr-none">
+              <div className="-m-6 mb-6 overflow-hidden border-b border-slate-200 bg-slate-100 rounded-t-2xl lg:-m-8 lg:mb-8 lg:rounded-tr-none">
                 <div className="h-[240px] w-full">
                   <img src={category.bannerImageUrl} alt="" className="h-full w-full object-cover object-center" />
                 </div>
               </div>
             ) : (
-              <div className="-m-6 mb-6 h-[240px] rounded-t-2xl border-b border-gray-200 bg-gray-100 lg:-m-8 lg:mb-8 lg:rounded-tr-none" />
+              <div className="-m-6 mb-6 h-[240px] rounded-t-2xl border-b border-slate-200 bg-slate-100 lg:-m-8 lg:mb-8 lg:rounded-tr-none" />
             )}
 
-            <div className="flex size-16 items-center justify-center overflow-hidden rounded-full border border-gray-200 bg-gray-100 text-sm font-semibold text-gray-900">
+            <div className="flex size-16 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-slate-100 text-sm font-semibold text-slate-900">
               {category.thumbnailImageUrl ? (
                 <img src={category.thumbnailImageUrl} alt="" className="h-full w-full object-cover" />
               ) : (
                 initials || "RDV"
               )}
             </div>
-            <p className="mt-4 text-lg font-bold text-gray-950">{category.title}</p>
-            <p className="mt-2 text-sm leading-6 text-gray-500">{category.description}</p>
+            <p className="mt-4 text-lg font-bold text-slate-900">{category.title}</p>
+            <p className="mt-2 text-sm leading-6 text-slate-500">{category.description}</p>
 
-            <div className="mt-6 space-y-3 text-sm text-gray-500">
+            <div className="mt-6 space-y-3 text-sm text-slate-500">
               <div className="flex items-start gap-3">
-                <CheckSquare className="mt-0.5 size-4 shrink-0 text-gray-500" />
+                <CheckSquare className="mt-0.5 size-4 shrink-0 text-slate-500" />
                 <span>{helperMessage}</span>
               </div>
               <div className="flex items-center gap-3">
-                <Clock className="size-4 shrink-0 text-gray-500" />
+                <Clock className="size-4 shrink-0 text-slate-500" />
                 <span>{category.durationMinutes} min</span>
               </div>
               <div className="flex items-center gap-3">
-                <Video className="size-4 shrink-0 text-gray-500" />
+                <Video className="size-4 shrink-0 text-slate-500" />
                 <span>{formatAppointmentMode(category.appointmentMode)}</span>
               </div>
               <div className="flex items-center gap-3">
-                <Globe className="size-4 shrink-0 text-gray-500" />
+                <Globe className="size-4 shrink-0 text-slate-500" />
                 <span>Europe, Paris (24h)</span>
               </div>
             </div>
@@ -267,23 +267,23 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
 
           <section
             className={cn(
-              "border-b border-gray-200 p-6 lg:border-b-0 lg:p-8",
+              "border-b border-slate-200 p-6 lg:border-b-0 lg:p-8",
               currentStep === 1 ? "lg:border-r" : "lg:col-span-2",
             )}
           >
             {activeStep === 1 ? (
               <>
                 <div className="flex items-center gap-3">
-                  <CalendarDays className="size-5 text-gray-500" />
+                  <CalendarDays className="size-5 text-slate-500" />
                   <div>
-                    <p className="text-lg font-semibold text-gray-950">Sélectionnez la date et l&apos;heure</p>
-                    <p className="text-sm text-gray-500">Choisissez d&apos;abord un jour, puis un créneau disponible.</p>
+                    <p className="text-lg font-semibold text-slate-900">Sélectionnez la date et l&apos;heure</p>
+                    <p className="text-sm text-slate-500">Choisissez d&apos;abord un jour, puis un créneau disponible.</p>
                   </div>
                 </div>
 
                 <div className="mt-6">
                   <div className="flex items-center justify-between">
-                    <p className="text-sm font-semibold capitalize text-gray-900">
+                    <p className="text-sm font-semibold capitalize text-slate-900">
                       {formatMonthLabel(monthKeys[visibleMonthIndex] ?? visibleMonthKey)}
                     </p>
                     <div className="flex items-center gap-2">
@@ -291,7 +291,7 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                         type="button"
                         onClick={() => setVisibleMonthKey(monthKeys[Math.max(0, visibleMonthIndex - 1)] ?? visibleMonthKey)}
                         disabled={visibleMonthIndex === 0}
-                        className="flex size-9 items-center justify-center rounded-full border border-gray-200 text-gray-500 transition-all duration-150 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
+                        className="flex size-9 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition-all duration-150 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         <ChevronLeft className="size-4" />
                       </button>
@@ -301,14 +301,14 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                           setVisibleMonthKey(monthKeys[Math.min(monthKeys.length - 1, visibleMonthIndex + 1)] ?? visibleMonthKey)
                         }
                         disabled={visibleMonthIndex >= monthKeys.length - 1}
-                        className="flex size-9 items-center justify-center rounded-full border border-gray-200 text-gray-500 transition-all duration-150 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
+                        className="flex size-9 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition-all duration-150 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         <ChevronRight className="size-4" />
                       </button>
                     </div>
                   </div>
 
-                  <div className="mt-6 grid grid-cols-7 gap-2 text-center text-xs uppercase tracking-wide text-gray-400">
+                  <div className="mt-6 grid grid-cols-7 gap-2 text-center text-xs uppercase tracking-wide text-slate-400">
                     {weekdayHeaders.map((label) => (
                       <div key={label}>{label}</div>
                     ))}
@@ -337,11 +337,11 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                             onClick={() => handleSelectDate(cell.key)}
                             className={cn(
                               "flex size-10 items-center justify-center rounded-lg text-sm transition-all duration-150",
-                            isDisabled && isPastDay && "cursor-not-allowed bg-gray-100 text-gray-400",
-                            isDisabled && !isPastDay && !isBlackoutDay && "cursor-not-allowed text-gray-300",
+                            isDisabled && isPastDay && "cursor-not-allowed bg-slate-100 text-slate-400",
+                            isDisabled && !isPastDay && !isBlackoutDay && "cursor-not-allowed text-slate-300",
                             isDisabled && isBlackoutDay && "cursor-not-allowed bg-red-100 text-red-700",
-                              !isDisabled && !isSelected && "bg-gray-100 text-gray-700 hover:bg-gray-200",
-                              isSelected && "bg-black text-white shadow-sm",
+                              !isDisabled && !isSelected && "bg-slate-100 text-slate-700 hover:bg-slate-200",
+                              isSelected && "bg-blue-600 text-white shadow-sm",
                             )}
                           >
                             {cell.dayNumber}
@@ -351,7 +351,7 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                     })}
                   </div>
 
-                  <div className="mt-8 inline-flex rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-500">
+                  <div className="mt-8 inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-500">
                     Heure d&apos;Europe, Paris (24h)
                   </div>
                   <CalendarLegend className="mt-5" />
@@ -360,8 +360,8 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
             ) : activeStep === 2 ? (
               <div className="mx-auto max-w-2xl space-y-5">
                 <div className="space-y-1">
-                  <p className="text-lg font-semibold text-gray-950">Vos informations</p>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-lg font-semibold text-slate-900">Vos informations</p>
+                  <p className="text-sm text-slate-500">
                     {activeSelectedSlot
                       ? `Créneau choisi : ${formatDateTimeFr(activeSelectedSlot, { dateStyle: "full", timeStyle: "short" })}`
                       : "Complétez vos informations pour continuer."}
@@ -369,44 +369,44 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <label className="space-y-2 text-sm font-medium text-gray-700">
+                  <label className="space-y-2 text-sm font-medium text-slate-700">
                     <span>Prénom</span>
                     <input
                       value={firstName}
                       onChange={(event) => setFirstName(event.target.value)}
-                      className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 outline-none transition-all duration-150 focus:border-black"
+                      className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                     />
                   </label>
 
-                  <label className="space-y-2 text-sm font-medium text-gray-700">
+                  <label className="space-y-2 text-sm font-medium text-slate-700">
                     <span>Nom</span>
                     <input
                       value={lastName}
                       onChange={(event) => setLastName(event.target.value)}
-                      className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 outline-none transition-all duration-150 focus:border-black"
+                      className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                     />
                   </label>
                 </div>
 
-                <label className="space-y-2 text-sm font-medium text-gray-700">
+                <label className="space-y-2 text-sm font-medium text-slate-700">
                   <span>Email</span>
                   <input
                     type="email"
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
-                    className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 outline-none transition-all duration-150 focus:border-black"
+                    className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   />
                 </label>
 
                 {initialUser?.email ? (
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-slate-500">
                     Les champs préremplis peuvent être corrigés avant la confirmation du rendez-vous.
                   </p>
                 ) : null}
 
                 {shouldSuggestSavedPhone ? (
-                  <div className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-4 text-sm leading-7 text-gray-600">
-                    <p className="font-medium text-gray-900">
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm leading-7 text-slate-600">
+                    <p className="font-medium text-slate-900">
                       Lors de votre dernier rendez-vous téléphonique, vous aviez utilisé le numéro de téléphone{" "}
                       <span className="font-semibold">{initialUser?.phone}</span>. Est-ce toujours correct ?
                     </p>
@@ -418,10 +418,10 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                           setPhoneConfirmation("yes");
                         }}
                         className={cn(
-                          "rounded-full border px-4 py-2 text-sm font-medium transition-all duration-150",
+                          "rounded-md border px-4 py-2 text-sm font-medium transition-all duration-150",
                           phoneConfirmation === "yes"
-                            ? "border-black bg-black text-white"
-                            : "border-gray-200 bg-white text-gray-700 hover:border-gray-400",
+                            ? "border-blue-600 bg-blue-600 text-white"
+                            : "border-slate-200 bg-white text-slate-700 hover:border-slate-400",
                         )}
                       >
                         Oui
@@ -433,58 +433,58 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                           setPhoneConfirmation("no");
                         }}
                         className={cn(
-                          "rounded-full border px-4 py-2 text-sm font-medium transition-all duration-150",
+                          "rounded-md border px-4 py-2 text-sm font-medium transition-all duration-150",
                           phoneConfirmation === "no"
-                            ? "border-black bg-black text-white"
-                            : "border-gray-200 bg-white text-gray-700 hover:border-gray-400",
+                            ? "border-blue-600 bg-blue-600 text-white"
+                            : "border-slate-200 bg-white text-slate-700 hover:border-slate-400",
                         )}
                       >
                         Non
                       </button>
                     </div>
                     {phoneConfirmation === "no" ? (
-                      <p className="mt-3 text-xs text-gray-500">
+                      <p className="mt-3 text-xs text-slate-500">
                         Si non, vous pouvez modifier le numéro ci-dessous.
                       </p>
                     ) : null}
                   </div>
                 ) : null}
 
-                <label className="space-y-2 text-sm font-medium text-gray-700">
+                <label className="space-y-2 text-sm font-medium text-slate-700">
                   <span>Téléphone</span>
                   <input
                     type="tel"
                     value={phone}
                     onChange={(event) => setPhone(event.target.value)}
-                    className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 outline-none transition-all duration-150 focus:border-black"
+                    className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   />
                 </label>
 
                 {!isAuthenticated ? (
-                  <div className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-4 text-sm leading-7 text-gray-600">
-                    <p className="font-medium text-gray-900">Avez-vous un compte ?</p>
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm leading-7 text-slate-600">
+                    <p className="font-medium text-slate-900">Avez-vous un compte ?</p>
                     <p className="mt-2">
                       Ce n&apos;est pas obligatoire. Cela sert uniquement à retrouver l&apos;historique de vos rendez-vous et à
                       annuler un rendez-vous en ligne si besoin.
                     </p>
                     <div className="mt-3 flex flex-wrap gap-4">
-                      <a href="/connexion" className="font-medium text-gray-900 underline underline-offset-4">
+                      <a href="/connexion" className="font-medium text-slate-900 underline underline-offset-4">
                         Connectez-vous
                       </a>
-                      <a href="/inscription" className="font-medium text-gray-900 underline underline-offset-4">
+                      <a href="/inscription" className="font-medium text-slate-900 underline underline-offset-4">
                         Inscrivez-vous
                       </a>
                     </div>
                   </div>
                 ) : null}
 
-                <label className="space-y-2 text-sm font-medium text-gray-700">
+                <label className="space-y-2 text-sm font-medium text-slate-700">
                   <span>Message optionnel</span>
                   <textarea
                     rows={4}
                     value={message}
                     onChange={(event) => setMessage(event.target.value)}
-                    className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 outline-none transition-all duration-150 focus:border-black"
+                    className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   />
                 </label>
 
@@ -497,14 +497,14 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                       setCurrentStep(1);
                       setError("");
                     }}
-                    className="inline-flex flex-1 items-center justify-center rounded-lg border border-gray-200 px-5 py-3 text-sm font-semibold text-gray-700 transition-all duration-150 hover:bg-gray-50"
+                    className="inline-flex flex-1 items-center justify-center rounded-md border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 transition-all duration-150 hover:bg-slate-50"
                   >
                     Modifier le créneau
                   </button>
                   <button
                     type="button"
                     onClick={handleContinueToRecap}
-                    className="inline-flex flex-1 items-center justify-center rounded-lg bg-black px-5 py-3 text-sm font-semibold text-white transition-all duration-150 hover:bg-gray-900"
+                    className="inline-flex flex-1 items-center justify-center rounded-md bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition-all duration-150 hover:bg-blue-700"
                   >
                     Continuer
                   </button>
@@ -512,15 +512,15 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
               </div>
             ) : (
               <div className="mx-auto max-w-2xl space-y-5">
-                <div className="rounded-2xl border border-gray-200 bg-gray-50 px-5 py-5">
-                  <p className="text-sm font-semibold text-gray-900">Récapitulatif</p>
-                  <dl className="mt-4 space-y-3 text-sm text-gray-600">
+                <div className="rounded-xl border border-slate-200 bg-slate-50 px-5 py-5">
+                  <p className="text-sm font-semibold text-slate-900">Récapitulatif</p>
+                  <dl className="mt-4 space-y-3 text-sm text-slate-600">
                     <div>
-                      <dt className="font-medium text-gray-900">Catégorie</dt>
+                      <dt className="font-medium text-slate-900">Catégorie</dt>
                       <dd>{category.title}</dd>
                     </div>
                     <div>
-                      <dt className="font-medium text-gray-900">Date et heure</dt>
+                      <dt className="font-medium text-slate-900">Date et heure</dt>
                       <dd>
                         {selectedSlotDetails
                           ? formatDateTimeFr(selectedSlotDetails.start, { dateStyle: "full", timeStyle: "short" })
@@ -528,30 +528,30 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                       </dd>
                     </div>
                     <div>
-                      <dt className="font-medium text-gray-900">Nom</dt>
+                      <dt className="font-medium text-slate-900">Nom</dt>
                       <dd>{firstName} {lastName}</dd>
                     </div>
                     <div>
-                      <dt className="font-medium text-gray-900">Email</dt>
+                      <dt className="font-medium text-slate-900">Email</dt>
                       <dd>{email}</dd>
                     </div>
                     <div>
-                      <dt className="font-medium text-gray-900">Téléphone</dt>
+                      <dt className="font-medium text-slate-900">Téléphone</dt>
                       <dd>{phone}</dd>
                     </div>
                     <div>
-                      <dt className="font-medium text-gray-900">Message</dt>
+                      <dt className="font-medium text-slate-900">Message</dt>
                       <dd>{message.trim() || "Aucun message"}</dd>
                     </div>
                   </dl>
                 </div>
 
-                <div className="rounded-2xl border border-gray-200 bg-gray-50 px-5 py-5 text-sm text-gray-800">
+                <div className="rounded-xl border border-slate-200 bg-slate-50 px-5 py-5 text-sm text-slate-800">
                   <div className="flex items-center gap-2 font-medium">
-                    <CheckSquare className="size-4 text-gray-500" />
+                    <CheckSquare className="size-4 text-slate-500" />
                     <span>Confirmation</span>
                   </div>
-                  <p className="mt-2 text-gray-600">
+                  <p className="mt-2 text-slate-600">
                     En confirmant, votre demande sera enregistrée puis transmise pour validation.
                   </p>
                 </div>
@@ -565,7 +565,7 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                       setCurrentStep(2);
                       setError("");
                     }}
-                    className="inline-flex flex-1 items-center justify-center rounded-lg border border-gray-200 px-5 py-3 text-sm font-semibold text-gray-700 transition-all duration-150 hover:bg-gray-50"
+                    className="inline-flex flex-1 items-center justify-center rounded-md border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 transition-all duration-150 hover:bg-slate-50"
                   >
                     Modifier les informations
                   </button>
@@ -573,7 +573,7 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                     type="button"
                     onClick={handleSubmit}
                     disabled={isSubmitting}
-                    className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-black px-5 py-3 text-sm font-semibold text-white transition-all duration-150 hover:bg-gray-900 disabled:cursor-not-allowed disabled:bg-gray-300"
+                    className="inline-flex flex-1 items-center justify-center gap-2 rounded-md bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition-all duration-150 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {isSubmitting ? <LoaderCircle className="size-4 animate-spin" /> : null}
                     <span>{isSubmitting ? "Confirmation..." : "Confirmer la demande"}</span>
@@ -586,10 +586,10 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
           {activeStep === 1 ? (
             <section className="p-6 lg:p-8">
               <div className="mb-5 flex items-center justify-between gap-3">
-                <p className="text-sm font-semibold text-gray-900">Créneaux horaires</p>
-                <div className="inline-flex rounded-full bg-gray-100 p-1 text-xs font-medium text-gray-500">
-                  <span className="rounded-full px-3 py-1 text-gray-500">12h</span>
-                  <span className="rounded-full bg-white px-3 py-1 text-gray-900 shadow-sm">24h</span>
+                <p className="text-sm font-semibold text-slate-900">Créneaux horaires</p>
+                <div className="inline-flex rounded-full bg-slate-100 p-1 text-xs font-medium text-slate-500">
+                  <span className="rounded-full px-3 py-1 text-slate-500">12h</span>
+                  <span className="rounded-full bg-white px-3 py-1 text-slate-900 shadow-sm">24h</span>
                 </div>
               </div>
 
@@ -605,11 +605,11 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                         disabled={slot.isBlocked}
                         onClick={() => handleSelectSlot(slot.start)}
                         className={cn(
-                          "flex w-full items-center justify-center rounded-lg border border-gray-200 px-4 py-3 text-sm font-medium transition-all duration-150",
+                          "flex w-full items-center justify-center rounded-lg border border-slate-200 px-4 py-3 text-sm font-medium transition-all duration-150",
                           slot.isBlocked
-                            ? "cursor-not-allowed bg-gray-50 text-gray-300"
-                            : "bg-white text-gray-700 hover:border-black hover:bg-gray-50 hover:text-gray-950",
-                          active && "border-black bg-black text-white hover:bg-black hover:text-white",
+                            ? "cursor-not-allowed bg-slate-50 text-slate-300"
+                            : "bg-white text-slate-700 hover:border-blue-600 hover:text-blue-600",
+                          active && "border-blue-600 bg-blue-600 text-white hover:bg-blue-700 hover:text-white hover:border-blue-700",
                         )}
                       >
                         {slot.label}
@@ -617,7 +617,7 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                     );
                   })
                 ) : (
-                  <div className="rounded-2xl border border-dashed border-gray-200 px-4 py-6 text-sm text-gray-500">
+                  <div className="rounded-xl border border-dashed border-slate-200 px-4 py-6 text-sm text-slate-500">
                     {hasAnyAvailableSlot
                       ? "Sélectionnez une date dans le calendrier."
                       : "Aucun créneau n'est disponible pour le moment."}

@@ -1,52 +1,61 @@
 import Link from "next/link";
+import { ArrowRight, Clock, MapPin, CalendarDays } from "lucide-react";
 
 import { PublicFooter } from "@/components/public/public-footer";
 import { PublicHeader } from "@/components/public/public-header";
 import { getPublicCategories } from "@/lib/data-access";
+import { formatAppointmentMode } from "@/lib/utils";
 
 export default async function Home() {
   const categories = await getPublicCategories();
 
   return (
-    <div className="flex min-h-screen flex-col bg-white text-black">
+    <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
       <PublicHeader />
 
-      <main className="flex-1 px-6 py-12">
-        <div className="mx-auto max-w-4xl">
-          <section className="border-b border-neutral-200 pb-8">
-            <h1 className="text-3xl font-semibold tracking-tight text-neutral-950 sm:text-4xl">
-              Bienvenue sur mon espace de prise de rendez-vous
+      <main className="flex-1 px-6 py-12 md:py-20">
+        <div className="mx-auto max-w-5xl">
+          <section className="text-center mb-16">
+            <h1 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
+              Prenez rendez-vous en ligne
             </h1>
-            <p className="mt-4 max-w-2xl text-base leading-8 text-neutral-600">
-              Choisissez la catégorie souhaitée ci-dessous pour accéder directement aux créneaux disponibles.
+            <p className="mt-4 mx-auto max-w-2xl text-lg text-slate-600">
+              Choisissez le motif de votre rendez-vous ci-dessous et réservez directement le créneau qui vous convient le mieux.
             </p>
           </section>
 
           {categories.length === 0 ? (
-            <section className="mt-8 rounded-2xl border border-dashed border-neutral-300 px-6 py-12 text-center">
-              <p className="text-lg font-medium text-neutral-900">Aucun calendrier n&apos;est disponible pour le moment.</p>
-              <p className="mt-3 text-sm text-neutral-500">Revenez un peu plus tard pour consulter les prochaines disponibilités.</p>
+            <section className="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-16 text-center shadow-sm">
+              <CalendarDays className="mx-auto size-12 text-slate-400 mb-4" />
+              <p className="text-lg font-medium text-slate-900">Aucun calendrier n&apos;est disponible pour le moment.</p>
+              <p className="mt-2 text-sm text-slate-500">Revenez un peu plus tard pour consulter les prochaines disponibilités.</p>
             </section>
           ) : (
-            <section className="mt-8 space-y-4">
+            <section className="grid gap-6 sm:grid-cols-2">
               {categories.map((category) => (
-                <article
+                <Link
+                  href={`/rdv/${category.slug}`}
                   key={category.id}
-                  className="overflow-hidden rounded-2xl border border-neutral-200 bg-white"
+                  className="group flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-slate-300"
                 >
-                  <div className="aspect-[8/3] w-full overflow-hidden bg-neutral-100">
+                  <div className="relative aspect-[21/9] w-full overflow-hidden bg-slate-100">
                     {category.bannerImageUrl ? (
-                      <img src={category.bannerImageUrl} alt="" className="h-full w-full object-cover" />
+                      <img 
+                        src={category.bannerImageUrl} 
+                        alt="" 
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" 
+                      />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-neutral-100">
-                        <span className="text-sm text-neutral-400">{category.title}</span>
+                      <div className="flex h-full w-full items-center justify-center bg-slate-100">
+                        <CalendarDays className="size-8 text-slate-300" />
                       </div>
                     )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                   </div>
 
-                  <div className="px-5 py-5 sm:px-6">
+                  <div className="flex flex-1 flex-col p-6">
                     <div className="flex items-start gap-4">
-                      <div className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-full border border-neutral-200 bg-neutral-100 text-sm font-semibold text-neutral-900">
+                      <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-md border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-900 shadow-sm">
                         {category.thumbnailImageUrl ? (
                           <img src={category.thumbnailImageUrl} alt="" className="h-full w-full object-cover" />
                         ) : (
@@ -60,18 +69,30 @@ export default async function Home() {
                       </div>
 
                       <div className="min-w-0 flex-1">
-                        <p className="text-lg font-semibold text-neutral-950">{category.title}</p>
-                        <p className="mt-2 text-sm leading-7 text-neutral-600">{category.description}</p>
+                        <h2 className="text-lg font-bold text-slate-900 transition-colors group-hover:text-blue-600">
+                          {category.title}
+                        </h2>
+                        <p className="mt-1 line-clamp-2 text-sm text-slate-600">{category.description}</p>
                       </div>
                     </div>
 
-                    <div className="mt-5 border-t border-neutral-200 pt-4">
-                      <Link href={`/rdv/${category.slug}`} className="text-sm font-medium underline underline-offset-4">
-                        Accéder à cette catégorie
-                      </Link>
+                    <div className="mt-6 grid grid-cols-2 gap-3 mb-6">
+                      <div className="flex items-center gap-2 text-sm text-slate-600">
+                        <Clock className="size-4 text-slate-400" />
+                        <span>{category.durationMinutes} min</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-slate-600">
+                        <MapPin className="size-4 text-slate-400" />
+                        <span className="truncate">{formatAppointmentMode(category.appointmentMode)}</span>
+                      </div>
+                    </div>
+
+                    <div className="mt-auto flex items-center justify-between border-t border-slate-100 pt-4 text-sm font-semibold text-blue-600">
+                      <span>Prendre rendez-vous</span>
+                      <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
                     </div>
                   </div>
-                </article>
+                </Link>
               ))}
             </section>
           )}

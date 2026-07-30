@@ -6,17 +6,20 @@ import { loginAction } from "./actions";
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen flex-col bg-[#f3f5f9] text-[#103b67]">
+    <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
       <PublicHeader currentPath="/connexion" />
 
-      <main className="flex-1 px-6 py-10">
+      <main className="flex-1 px-6 py-10 md:py-16">
         <div className="mx-auto max-w-5xl">
-          <div className="mt-10 flex flex-col items-center">
-            <h1 className="max-w-3xl text-center text-5xl font-semibold leading-tight tracking-tight text-[#113b67] sm:text-6xl">
-              Connectez-vous a votre compte
+          <div className="flex flex-col items-center">
+            <h1 className="max-w-3xl text-center text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
+              Connexion à votre espace
             </h1>
+            <p className="mt-4 text-center text-slate-600">
+              Gérez vos rendez-vous et vos informations personnelles.
+            </p>
 
-            <div className="mt-12 w-full max-w-xl">
+            <div className="mt-10 w-full max-w-md">
               <LoginForm action={loginAction} />
             </div>
           </div>

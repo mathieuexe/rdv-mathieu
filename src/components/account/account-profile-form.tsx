@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { Save, LoaderCircle } from "lucide-react";
 
 import type { AccountProfileActionState } from "@/app/compte/actions";
 import type { UserProfileRecord } from "@/types/domain";
@@ -18,44 +19,44 @@ export function AccountProfileForm({ profile, action }: AccountProfileFormProps)
   const [state, formAction, pending] = useActionState(action, initialState);
 
   return (
-    <form action={formAction} className="space-y-6">
-      <div className="grid gap-4 sm:grid-cols-2">
-        <label className="block space-y-2 text-sm font-medium text-neutral-700">
+    <form action={formAction} className="space-y-5">
+      <div className="grid gap-5 sm:grid-cols-2">
+        <label className="block space-y-1.5 text-sm font-medium text-slate-700">
           <span>Prénom</span>
           <input
             name="firstName"
             defaultValue={profile.firstName}
             required
             disabled={pending}
-            className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 outline-none transition focus:border-black focus:bg-white disabled:cursor-not-allowed disabled:bg-neutral-100"
+            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500"
           />
         </label>
 
-        <label className="block space-y-2 text-sm font-medium text-neutral-700">
+        <label className="block space-y-1.5 text-sm font-medium text-slate-700">
           <span>Nom</span>
           <input
             name="lastName"
             defaultValue={profile.lastName}
             required
             disabled={pending}
-            className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 outline-none transition focus:border-black focus:bg-white disabled:cursor-not-allowed disabled:bg-neutral-100"
+            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500"
           />
         </label>
       </div>
 
-      <label className="block space-y-2 text-sm font-medium text-neutral-700">
-        <span>Email</span>
+      <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+        <span>Adresse email</span>
         <input
           name="email"
           type="email"
           defaultValue={profile.email}
           required
           disabled={pending}
-          className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 outline-none transition focus:border-black focus:bg-white disabled:cursor-not-allowed disabled:bg-neutral-100"
+          className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500"
         />
       </label>
 
-      <label className="block space-y-2 text-sm font-medium text-neutral-700">
+      <label className="block space-y-1.5 text-sm font-medium text-slate-700">
         <span>Numéro de téléphone</span>
         <input
           name="phone"
@@ -63,21 +64,26 @@ export function AccountProfileForm({ profile, action }: AccountProfileFormProps)
           defaultValue={profile.phone ?? ""}
           required
           disabled={pending}
-          className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 outline-none transition focus:border-black focus:bg-white disabled:cursor-not-allowed disabled:bg-neutral-100"
+          className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500"
         />
       </label>
 
       {state.message ? (
-        <p className={`text-sm ${state.status === "error" ? "text-red-600" : "text-emerald-700"}`}>{state.message}</p>
+        <div className={`rounded-md p-3 text-sm ${state.status === "error" ? "bg-rose-50 text-rose-700 border border-rose-200" : "bg-emerald-50 text-emerald-700 border border-emerald-200"}`}>
+          {state.message}
+        </div>
       ) : null}
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="inline-flex items-center justify-center rounded-full border border-black bg-black px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:border-neutral-300 disabled:bg-neutral-300"
-      >
-        {pending ? "Enregistrement..." : "Enregistrer mes informations"}
-      </button>
+      <div className="pt-2">
+        <button
+          type="submit"
+          disabled={pending}
+          className="inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {pending ? <LoaderCircle className="size-4 animate-spin" /> : <Save className="size-4" />}
+          <span>{pending ? "Enregistrement..." : "Enregistrer mes informations"}</span>
+        </button>
+      </div>
     </form>
   );
 }

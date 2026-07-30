@@ -39,18 +39,18 @@ export default async function BookingCategoryPage({
   const session = await getPublicUserSession();
 
   return (
-    <div className="flex min-h-screen flex-col bg-gray-50 text-black">
+    <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
       <PublicHeader />
 
-      <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
+      <main className="flex-1 px-4 py-8 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
           {!bookingState.available ? (
-            <section className="rounded-[28px] border border-amber-200 bg-amber-50 p-6 shadow-[0_24px_60px_rgba(15,23,42,0.06)] sm:p-8">
+            <section className="rounded-xl border border-amber-200 bg-amber-50 p-6 shadow-sm sm:p-8">
               <div className="flex items-start gap-3">
-                <TriangleAlert className="mt-1 size-5 text-amber-700" />
+                <TriangleAlert className="mt-1 size-5 text-amber-600" />
                 <div>
-                  <h2 className="text-2xl font-semibold text-amber-950">{bookingState.title}</h2>
-                  <p className="mt-3 max-w-2xl text-sm leading-7 text-amber-900/90">{bookingState.message}</p>
+                  <h2 className="text-xl font-bold text-amber-900">{bookingState.title}</h2>
+                  <p className="mt-2 max-w-2xl text-sm leading-6 text-amber-800">{bookingState.message}</p>
                 </div>
               </div>
             </section>

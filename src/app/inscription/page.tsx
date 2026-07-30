@@ -6,17 +6,20 @@ import { signUpAction } from "./actions";
 
 export default function SignUpPage() {
   return (
-    <div className="flex min-h-screen flex-col bg-[#f3f5f9] text-[#103b67]">
+    <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
       <PublicHeader currentPath="/inscription" />
 
-      <main className="flex-1 px-6 py-10">
+      <main className="flex-1 px-6 py-10 md:py-16">
         <div className="mx-auto max-w-5xl">
-          <div className="mt-10 flex flex-col items-center">
-            <h1 className="max-w-3xl text-center text-5xl font-semibold leading-tight tracking-tight text-[#113b67] sm:text-6xl">
-              Creez votre compte
+          <div className="flex flex-col items-center">
+            <h1 className="max-w-3xl text-center text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
+              Création de compte
             </h1>
+            <p className="mt-4 text-center text-slate-600">
+              Rejoignez-nous pour simplifier vos prises de rendez-vous.
+            </p>
 
-            <div className="mt-12 w-full max-w-xl">
+            <div className="mt-10 w-full max-w-md">
               <SignUpForm action={signUpAction} />
             </div>
           </div>
