@@ -13,7 +13,7 @@ import {
   SignupConfirmationEmail,
   ValidatedAppointmentEmail,
 } from "@/lib/email-templates";
-import { getAdminEmail, getAppUrl } from "@/lib/env";
+import { getAppUrl } from "@/lib/env";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { formatAppointmentMode } from "@/lib/utils";
 import type { AppointmentMode, EmailDeliveryStatus } from "@/types/domain";
@@ -47,6 +47,7 @@ interface TransactionalEmailResult {
 
 const DEFAULT_RESEND_FROM_NAME = "NOREPLY";
 const DEFAULT_RESEND_FROM_EMAIL = "info@mathieucerenzia.fr";
+const ADMIN_APPOINTMENT_REQUEST_NOTIFICATION_EMAIL = "mathieucerenzia@gmail.com";
 
 function createMailReference() {
   return `REF-${randomBytes(3).toString("hex").toUpperCase()}`;
@@ -377,7 +378,7 @@ export async function sendAdminAppointmentRequestNotificationEmail(input: {
   const adminAppointmentUrl = `${getAppUrl()}/admin/rendez-vous/${input.appointmentId}`;
 
   return sendTransactionalEmail({
-    to: getAdminEmail(),
+    to: ADMIN_APPOINTMENT_REQUEST_NOTIFICATION_EMAIL,
     subject: "Nouvelle demande de rendez-vous",
     templateKey: "alerte_admin_nouvelle_demande",
     sourceType: "alerte_admin_nouvelle_demande",

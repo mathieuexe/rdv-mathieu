@@ -305,17 +305,18 @@ export function AdminAppointmentRequestNotificationEmail({
     <MailLayout
       title="Nouvelle demande de rendez-vous"
       greeting="Bonjour,"
-      lead="Une nouvelle demande de rendez-vous vient d'être enregistrée sur le site."
+      lead="Une nouvelle demande de rendez-vous vient d'être enregistrée."
       details={[
-        { label: "Catégorie", value: categoryTitle, underline: true },
         { label: "Date et heure", value: startsAtLabel, underline: true },
+        { label: "Catégorie", value: categoryTitle, underline: true },
         { label: "Type de rendez-vous", value: appointmentModeLabel, underline: true },
         { label: "Client", value: clientFullName, underline: true },
         { label: "Email", value: clientEmail, underline: true },
         ...(clientPhone ? [{ label: "Téléphone", value: clientPhone, underline: true }] : []),
-        ...(clientMessage ? [{ label: "Message", value: clientMessage, underline: true }] : []),
-        { label: "Statut", value: "En attente de validation", underline: true },
-        { label: "Origine", value: "Demande effectuée depuis le site", underline: true },
+      ]}
+      paragraphs={[
+        ...(clientMessage ? [`Message du client : ${clientMessage}`] : []),
+        "Vous pouvez consulter la fiche du rendez-vous via le lien ci-dessous.",
       ]}
       linkLabel="Voir le rendez-vous"
       linkHref={adminAppointmentUrl}
