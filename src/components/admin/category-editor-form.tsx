@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { Info, Calendar, Image as ImageIcon, Globe, MessageSquare, Save } from "lucide-react";
 
 import type { AppointmentCategory } from "@/types/domain";
 
@@ -148,295 +149,322 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
   }
 
   return (
-    <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_16px_50px_rgba(15,23,42,0.04)]">
-      <div>
-        <p className="text-sm uppercase tracking-[0.2em] text-slate-400">Éditeur</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">{title}</h1>
-        <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
-          Renseignez le titre, la description, la durée, le planning hebdomadaire et le type de rendez-vous.
-        </p>
-      </div>
+    <div className="mx-auto max-w-7xl space-y-6 pb-12">
+      <section className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">{title}</h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Renseignez le titre, la description, la durée, le planning hebdomadaire et le type de rendez-vous.
+          </p>
+        </div>
+      </section>
 
-      <form action={action} className="mt-8 grid gap-6 xl:grid-cols-[1fr_0.9fr]">
+      {saved && (
+        <div className="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+          La catégorie a bien été enregistrée.
+        </div>
+      )}
+
+      {error && (
+        <div className="rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+          {error}
+        </div>
+      )}
+
+      {imageError && (
+        <div className="rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+          {imageError}
+        </div>
+      )}
+
+      <form action={action} className="grid items-start gap-6 lg:grid-cols-3">
         <input type="hidden" name="categoryId" value={category?.id ?? ""} />
         <input type="hidden" name="returnPath" value={returnPath} />
         <input type="hidden" name="thumbnailImageDataUrl" value={thumbnailPreview} />
         <input type="hidden" name="bannerImageDataUrl" value={bannerPreview} />
 
-        {saved ? (
-          <div className="xl:col-span-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-            La catégorie a bien été enregistrée.
-          </div>
-        ) : null}
+        {/* Left Column */}
+        <div className="space-y-6 lg:col-span-2">
+          {/* General Info Card */}
+          <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
+            <div className="flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3">
+              <Info className="size-4 text-slate-600" />
+              <h2 className="font-semibold text-slate-800">Informations générales</h2>
+            </div>
+            <div className="space-y-5 p-4 md:p-6">
+              <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+                <span>Titre</span>
+                <input
+                  name="title"
+                  defaultValue={category?.title}
+                  required
+                  className="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </label>
 
-        {error ? (
-          <div className="xl:col-span-2 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
-            {error}
-          </div>
-        ) : null}
+              <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+                <span>Description</span>
+                <textarea
+                  name="description"
+                  rows={4}
+                  defaultValue={category?.description}
+                  required
+                  className="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </label>
 
-        {imageError ? (
-          <div className="xl:col-span-2 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
-            {imageError}
-          </div>
-        ) : null}
+              <div className="grid gap-4 sm:grid-cols-3">
+                <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+                  <span>Durée (minutes)</span>
+                  <input
+                    name="durationMinutes"
+                    type="number"
+                    min={15}
+                    step={15}
+                    defaultValue={category?.durationMinutes ?? 30}
+                    className="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  />
+                </label>
 
-        <div className="space-y-5">
-          <label className="block space-y-2 text-sm font-medium text-slate-700">
-            <span>Titre</span>
-            <input
-              name="title"
-              defaultValue={category?.title}
-              required
-              className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition duration-150 focus:border-slate-950 focus:bg-white"
-            />
-          </label>
+                <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+                  <span>Type</span>
+                  <select
+                    name="appointmentMode"
+                    defaultValue={category?.appointmentMode ?? "visioconference"}
+                    className="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  >
+                    <option value="telephone">Téléphonique</option>
+                    <option value="physique">Présentiel</option>
+                    <option value="visioconference">Visioconférence</option>
+                  </select>
+                </label>
 
-          <label className="block space-y-2 text-sm font-medium text-slate-700">
-            <span>Description</span>
-            <textarea
-              name="description"
-              rows={5}
-              defaultValue={category?.description}
-              required
-              className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition duration-150 focus:border-slate-950 focus:bg-white"
-            />
-          </label>
+                <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+                  <span>Slug</span>
+                  <input
+                    name="slug"
+                    defaultValue={category?.slug}
+                    placeholder="consultation-30min"
+                    className="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  />
+                </label>
+              </div>
+            </div>
+          </section>
 
-          <div className="grid gap-4 sm:grid-cols-3">
-            <label className="block space-y-2 text-sm font-medium text-slate-700">
-              <span>Durée (minutes)</span>
-              <input
-                name="durationMinutes"
-                type="number"
-                min={15}
-                step={15}
-                defaultValue={category?.durationMinutes ?? 30}
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition duration-150 focus:border-slate-950 focus:bg-white"
-              />
-            </label>
+          {/* Schedule Card */}
+          <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
+            <div className="flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3">
+              <Calendar className="size-4 text-slate-600" />
+              <h2 className="font-semibold text-slate-800">Planning hebdomadaire</h2>
+            </div>
+            <div className="p-4 md:p-6">
+              <p className="text-sm text-slate-600 mb-6">
+                Sélectionnez les jours ouverts, les heures de disponibilité et, si besoin, une pause repas qui deviendra
+                une période indisponible pour le client.
+              </p>
 
-            <label className="block space-y-2 text-sm font-medium text-slate-700">
-              <span>Type</span>
-              <select
-                name="appointmentMode"
-                defaultValue={category?.appointmentMode ?? "visioconference"}
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition duration-150 focus:border-slate-950 focus:bg-white"
-              >
-                <option value="telephone">Téléphonique</option>
-                <option value="physique">Présentiel</option>
-                <option value="visioconference">Visioconférence</option>
-              </select>
-            </label>
+              <div className="space-y-4">
+                {weekdayOptions.map((day) => {
+                  const defaults = getDayDefaults(category, day.key);
 
-            <label className="block space-y-2 text-sm font-medium text-slate-700">
-              <span>Slug</span>
-              <input
-                name="slug"
-                defaultValue={category?.slug}
-                placeholder="consultation-30min"
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition duration-150 focus:border-slate-950 focus:bg-white"
-              />
-            </label>
-          </div>
+                  return (
+                    <div key={day.key} className="rounded-md border border-slate-200 bg-slate-50 p-4">
+                      <div className="grid gap-4 xl:grid-cols-[160px_repeat(4,minmax(0,1fr))] xl:items-end">
+                        <label className="flex items-center gap-3 text-sm font-medium text-slate-900">
+                          <input type="checkbox" name={`availabilityEnabled_${day.key}`} defaultChecked={defaults.enabled} className="size-4 rounded border-slate-300 text-blue-600" />
+                          <span>{day.label}</span>
+                        </label>
 
-          <div className="rounded-[24px] border border-slate-200 bg-slate-50/60 p-5">
-            <p className="text-sm font-semibold text-slate-900">Planning hebdomadaire</p>
-            <p className="mt-2 text-sm leading-7 text-slate-600">
-              Sélectionnez les jours ouverts, les heures de disponibilité et, si besoin, une pause repas qui deviendra
-              une période indisponible pour le client.
-            </p>
+                        <label className="space-y-1.5 text-xs font-medium text-slate-700">
+                          <span>Début</span>
+                          <input
+                            name={`availabilityStart_${day.key}`}
+                            type="time"
+                            lang="fr-FR"
+                            step={900}
+                            defaultValue={defaults.startTime}
+                            className="w-full rounded-md border border-slate-300 px-2 py-1.5 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                          />
+                        </label>
 
-            <div className="mt-5 space-y-4">
-              {weekdayOptions.map((day) => {
-                const defaults = getDayDefaults(category, day.key);
+                        <label className="space-y-1.5 text-xs font-medium text-slate-700">
+                          <span>Fin</span>
+                          <input
+                            name={`availabilityEnd_${day.key}`}
+                            type="time"
+                            lang="fr-FR"
+                            step={900}
+                            defaultValue={defaults.endTime}
+                            className="w-full rounded-md border border-slate-300 px-2 py-1.5 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                          />
+                        </label>
 
-                return (
-                  <div key={day.key} className="rounded-2xl border border-slate-200 bg-white p-4">
-                    <div className="grid gap-4 xl:grid-cols-[190px_repeat(4,minmax(0,1fr))] xl:items-end">
-                      <label className="flex items-center gap-3 text-sm font-medium text-slate-800">
-                        <input type="checkbox" name={`availabilityEnabled_${day.key}`} defaultChecked={defaults.enabled} />
-                        <span>{day.label}</span>
-                      </label>
+                        <label className="space-y-1.5 text-xs font-medium text-slate-700">
+                          <span>Pause (début)</span>
+                          <input
+                            name={`breakStart_${day.key}`}
+                            type="time"
+                            lang="fr-FR"
+                            step={900}
+                            defaultValue={defaults.breakStart}
+                            className="w-full rounded-md border border-slate-300 px-2 py-1.5 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                          />
+                        </label>
 
-                      <label className="space-y-2 text-sm font-medium text-slate-700">
-                        <span>Début</span>
-                        <input
-                          name={`availabilityStart_${day.key}`}
-                          type="time"
-                          lang="fr-FR"
-                          step={900}
-                          defaultValue={defaults.startTime}
-                          className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition duration-150 focus:border-slate-950 focus:bg-white"
-                        />
-                      </label>
-
-                      <label className="space-y-2 text-sm font-medium text-slate-700">
-                        <span>Fin</span>
-                        <input
-                          name={`availabilityEnd_${day.key}`}
-                          type="time"
-                          lang="fr-FR"
-                          step={900}
-                          defaultValue={defaults.endTime}
-                          className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition duration-150 focus:border-slate-950 focus:bg-white"
-                        />
-                      </label>
-
-                      <label className="space-y-2 text-sm font-medium text-slate-700">
-                        <span>Pause repas début</span>
-                        <input
-                          name={`breakStart_${day.key}`}
-                          type="time"
-                          lang="fr-FR"
-                          step={900}
-                          defaultValue={defaults.breakStart}
-                          className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition duration-150 focus:border-slate-950 focus:bg-white"
-                        />
-                      </label>
-
-                      <label className="space-y-2 text-sm font-medium text-slate-700">
-                        <span>Pause repas fin</span>
-                        <input
-                          name={`breakEnd_${day.key}`}
-                          type="time"
-                          lang="fr-FR"
-                          step={900}
-                          defaultValue={defaults.breakEnd}
-                          className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition duration-150 focus:border-slate-950 focus:bg-white"
-                        />
-                      </label>
+                        <label className="space-y-1.5 text-xs font-medium text-slate-700">
+                          <span>Pause (fin)</span>
+                          <input
+                            name={`breakEnd_${day.key}`}
+                            type="time"
+                            lang="fr-FR"
+                            step={900}
+                            defaultValue={defaults.breakEnd}
+                            className="w-full rounded-md border border-slate-300 px-2 py-1.5 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                          />
+                        </label>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
+              <p className="mt-4 text-xs text-slate-500">
+                Format français 24h : HH:MM. Si une pause repas est renseignée, elle doit rester comprise entre l&apos;heure
+                de début et l&apos;heure de fin.
+              </p>
             </div>
+          </section>
 
-            <p className="mt-4 text-xs text-slate-500">
-              Format français 24h : HH:MM. Si une pause repas est renseignée, elle doit rester comprise entre l&apos;heure
-              de début et l&apos;heure de fin.
-            </p>
-          </div>
+          {/* Visuals Card */}
+          <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
+            <div className="flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3">
+              <ImageIcon className="size-4 text-slate-600" />
+              <h2 className="font-semibold text-slate-800">Visuels</h2>
+            </div>
+            <div className="p-4 md:p-6">
+              <p className="text-sm text-slate-600 mb-6">
+                Chaque image est automatiquement recadrée, redimensionnée puis enregistrée au format JPEG.
+              </p>
 
-          <div className="rounded-[24px] border border-slate-200 bg-slate-50/60 p-5">
-            <p className="text-sm font-semibold text-slate-900">Visuels de la catégorie</p>
-            <p className="mt-2 text-sm leading-7 text-slate-600">
-              Chaque image est automatiquement recadrée, redimensionnée puis enregistrée au format JPEG.
-            </p>
-
-            <div className="mt-5 grid gap-5">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <p className="text-sm font-medium text-slate-900">{thumbnailConfig.label}</p>
-                    <p className="text-xs text-slate-500">
-                      Taille finale : {thumbnailConfig.width} x {thumbnailConfig.height} px, JPEG.
-                    </p>
+              <div className="grid gap-8 sm:grid-cols-2">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-sm font-medium text-slate-900">{thumbnailConfig.label}</p>
+                      <p className="text-xs text-slate-500">
+                        {thumbnailConfig.width} x {thumbnailConfig.height} px
+                      </p>
+                    </div>
+                    {thumbnailPreview && (
+                      <button
+                        type="button"
+                        onClick={() => clearImage("thumbnail")}
+                        className="text-xs font-medium text-rose-600 hover:text-rose-700"
+                      >
+                        Supprimer
+                      </button>
+                    )}
                   </div>
-                  {thumbnailPreview ? (
-                    <button
-                      type="button"
-                      onClick={() => clearImage("thumbnail")}
-                      className="text-xs font-medium text-slate-600 underline underline-offset-4"
-                    >
-                      Supprimer
-                    </button>
-                  ) : null}
+
+                  <input
+                    ref={thumbnailInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={(event) => void handleImageChange(event, "thumbnail")}
+                    className="block w-full text-xs text-slate-600 file:mr-4 file:rounded-md file:border file:border-slate-200 file:bg-slate-50 file:px-3 file:py-1.5 file:font-medium file:text-slate-700 hover:file:bg-slate-100 cursor-pointer"
+                  />
+
+                  <div className="flex h-32 w-32 items-center justify-center overflow-hidden rounded-md border border-slate-200 bg-slate-50">
+                    {thumbnailPreview ? (
+                      <img src={thumbnailPreview} alt="Aperçu image catégorie" className="h-full w-full object-cover" />
+                    ) : (
+                      <span className="px-4 text-center text-xs text-slate-400">Aucun visuel</span>
+                    )}
+                  </div>
                 </div>
 
-                <input
-                  ref={thumbnailInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={(event) => void handleImageChange(event, "thumbnail")}
-                  className="block w-full text-sm text-slate-600 file:mr-4 file:rounded-full file:border file:border-slate-200 file:bg-white file:px-4 file:py-2 file:text-sm file:font-medium"
-                />
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-sm font-medium text-slate-900">{bannerConfig.label}</p>
+                      <p className="text-xs text-slate-500">
+                        {bannerConfig.width} x {bannerConfig.height} px
+                      </p>
+                    </div>
+                    {bannerPreview && (
+                      <button
+                        type="button"
+                        onClick={() => clearImage("banner")}
+                        className="text-xs font-medium text-rose-600 hover:text-rose-700"
+                      >
+                        Supprimer
+                      </button>
+                    )}
+                  </div>
 
-                <div className="flex h-40 w-40 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white">
-                  {thumbnailPreview ? (
-                    <img src={thumbnailPreview} alt="Aperçu image catégorie" className="h-full w-full object-cover" />
-                  ) : (
-                    <span className="px-4 text-center text-xs text-slate-400">Aucun visuel sélectionné</span>
-                  )}
+                  <input
+                    ref={bannerInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={(event) => void handleImageChange(event, "banner")}
+                    className="block w-full text-xs text-slate-600 file:mr-4 file:rounded-md file:border file:border-slate-200 file:bg-slate-50 file:px-3 file:py-1.5 file:font-medium file:text-slate-700 hover:file:bg-slate-100 cursor-pointer"
+                  />
+
+                  <div className="flex aspect-[8/3] w-full items-center justify-center overflow-hidden rounded-md border border-slate-200 bg-slate-50">
+                    {bannerPreview ? (
+                      <img src={bannerPreview} alt="Aperçu bannière catégorie" className="h-full w-full object-cover" />
+                    ) : (
+                      <span className="px-4 text-center text-xs text-slate-400">Aucune bannière</span>
+                    )}
+                  </div>
                 </div>
               </div>
-
-              <div className="space-y-3">
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <p className="text-sm font-medium text-slate-900">{bannerConfig.label}</p>
-                    <p className="text-xs text-slate-500">
-                      Taille finale : {bannerConfig.width} x {bannerConfig.height} px, JPEG.
-                    </p>
-                  </div>
-                  {bannerPreview ? (
-                    <button
-                      type="button"
-                      onClick={() => clearImage("banner")}
-                      className="text-xs font-medium text-slate-600 underline underline-offset-4"
-                    >
-                      Supprimer
-                    </button>
-                  ) : null}
-                </div>
-
-                <input
-                  ref={bannerInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={(event) => void handleImageChange(event, "banner")}
-                  className="block w-full text-sm text-slate-600 file:mr-4 file:rounded-full file:border file:border-slate-200 file:bg-white file:px-4 file:py-2 file:text-sm file:font-medium"
-                />
-
-                <div className="flex aspect-[8/3] w-full items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white">
-                  {bannerPreview ? (
-                    <img src={bannerPreview} alt="Aperçu bannière catégorie" className="h-full w-full object-cover" />
-                  ) : (
-                    <span className="px-4 text-center text-xs text-slate-400">Aucune bannière sélectionnée</span>
-                  )}
-                </div>
-              </div>
             </div>
-          </div>
+          </section>
         </div>
 
-        <div className="space-y-5">
-          <div className="rounded-[24px] border border-slate-200 bg-slate-50/60 p-5">
-            <p className="text-sm font-semibold text-slate-900">Publication</p>
-            <label className="mt-4 flex items-center gap-3 text-sm text-slate-700">
-              <input type="checkbox" name="isOnline" defaultChecked={category?.isOnline ?? true} />
-              <span>Catégorie visible sur le site public</span>
-            </label>
-          </div>
+        {/* Right Column */}
+        <div className="space-y-6">
+          <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
+            <div className="flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3">
+              <Globe className="size-4 text-slate-600" />
+              <h2 className="font-semibold text-slate-800">Publication</h2>
+            </div>
+            <div className="p-4">
+              <label className="flex items-center gap-3 text-sm text-slate-700">
+                <input type="checkbox" name="isOnline" defaultChecked={category?.isOnline ?? true} className="size-4 rounded border-slate-300 text-blue-600" />
+                <span className="font-medium">Catégorie visible au public</span>
+              </label>
+            </div>
+          </section>
 
-          <div className="rounded-[24px] border border-slate-200 bg-slate-50/60 p-5">
-            <p className="text-sm font-semibold text-slate-900">Message personnalisé</p>
-            <textarea
-              name="customMessage"
-              rows={6}
-              defaultValue={category?.customMessage}
-              placeholder="Instructions, congés, informations utiles..."
-              className="mt-4 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition duration-150 focus:border-slate-950"
-            />
-          </div>
+          <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
+            <div className="flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3">
+              <MessageSquare className="size-4 text-slate-600" />
+              <h2 className="font-semibold text-slate-800">Message personnalisé</h2>
+            </div>
+            <div className="p-4">
+              <textarea
+                name="customMessage"
+                rows={5}
+                defaultValue={category?.customMessage}
+                placeholder="Instructions, congés, informations utiles..."
+                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              />
+            </div>
+          </section>
 
-          <div className="rounded-[24px] border border-slate-200 bg-slate-50/60 p-5 text-sm leading-7 text-slate-600">
-            <p className="font-semibold text-slate-900">Disponibilités de la catégorie</p>
-            <p className="mt-3">
-              Chaque jour peut être activé séparément, avec une plage horaire dédiée et une pause repas facultative.
-            </p>
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+            <button
+              type="submit"
+              className="flex w-full items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700"
+            >
+              <Save className="size-4" />
+              Enregistrer la catégorie
+            </button>
           </div>
-        </div>
-
-        <div className="xl:col-span-2">
-          <button
-            type="submit"
-            className="inline-flex rounded-full bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition duration-150 hover:bg-slate-800"
-          >
-            Enregistrer la catégorie
-          </button>
         </div>
       </form>
-    </section>
+    </div>
   );
 }

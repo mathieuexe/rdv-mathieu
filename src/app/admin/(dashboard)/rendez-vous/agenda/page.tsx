@@ -1,3 +1,5 @@
+import { CalendarDays } from "lucide-react";
+
 import { AdminAgendaCalendar } from "@/components/admin/admin-agenda-calendar";
 import { getAgendaAppointmentsView } from "@/lib/data-access";
 
@@ -5,18 +7,25 @@ export default async function AgendaAppointmentsPage() {
   const appointments = await getAgendaAppointmentsView();
 
   return (
-    <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_16px_50px_rgba(15,23,42,0.04)]">
-      <div>
-        <p className="text-sm uppercase tracking-[0.2em] text-slate-400">Agenda</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">Rendez-vous confirmés</h1>
-        <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
-          Cette page regroupe les rendez-vous pris et confirmés, qu&apos;ils aient été créés par un utilisateur ou par un administrateur.
-        </p>
-      </div>
+    <div className="mx-auto max-w-7xl space-y-6 pb-12">
+      <section className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Agenda confirmés</h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Cette page regroupe les rendez-vous pris et confirmés, qu&apos;ils aient été créés par un utilisateur ou par un administrateur.
+          </p>
+        </div>
+      </section>
 
-      <div className="mt-6">
-        <AdminAgendaCalendar appointments={appointments} />
-      </div>
-    </section>
+      <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
+        <div className="flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3">
+          <CalendarDays className="size-4 text-slate-600" />
+          <h2 className="font-semibold text-slate-800">Calendrier</h2>
+        </div>
+        <div className="p-4 md:p-6">
+          <AdminAgendaCalendar appointments={appointments} />
+        </div>
+      </section>
+    </div>
   );
 }

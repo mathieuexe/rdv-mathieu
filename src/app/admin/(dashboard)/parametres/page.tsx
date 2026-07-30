@@ -1,4 +1,5 @@
 import { headers } from "next/headers";
+import { Settings, Save } from "lucide-react";
 
 import { GlobalBlackoutPeriodsEditor } from "@/components/admin/global-blackout-periods-editor";
 import { getSiteSettings } from "@/lib/data-access";
@@ -17,91 +18,97 @@ export default async function SettingsPage({
   const isCurrentIpAlreadyAllowed = currentIp ? settings.maintenanceAllowedIps.includes(currentIp) : false;
 
   return (
-    <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_16px_50px_rgba(15,23,42,0.04)]">
-      <div>
-        <p className="text-sm uppercase tracking-[0.2em] text-slate-400">Site</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">Paramètres globaux</h1>
-        <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
-          Activez le mode maintenance, ajustez le message public et définissez les IP pouvant continuer à accéder au
-          site.
-        </p>
-      </div>
+    <div className="mx-auto max-w-7xl space-y-6 pb-12">
+      <section className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Paramètres globaux</h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Maintenance, widget, indisponibilités et sécurité d'accès.
+          </p>
+        </div>
+      </section>
 
       {saved ? (
-        <p className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+        <div className="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
           Configuration enregistrée avec succès.
-        </p>
+        </div>
       ) : null}
       {error ? (
-        <p className="mt-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
+        <div className="rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
           {decodedError}
-        </p>
+        </div>
       ) : null}
 
-      <form action={saveSettingsAction} className="mt-8 grid gap-6 xl:grid-cols-[1fr_0.9fr]">
-        <div className="space-y-5">
-          <div className="rounded-[22px] border border-slate-200 bg-slate-50/60 p-5">
-            <label className="flex items-center gap-3 text-sm font-medium text-slate-800">
-              <input type="checkbox" name="maintenanceMode" defaultChecked={settings.maintenanceMode} />
-              <span>Activer le mode maintenance global</span>
-            </label>
-          </div>
+      <form action={saveSettingsAction} className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
+        <div className="space-y-6 lg:col-span-2">
+          
+          {/* General Config Card */}
+          <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
+            <div className="flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3">
+              <Settings className="size-4 text-slate-600" />
+              <h2 className="font-semibold text-slate-800">Configuration du site</h2>
+            </div>
+            <div className="space-y-6 p-4 md:p-6">
+              <div className="flex flex-col gap-4 rounded-md border border-slate-200 bg-slate-50 p-4">
+                <label className="flex items-center gap-3 text-sm font-medium text-slate-900">
+                  <input type="checkbox" name="maintenanceMode" defaultChecked={settings.maintenanceMode} className="size-4 rounded border-slate-300" />
+                  <span>Activer le mode maintenance global</span>
+                </label>
+                <label className="flex items-center gap-3 text-sm font-medium text-slate-900">
+                  <input type="checkbox" name="enableWhatsappWidget" defaultChecked={settings.enableWhatsappWidget} className="size-4 rounded border-slate-300" />
+                  <span>Afficher le widget WhatsApp public</span>
+                </label>
+              </div>
 
-          <div className="rounded-[22px] border border-slate-200 bg-slate-50/60 p-5">
-            <label className="flex items-center gap-3 text-sm font-medium text-slate-800">
-              <input type="checkbox" name="enableWhatsappWidget" defaultChecked={settings.enableWhatsappWidget} />
-              <span>Afficher le widget WhatsApp en bas à gauche du site</span>
-            </label>
-            <p className="mt-3 text-xs leading-6 text-slate-500">
-              Ce widget Elfsight est affiché sur les pages publiques uniquement. Vous pouvez le désactiver ici à tout moment.
-            </p>
-          </div>
+              <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+                <span>Message de maintenance</span>
+                <textarea
+                  name="maintenanceMessage"
+                  rows={4}
+                  defaultValue={settings.maintenanceMessage}
+                  className="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </label>
 
-          <label className="block space-y-2 text-sm font-medium text-slate-700">
-            <span>Message de maintenance</span>
-            <textarea
-              name="maintenanceMessage"
-              rows={6}
-              defaultValue={settings.maintenanceMessage}
-              className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition focus:border-slate-950 focus:bg-white"
-            />
-          </label>
+              <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+                <span>Adresses IP autorisées (Bypass maintenance)</span>
+                <textarea
+                  name="maintenanceAllowedIps"
+                  rows={4}
+                  defaultValue={settings.maintenanceAllowedIps.join("\n")}
+                  placeholder={"82.66.10.25\n2001:db8::1"}
+                  className="w-full rounded-md border border-slate-300 px-3 py-2 font-mono text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+                <span className="block text-xs text-slate-500">Une IP par ligne.</span>
+              </label>
 
-          <label className="block space-y-2 text-sm font-medium text-slate-700">
-            <span>Adresses IP autorisées</span>
-            <textarea
-              name="maintenanceAllowedIps"
-              rows={6}
-              defaultValue={settings.maintenanceAllowedIps.join("\n")}
-              placeholder={"Exemple :\n82.66.10.25\n2001:db8::1"}
-              className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 font-mono text-sm outline-none transition focus:border-slate-950 focus:bg-white"
-            />
-            <span className="block text-xs leading-6 text-slate-500">
-              Saisissez une IP par ligne. Ces adresses conservent l&apos;accès au site même si la maintenance est active.
-            </span>
-          </label>
-
-          <div className="rounded-[22px] border border-slate-200 bg-slate-50/60 p-5 text-sm text-slate-700">
-            <p className="font-medium text-slate-900">Mon IP actuelle</p>
-            <p className="mt-2 font-mono text-sm text-slate-700">{currentIp ?? "IP non détectée."}</p>
-            <label className="mt-4 flex items-center gap-3 text-sm font-medium text-slate-800">
-              <input type="checkbox" name="allowCurrentIp" defaultChecked={isCurrentIpAlreadyAllowed} />
-              <span>Ajouter automatiquement mon IP actuelle à la liste autorisée</span>
-            </label>
-          </div>
+              <div className="rounded-md border border-blue-100 bg-blue-50 p-4 text-sm">
+                <p className="font-medium text-blue-900">Mon IP actuelle : <span className="font-mono">{currentIp ?? "Non détectée"}</span></p>
+                <label className="mt-3 flex items-center gap-2 text-sm font-medium text-blue-900">
+                  <input type="checkbox" name="allowCurrentIp" defaultChecked={isCurrentIpAlreadyAllowed} className="size-4 rounded border-blue-300" />
+                  <span>Autoriser mon IP automatiquement</span>
+                </label>
+              </div>
+            </div>
+          </section>
         </div>
 
-        <GlobalBlackoutPeriodsEditor periods={settings.globalBlackoutPeriods} />
-
-        <div className="xl:col-span-2">
-          <button
-            type="submit"
-            className="inline-flex rounded-full border border-slate-950 bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
-          >
-            Enregistrer les paramètres
-          </button>
+        <div className="space-y-6">
+          <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
+            <GlobalBlackoutPeriodsEditor periods={settings.globalBlackoutPeriods} />
+          </section>
+          
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+            <button
+              type="submit"
+              className="flex w-full items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700"
+            >
+              <Save className="size-4" />
+              Enregistrer les modifications
+            </button>
+          </div>
         </div>
       </form>
-    </section>
+    </div>
   );
 }

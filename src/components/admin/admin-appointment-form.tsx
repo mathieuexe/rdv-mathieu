@@ -165,215 +165,217 @@ export function AdminAppointmentForm({ categories, registeredClients, action, er
   }
 
   return (
-    <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_18px_55px_rgba(37,99,235,0.08)]">
-      <div>
-        <p className="text-sm uppercase tracking-[0.2em] text-blue-600/70">Création</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">Créer un rendez-vous</h1>
-        <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
-          L&apos;administrateur peut réserver directement un créneau disponible au nom d&apos;un client.
-        </p>
-        {errorMessage ? (
-          <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-            {errorMessage}
-          </div>
-        ) : null}
-      </div>
+    <div className="mx-auto max-w-7xl space-y-6 pb-12">
+      <section className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Créer un rendez-vous</h1>
+          <p className="mt-1 text-sm text-slate-500">
+            L&apos;administrateur peut réserver directement un créneau disponible au nom d&apos;un client.
+          </p>
+        </div>
+      </section>
 
-      <form action={action} className="mt-8 grid gap-6 xl:grid-cols-[1fr_0.95fr]">
-        <div className="space-y-5">
-          <label className="block space-y-2 text-sm font-medium text-slate-700">
-            <span>Client déjà inscrit</span>
-            <input
-              type="search"
-              value={clientSearch}
-              onChange={(event) => setClientSearch(event.target.value)}
-              placeholder="Rechercher par nom, prénom ou email"
-              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition duration-150 focus:border-blue-500"
-            />
-            <select
-              name="linkedUserId"
-              value={linkedUserId}
-              onChange={(event) => handleClientChange(event.target.value)}
-              className="w-full rounded-2xl border border-blue-100 bg-blue-50/40 px-4 py-3 outline-none transition duration-150 focus:border-blue-500 focus:bg-white"
-            >
-              <option value="">Aucun lien client</option>
-              {filteredClients.map((client) => (
-                <option key={client.userId} value={client.userId}>
-                  {client.firstName} {client.lastName} - {client.email}
-                </option>
-              ))}
-            </select>
-            <p className="text-xs text-slate-500">
-              Si vous sélectionnez un client inscrit, ce rendez-vous apparaîtra aussi dans son espace personnel.
-            </p>
-            {clientSearch.trim() && filteredClients.length === 0 ? (
-              <p className="text-xs text-amber-700">Aucun client ne correspond à votre recherche.</p>
-            ) : null}
-          </label>
+      {errorMessage && (
+        <div className="rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+          {errorMessage}
+        </div>
+      )}
 
-          {selectedClient ? (
-            <label className="block rounded-2xl border border-blue-100 bg-blue-50/40 px-4 py-4 text-sm text-slate-700">
-              <span className="flex items-start gap-3">
+      <form action={action} className="grid items-start gap-6 lg:grid-cols-3">
+        <div className="space-y-6 lg:col-span-2">
+          {/* Client Info Card */}
+          <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
+            <div className="flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3">
+              <h2 className="font-semibold text-slate-800">Informations Client</h2>
+            </div>
+            <div className="space-y-5 p-4 md:p-6">
+              <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+                <span>Client déjà inscrit</span>
                 <input
-                  name="updateLinkedUserProfile"
-                  type="checkbox"
-                  checked={updateLinkedUserProfile}
-                  onChange={(event) => setUpdateLinkedUserProfile(event.target.checked)}
-                  className="mt-1 size-4 rounded border-slate-300 text-blue-600"
+                  type="search"
+                  value={clientSearch}
+                  onChange={(event) => setClientSearch(event.target.value)}
+                  placeholder="Rechercher par nom, prénom ou email"
+                  className="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 />
-                <span>
-                  <span className="block font-medium text-slate-950">Mettre aussi à jour la fiche client</span>
-                  <span className="mt-1 block text-xs leading-6 text-slate-500">
-                    Si cette option est cochée, le prénom, le nom, l&apos;email et le téléphone du client sélectionné
-                    seront aussi modifiés dans son espace personnel.
+                <select
+                  name="linkedUserId"
+                  value={linkedUserId}
+                  onChange={(event) => handleClientChange(event.target.value)}
+                  className="mt-2 w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                >
+                  <option value="">Aucun lien client</option>
+                  {filteredClients.map((client) => (
+                    <option key={client.userId} value={client.userId}>
+                      {client.firstName} {client.lastName} - {client.email}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-slate-500">
+                  Si vous sélectionnez un client inscrit, ce rendez-vous apparaîtra aussi dans son espace personnel.
+                </p>
+                {clientSearch.trim() && filteredClients.length === 0 ? (
+                  <p className="text-xs text-amber-700">Aucun client ne correspond à votre recherche.</p>
+                ) : null}
+              </label>
+
+              {selectedClient ? (
+                <label className="block rounded-md border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-slate-700">
+                  <span className="flex items-start gap-3">
+                    <input
+                      name="updateLinkedUserProfile"
+                      type="checkbox"
+                      checked={updateLinkedUserProfile}
+                      onChange={(event) => setUpdateLinkedUserProfile(event.target.checked)}
+                      className="mt-0.5 size-4 rounded border-slate-300 text-blue-600"
+                    />
+                    <span>
+                      <span className="block font-medium text-slate-900">Mettre aussi à jour la fiche client</span>
+                      <span className="mt-0.5 block text-xs text-slate-500">
+                        Si cette option est cochée, les informations du client seront mises à jour.
+                      </span>
+                    </span>
                   </span>
-                </span>
-              </span>
-            </label>
-          ) : (
-            <label className="block rounded-2xl border border-emerald-100 bg-emerald-50/70 px-4 py-4 text-sm text-slate-700">
-              <span className="flex items-start gap-3">
+                </label>
+              ) : (
+                <label className="block rounded-md border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-slate-700">
+                  <span className="flex items-start gap-3">
+                    <input
+                      name="createClientAccount"
+                      type="checkbox"
+                      checked={createClientAccount}
+                      onChange={(event) => setCreateClientAccount(event.target.checked)}
+                      className="mt-0.5 size-4 rounded border-slate-300 text-emerald-600"
+                    />
+                    <span>
+                      <span className="block font-medium text-slate-900">Créer aussi un compte client</span>
+                      <span className="mt-0.5 block text-xs text-slate-500">
+                        Le client recevra un email avec un mot de passe temporaire.
+                      </span>
+                    </span>
+                  </span>
+                </label>
+              )}
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+                  <span>Prénom</span>
+                  <input
+                    name="firstName"
+                    required
+                    value={firstName}
+                    onChange={(event) => setFirstName(event.target.value)}
+                    className="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  />
+                </label>
+
+                <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+                  <span>Nom</span>
+                  <input
+                    name="lastName"
+                    required
+                    value={lastName}
+                    onChange={(event) => setLastName(event.target.value)}
+                    className="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  />
+                </label>
+              </div>
+
+              <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+                <span>Email</span>
                 <input
-                  name="createClientAccount"
-                  type="checkbox"
-                  checked={createClientAccount}
-                  onChange={(event) => setCreateClientAccount(event.target.checked)}
-                  className="mt-1 size-4 rounded border-slate-300 text-emerald-600"
+                  name="email"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  className="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 />
-                <span>
-                  <span className="block font-medium text-slate-950">Créer aussi un compte client</span>
-                  <span className="mt-1 block text-xs leading-6 text-slate-500">
-                    Si aucun client n&apos;est sélectionné, vous pouvez créer son compte avec ces informations. Le client
-                    recevra automatiquement un email avec un mot de passe temporaire et devra le modifier lors de sa
-                    première connexion.
-                  </span>
-                </span>
-              </span>
-            </label>
-          )}
+              </label>
 
-          <label className="block space-y-2 text-sm font-medium text-slate-700">
-            <span>Catégorie</span>
-            <select
-              name="categorySlug"
-              value={categorySlug}
-              onChange={(event) => setCategorySlug(event.target.value)}
-              className="w-full rounded-2xl border border-blue-100 bg-blue-50/40 px-4 py-3 outline-none transition duration-150 focus:border-blue-500 focus:bg-white"
-            >
-              {categories.map((category) => (
-                <option key={category.id} value={category.slug}>
-                  {category.title}
-                </option>
-              ))}
-            </select>
-          </label>
+              <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+                <span>Téléphone</span>
+                <input
+                  name="phone"
+                  type="tel"
+                  required
+                  value={phone}
+                  onChange={(event) => setPhone(event.target.value)}
+                  className="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </label>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <label className="block space-y-2 text-sm font-medium text-slate-700">
-              <span>Prénom</span>
-              <input
-                name="firstName"
-                required
-                value={firstName}
-                onChange={(event) => setFirstName(event.target.value)}
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition duration-150 focus:border-blue-500 focus:bg-white"
-              />
-            </label>
-
-            <label className="block space-y-2 text-sm font-medium text-slate-700">
-              <span>Nom</span>
-              <input
-                name="lastName"
-                required
-                value={lastName}
-                onChange={(event) => setLastName(event.target.value)}
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition duration-150 focus:border-blue-500 focus:bg-white"
-              />
-            </label>
-          </div>
-
-          <label className="block space-y-2 text-sm font-medium text-slate-700">
-            <span>Email</span>
-            <input
-              name="email"
-              type="email"
-              required
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition duration-150 focus:border-blue-500 focus:bg-white"
-            />
-          </label>
-
-          <label className="block space-y-2 text-sm font-medium text-slate-700">
-            <span>Téléphone</span>
-            <input
-              name="phone"
-              type="tel"
-              required
-              value={phone}
-              onChange={(event) => setPhone(event.target.value)}
-              className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition duration-150 focus:border-blue-500 focus:bg-white"
-            />
-          </label>
-
-          <label className="block space-y-2 text-sm font-medium text-slate-700">
-            <span>Message</span>
-            <textarea
-              name="message"
-              rows={4}
-              value={message}
-              onChange={(event) => setMessage(event.target.value)}
-              className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 outline-none transition duration-150 focus:border-blue-500 focus:bg-white"
-            />
-          </label>
+              <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+                <span>Message</span>
+                <textarea
+                  name="message"
+                  rows={4}
+                  value={message}
+                  onChange={(event) => setMessage(event.target.value)}
+                  className="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </label>
+            </div>
+          </section>
         </div>
 
-        <div className="space-y-5">
-          <input type="hidden" name="startsAt" value={selectedSlot} />
-
-          <div className="rounded-[24px] border border-blue-100 bg-blue-50/40 p-5">
-            <div className="space-y-2">
-              <p className="text-sm font-semibold text-slate-900">Disponibilités</p>
-              {selectedCategory ? (
-                <>
-                  <p className="text-lg font-semibold text-slate-950">{selectedCategory.title}</p>
-                  <div className="flex flex-wrap gap-4 text-sm text-slate-600">
-                    <span className="inline-flex items-center gap-2">
-                      <Clock3 className="size-4" />
-                      {selectedCategory.durationMinutes} min
-                    </span>
-                    <span className="inline-flex items-center gap-2">
-                      <MapPinned className="size-4" />
-                      {formatAppointmentMode(selectedCategory.appointmentMode)}
-                    </span>
-                  </div>
-                </>
-              ) : null}
+        {/* Calendar and Slots Card */}
+        <div className="space-y-6">
+          <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
+            <div className="flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3">
+              <h2 className="font-semibold text-slate-800">Planification</h2>
             </div>
-            {loading ? <p className="mt-3 text-sm text-slate-600">Chargement...</p> : null}
-            {error ? <p className="mt-3 text-sm text-red-600">{error}</p> : null}
+            <div className="space-y-5 p-4">
+              <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+                <span>Catégorie</span>
+                <select
+                  name="categorySlug"
+                  value={categorySlug}
+                  onChange={(event) => setCategorySlug(event.target.value)}
+                  className="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                >
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.slug}>
+                      {category.title}
+                    </option>
+                  ))}
+                </select>
+              </label>
 
-            <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1fr)_220px]">
-              <div>
-                <div className="flex items-center gap-3">
-                  <CalendarDays className="size-5 text-slate-500" />
-                  <div>
-                    <p className="text-lg font-semibold text-slate-950">Sélectionnez la date et l&apos;heure</p>
-                    <p className="text-sm text-slate-500">Le sélecteur reprend la même logique que sur le site public.</p>
-                  </div>
+              <input type="hidden" name="startsAt" value={selectedSlot} />
+
+              <div className="rounded-md border border-slate-200 bg-slate-50 p-4">
+                <div className="space-y-2">
+                  {selectedCategory ? (
+                    <>
+                      <p className="font-medium text-slate-900">{selectedCategory.title}</p>
+                      <div className="flex flex-wrap gap-4 text-xs text-slate-600">
+                        <span className="inline-flex items-center gap-1.5">
+                          <Clock3 className="size-3.5" />
+                          {selectedCategory.durationMinutes} min
+                        </span>
+                        <span className="inline-flex items-center gap-1.5">
+                          <MapPinned className="size-3.5" />
+                          {formatAppointmentMode(selectedCategory.appointmentMode)}
+                        </span>
+                      </div>
+                    </>
+                  ) : null}
                 </div>
+                {loading ? <p className="mt-3 text-sm text-slate-600">Chargement...</p> : null}
+                {error ? <p className="mt-3 text-sm text-red-600">{error}</p> : null}
 
-                <div className="mt-6">
+                <div className="mt-4">
                   <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium uppercase tracking-[0.14em] text-slate-500">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                       {formatMonthLabel(monthKeys[visibleMonthIndex] ?? visibleMonthKey)}
                     </p>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
                       <button
                         type="button"
                         onClick={() => setVisibleMonthKey(monthKeys[Math.max(0, visibleMonthIndex - 1)] ?? visibleMonthKey)}
                         disabled={visibleMonthIndex === 0}
-                      className="flex size-9 items-center justify-center rounded-full border border-blue-100 bg-white text-slate-600 transition duration-150 hover:border-blue-300 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-40"
+                        className="flex size-7 items-center justify-center rounded border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50"
                       >
                         ‹
                       </button>
@@ -383,23 +385,23 @@ export function AdminAppointmentForm({ categories, registeredClients, action, er
                           setVisibleMonthKey(monthKeys[Math.min(monthKeys.length - 1, visibleMonthIndex + 1)] ?? visibleMonthKey)
                         }
                         disabled={visibleMonthIndex >= monthKeys.length - 1}
-                        className="flex size-9 items-center justify-center rounded-full border border-blue-100 bg-white text-slate-600 transition duration-150 hover:border-blue-300 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-40"
+                        className="flex size-7 items-center justify-center rounded border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50"
                       >
                         ›
                       </button>
                     </div>
                   </div>
 
-                  <div className="mt-6 grid grid-cols-7 gap-y-4 text-center text-xs uppercase tracking-[0.12em] text-slate-400">
+                  <div className="mt-4 grid grid-cols-7 gap-y-2 text-center text-[10px] font-semibold uppercase tracking-wider text-slate-400">
                     {weekdayHeaders.map((label) => (
-                      <div key={label}>{label}</div>
+                      <div key={label}>{label.slice(0, 3)}</div>
                     ))}
                   </div>
 
-                  <div className="mt-4 grid grid-cols-7 gap-y-3 text-center">
+                  <div className="mt-2 grid grid-cols-7 gap-y-1 text-center">
                     {calendarCells.map((cell) => {
                       if (cell.dayNumber === null) {
-                        return <div key={cell.key} className="h-10" />;
+                        return <div key={cell.key} className="h-8" />;
                       }
 
                       const entry = dayEntries.find((item) => item.dateKey === cell.key);
@@ -418,12 +420,12 @@ export function AdminAppointmentForm({ categories, registeredClients, action, er
                             disabled={isDisabled}
                             onClick={() => setSelectedDateKey(cell.key)}
                             className={cn(
-                              "flex size-10 items-center justify-center rounded-xl text-sm transition duration-150",
-                              isDisabled && isPastDay && "cursor-not-allowed bg-slate-100 text-slate-400",
+                              "flex size-8 items-center justify-center rounded text-sm transition-colors",
+                              isDisabled && isPastDay && "cursor-not-allowed bg-slate-50 text-slate-400",
                               isDisabled && !isPastDay && !isBlackoutDay && "cursor-not-allowed text-slate-300",
-                              isDisabled && isBlackoutDay && "cursor-not-allowed bg-rose-100 text-rose-700",
-                              !isDisabled && !isSelected && "bg-white text-slate-700 hover:bg-blue-50",
-                              isSelected && "bg-blue-600 text-white",
+                              isDisabled && isBlackoutDay && "cursor-not-allowed bg-rose-50 text-rose-700",
+                              !isDisabled && !isSelected && "bg-white text-slate-700 hover:bg-slate-100",
+                              isSelected && "bg-blue-600 text-white font-medium",
                             )}
                           >
                             {cell.dayNumber}
@@ -432,13 +434,11 @@ export function AdminAppointmentForm({ categories, registeredClients, action, er
                       );
                     })}
                   </div>
-
-                  <div className="mt-8 text-sm text-slate-500">Heure d&apos;Europe, Paris (24h)</div>
-                  <CalendarLegend className="mt-5" />
+                  <CalendarLegend className="mt-4 scale-90 origin-left" />
                 </div>
               </div>
 
-              <div className="max-h-[460px] space-y-3 overflow-y-auto pr-1">
+              <div className="max-h-[280px] space-y-2 overflow-y-auto pr-1">
                 {selectedDay ? (
                   selectedDay.dateSlots.map((slot) => {
                     const active = selectedSlot === slot.start;
@@ -450,11 +450,11 @@ export function AdminAppointmentForm({ categories, registeredClients, action, er
                         disabled={slot.isBlocked}
                         onClick={() => setSelectedSlot(slot.start)}
                         className={cn(
-                          "flex w-full items-center justify-center rounded-2xl border px-4 py-3 text-sm font-medium transition duration-150",
+                          "flex w-full items-center justify-center rounded-md border px-3 py-2 text-sm transition-colors",
                           slot.isBlocked
-                            ? "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400"
-                            : "border-slate-200 bg-white text-slate-700 hover:border-blue-500 hover:text-slate-950",
-                          active && "border-blue-600 bg-blue-600 text-white",
+                            ? "cursor-not-allowed border-slate-100 bg-slate-50 text-slate-400"
+                            : "border-slate-200 bg-white text-slate-700 hover:border-blue-300 hover:bg-blue-50",
+                          active && "border-blue-600 bg-blue-600 text-white font-medium hover:bg-blue-700 hover:border-blue-700 hover:text-white",
                         )}
                       >
                         {slot.label}
@@ -462,25 +462,27 @@ export function AdminAppointmentForm({ categories, registeredClients, action, er
                     );
                   })
                 ) : (
-                  <div className="rounded-2xl border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">
+                  <div className="rounded-md border border-dashed border-slate-300 p-4 text-center text-sm text-slate-500">
                     {hasAnyAvailableSlot
-                      ? "Sélectionnez une date dans le calendrier."
-                      : "Aucun créneau n'est disponible pour le moment."}
+                      ? "Sélectionnez une date."
+                      : "Aucun créneau disponible."}
                   </div>
                 )}
               </div>
             </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={!selectedSlot}
-            className="inline-flex w-full items-center justify-center rounded-full bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition duration-150 hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300"
-          >
-            Créer le rendez-vous
-          </button>
+            
+            <div className="border-t border-slate-200 bg-slate-50 p-4">
+              <button
+                type="submit"
+                disabled={!selectedSlot}
+                className="flex w-full items-center justify-center rounded-md bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Créer le rendez-vous
+              </button>
+            </div>
+          </section>
         </div>
       </form>
-    </section>
+    </div>
   );
 }
