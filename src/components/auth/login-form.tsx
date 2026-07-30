@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useActionState, useState } from "react";
 import { Eye, EyeOff, LoaderCircle, Mail } from "lucide-react";
 
+import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import type { PublicLoginActionState } from "@/app/connexion/actions";
 
 interface LoginFormProps {
@@ -41,6 +42,18 @@ export function LoginForm({ action }: LoginFormProps) {
 
     window.localStorage.removeItem("remembered-login-email");
   }
+
+  const handleGoogleLogin = async () => {
+    const supabase = getSupabaseBrowserClient();
+    if (!supabase) return;
+
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+  };
 
   return (
     <div className="w-full">
@@ -128,12 +141,11 @@ export function LoginForm({ action }: LoginFormProps) {
 
         <button
           type="button"
-          disabled
-          aria-disabled="true"
-          className="mt-6 flex w-full cursor-not-allowed items-center justify-center gap-3 rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 opacity-60 transition-colors"
+          onClick={handleGoogleLogin}
+          className="mt-6 flex w-full items-center justify-center gap-3 rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
         >
           <CustomGoogleIcon />
-          <span>Continuer avec Google (Bientôt)</span>
+          <span>Continuer avec Google</span>
         </button>
       </form>
 

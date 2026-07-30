@@ -562,6 +562,15 @@ export async function getAdminUserDetail(userId: string) {
     return null;
   }
 
+  const supabase = getSupabaseAdminClient();
+  let authProvider = "email";
+  if (supabase) {
+    const { data } = await supabase.auth.admin.getUserById(userId);
+    if (data?.user?.app_metadata?.provider) {
+      authProvider = data.user.app_metadata.provider;
+    }
+  }
+
   const [appointments, logs] = await Promise.all([
     getUserAppointmentsForAccount({ userId: profile.userId, email: profile.email }),
     getUserAccountActivityLogs(profile.userId, 200),
@@ -569,6 +578,7 @@ export async function getAdminUserDetail(userId: string) {
 
   return {
     profile,
+    authProvider,
     appointments,
     logs,
   };

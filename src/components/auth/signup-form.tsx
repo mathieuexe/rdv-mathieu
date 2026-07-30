@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useActionState, useMemo, useState } from "react";
 import { Eye, EyeOff, LoaderCircle, User, Mail, Lock, ShieldCheck } from "lucide-react";
 
+import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
+import CustomGoogleIcon from "@/components/auth/login-form";
 import type { SignUpActionState } from "@/app/inscription/actions";
 
 interface SignUpFormProps {
@@ -61,6 +63,18 @@ export function SignUpForm({ action }: SignUpFormProps) {
   const strengthLabel = passedCount === 5 ? "Robuste" : passedCount >= 3 ? "Moyenne" : "Faible";
   const strengthWidth = `${(passedCount / checks.length) * 100}%`;
   const passwordsMatch = confirmPassword.length > 0 && password === confirmPassword;
+
+  const handleGoogleSignup = async () => {
+    const supabase = getSupabaseBrowserClient();
+    if (!supabase) return;
+
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+  };
 
   return (
     <div className="w-full">
@@ -208,6 +222,21 @@ export function SignUpForm({ action }: SignUpFormProps) {
         >
           {pending ? <LoaderCircle className="size-4 animate-spin" /> : null}
           <span>{pending ? "Inscription..." : "Créer mon compte"}</span>
+        </button>
+
+        <div className="mt-6 flex items-center gap-4">
+          <div className="h-px flex-1 bg-slate-200" />
+          <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">OU</span>
+          <div className="h-px flex-1 bg-slate-200" />
+        </div>
+
+        <button
+          type="button"
+          onClick={handleGoogleSignup}
+          className="mt-6 flex w-full items-center justify-center gap-3 rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+        >
+          <CustomGoogleIcon />
+          <span>S&apos;inscrire avec Google</span>
         </button>
       </form>
 
