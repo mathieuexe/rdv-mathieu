@@ -3,17 +3,25 @@ import { ArrowRight, Clock, MapPin, CalendarDays } from "lucide-react";
 
 import { PublicFooter } from "@/components/public/public-footer";
 import { PublicHeader } from "@/components/public/public-header";
-import { getPublicCategories } from "@/lib/data-access";
+import { PublicBlackoutMarquee } from "@/components/public/public-blackout-marquee";
+import { getPublicCategories, getSiteSettings } from "@/lib/data-access";
 import { getPublicUserSession } from "@/lib/auth";
 import { formatAppointmentMode } from "@/lib/utils";
 
 export default async function Home() {
-  const categories = await getPublicCategories();
-  const session = await getPublicUserSession();
+  const [categories, session, settings] = await Promise.all([
+    getPublicCategories(),
+    getPublicUserSession(),
+    getSiteSettings()
+  ]);
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
       <PublicHeader />
+      
+      {settings.globalBlackoutPeriods && settings.globalBlackoutPeriods.length > 0 && (
+        <PublicBlackoutMarquee periods={settings.globalBlackoutPeriods} />
+      )}
 
       <main className="flex-1 px-6 py-12 md:py-20 flex flex-col">
         {session.isBanned ? (

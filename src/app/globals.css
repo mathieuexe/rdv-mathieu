@@ -51,3 +51,21 @@ select {
 .font-serif {
   font-family: var(--font-inter), "Inter", "Avenir Next", Arial, sans-serif;
 }
+
+@keyframes marquee {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.animate-marquee {
+  display: inline-block;
+  animation: marquee 30s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
