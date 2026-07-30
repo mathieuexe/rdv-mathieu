@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Cal_Sans, Inter } from "next/font/google";
+import { TrackingWrapper } from "@/components/tracking/tracking-wrapper";
 import "./globals.css";
 
 const inter = Inter({
@@ -28,7 +29,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr" className={`${inter.variable} ${calSans.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <TrackingWrapper />
+        {children}
+      </body>
     </html>
   );
 }

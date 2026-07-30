@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   ArrowUpRight,
+  BarChart3,
   CalendarPlus2,
   CalendarRange,
   Clock3,
@@ -22,6 +23,7 @@ const navigationSections = [
     title: "Vue générale",
     items: [
       { href: "/admin", label: "Tableau de bord", icon: LayoutDashboard },
+      { href: "/admin/statistiques", label: "Statistiques", icon: BarChart3 },
     ],
   },
   {

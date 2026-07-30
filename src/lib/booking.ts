@@ -63,6 +63,7 @@ export function buildBookingSlots({
   }
 
   const slots: BookingSlot[] = [];
+  const seenSlots = new Set<string>();
   const now = new Date();
 
   for (let dayOffset = 0; dayOffset < daysToShow; dayOffset += 1) {
@@ -101,17 +102,21 @@ export function buildBookingSlots({
           const blackoutReason = globalBlackout?.message ?? categoryBlackout?.message;
           const isBlocked = Boolean(isPast || busyAppointment || blackoutReason);
 
-          slots.push({
-            start: slotStart.toISOString(),
-            end: slotEnd.toISOString(),
-            isBlocked,
-            label: format(slotStart, "HH:mm"),
-            dayLabel: format(slotStart, "EEEE d MMMM"),
-            reason:
-              blackoutReason ??
-              (busyAppointment ? "Créneau déjà occupé par un autre rendez-vous." : undefined) ??
-              (isPast ? "Créneau déjà passé." : undefined),
-          });
+          const slotStartIso = slotStart.toISOString();
+          if (!seenSlots.has(slotStartIso)) {
+            seenSlots.add(slotStartIso);
+            slots.push({
+              start: slotStartIso,
+              end: slotEnd.toISOString(),
+              isBlocked,
+              label: format(slotStart, "HH:mm"),
+              dayLabel: format(slotStart, "EEEE d MMMM"),
+              reason:
+                blackoutReason ??
+                (busyAppointment ? "Créneau déjà occupé par un autre rendez-vous." : undefined) ??
+                (isPast ? "Créneau déjà passé." : undefined),
+            });
+          }
 
           cursor = addMinutes(cursor, category.durationMinutes);
         }

@@ -81,6 +81,7 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
   const [selectedDateKey, setSelectedDateKey] = useState(firstAvailableDateKey);
   const [visibleMonthKey, setVisibleMonthKey] = useState(toMonthKey(firstAvailableDateKey || new Date().toISOString().slice(0, 10)));
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
+  const [showOnlyAvailable, setShowOnlyAvailable] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string>("");
   const [firstName, setFirstName] = useState(initialUser?.firstName ?? "");
@@ -585,17 +586,34 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
 
           {activeStep === 1 ? (
             <section className="p-6 lg:p-8">
-              <div className="mb-5 flex items-center justify-between gap-3">
-                <p className="text-sm font-semibold text-slate-900">Créneaux horaires</p>
-                <div className="inline-flex rounded-full bg-slate-100 p-1 text-xs font-medium text-slate-500">
-                  <span className="rounded-full px-3 py-1 text-slate-500">12h</span>
-                  <span className="rounded-full bg-white px-3 py-1 text-slate-900 shadow-sm">24h</span>
+              <div className="mb-5 flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-semibold text-slate-900">Créneaux horaires</p>
+                  <label className="flex cursor-pointer items-center gap-2">
+                    <span className="text-xs text-slate-500">Heures disponibles uniquement</span>
+                    <div
+                      className={cn(
+                        "relative inline-flex h-5 w-9 items-center rounded-full transition-colors",
+                        showOnlyAvailable ? "bg-blue-600" : "bg-slate-200"
+                      )}
+                      onClick={() => setShowOnlyAvailable(!showOnlyAvailable)}
+                    >
+                      <span
+                        className={cn(
+                          "inline-block size-3.5 transform rounded-full bg-white transition-transform",
+                          showOnlyAvailable ? "translate-x-4" : "translate-x-1"
+                        )}
+                      />
+                    </div>
+                  </label>
                 </div>
               </div>
 
               <div className="max-h-[460px] space-y-3 overflow-y-auto pr-1">
                 {selectedDay ? (
-                  selectedDay.dateSlots.map((slot) => {
+                  selectedDay.dateSlots
+                    .filter((slot) => !showOnlyAvailable || !slot.isBlocked)
+                    .map((slot) => {
                     const active = activeSelectedSlot === slot.start;
 
                     return (
