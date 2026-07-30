@@ -6,12 +6,21 @@ import { getPublicUserSession } from "@/lib/auth";
 import { getUserAccountActivityLogs } from "@/lib/data-access";
 import { formatDateTimeFr } from "@/lib/utils";
 
+function safeDecode(value?: string | null) {
+  if (!value) return "";
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
 function formatLocation(log: {
   city?: string;
   region?: string;
   country?: string;
 }) {
-  const parts = [log.city, log.region, log.country].filter(Boolean);
+  const parts = [safeDecode(log.city), safeDecode(log.region), safeDecode(log.country)].filter(Boolean);
   return parts.length > 0 ? parts.join(", ") : "Lieu non disponible";
 }
 

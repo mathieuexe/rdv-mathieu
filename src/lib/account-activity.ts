@@ -94,6 +94,15 @@ export interface ClientContext {
   userAgent?: string;
 }
 
+function safeDecodeHeader(value?: string | null) {
+  if (!value) return "";
+  try {
+    return decodeURIComponent(value.trim());
+  } catch {
+    return value.trim();
+  }
+}
+
 export function extractClientContextFromHeaders(headers: Headers): ClientContext {
   const userAgent = headers.get("user-agent")?.trim() ?? "";
   const ipAddress =
@@ -101,9 +110,9 @@ export function extractClientContextFromHeaders(headers: Headers): ClientContext
     normalizeClientIp(headers.get("x-real-ip")) ||
     normalizeClientIp(headers.get("cf-connecting-ip")) ||
     "";
-  const country = headers.get("x-vercel-ip-country")?.trim() ?? "";
-  const region = headers.get("x-vercel-ip-country-region")?.trim() ?? "";
-  const city = headers.get("x-vercel-ip-city")?.trim() ?? "";
+  const country = safeDecodeHeader(headers.get("x-vercel-ip-country"));
+  const region = safeDecodeHeader(headers.get("x-vercel-ip-country-region"));
+  const city = safeDecodeHeader(headers.get("x-vercel-ip-city"));
 
   return {
     ipAddress: ipAddress || undefined,
