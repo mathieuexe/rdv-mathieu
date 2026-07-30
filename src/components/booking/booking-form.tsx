@@ -266,17 +266,17 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
 
           <section
             className={cn(
-              "border-b border-slate-200 p-6 lg:border-b-0 lg:p-8",
+              "border-b border-slate-200 p-4 sm:p-6 lg:border-b-0 lg:p-8",
               currentStep === 1 ? "lg:border-r" : "lg:col-span-2",
             )}
           >
             {activeStep === 1 ? (
               <>
                 <div className="flex items-center gap-3">
-                  <CalendarDays className="size-5 text-slate-500" />
+                  <CalendarDays className="size-5 text-slate-500 shrink-0" />
                   <div>
-                    <p className="text-lg font-semibold text-slate-900">Sélectionnez la date et l&apos;heure</p>
-                    <p className="text-sm text-slate-500">Choisissez d&apos;abord un jour, puis un créneau disponible.</p>
+                    <p className="text-base sm:text-lg font-semibold text-slate-900">Sélectionnez la date et l&apos;heure</p>
+                    <p className="text-xs sm:text-sm text-slate-500">Choisissez d&apos;abord un jour, puis un créneau disponible.</p>
                   </div>
                 </div>
 
@@ -290,7 +290,7 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                         type="button"
                         onClick={() => setVisibleMonthKey(monthKeys[Math.max(0, visibleMonthIndex - 1)] ?? visibleMonthKey)}
                         disabled={visibleMonthIndex === 0}
-                        className="flex size-9 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition-all duration-150 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+                        className="flex size-8 sm:size-9 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition-all duration-150 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         <ChevronLeft className="size-4" />
                       </button>
@@ -300,23 +300,26 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                           setVisibleMonthKey(monthKeys[Math.min(monthKeys.length - 1, visibleMonthIndex + 1)] ?? visibleMonthKey)
                         }
                         disabled={visibleMonthIndex >= monthKeys.length - 1}
-                        className="flex size-9 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition-all duration-150 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+                        className="flex size-8 sm:size-9 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition-all duration-150 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         <ChevronRight className="size-4" />
                       </button>
                     </div>
                   </div>
 
-                  <div className="mt-6 grid grid-cols-7 gap-2 text-center text-xs uppercase tracking-wide text-slate-400">
+                  <div className="mt-6 grid grid-cols-7 gap-1 sm:gap-2 text-center text-[10px] sm:text-xs uppercase tracking-wide text-slate-400">
                     {weekdayHeaders.map((label) => (
-                      <div key={label}>{label}</div>
+                      <div key={label} className="hidden sm:block">{label}</div>
+                    ))}
+                    {weekdayHeaders.map((label) => (
+                      <div key={`short-${label}`} className="sm:hidden">{label.slice(0, 1)}</div>
                     ))}
                   </div>
 
-                  <div className="mt-4 grid grid-cols-7 gap-2 text-center">
+                  <div className="mt-4 grid grid-cols-7 gap-1 sm:gap-2 text-center">
                     {calendarCells.map((cell) => {
                       if (cell.dayNumber === null) {
-                        return <div key={cell.key} className="h-10" />;
+                        return <div key={cell.key} className="h-8 sm:h-10" />;
                       }
 
                       const entry = dayEntries.find((item) => item.dateKey === cell.key);
@@ -335,7 +338,7 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                             disabled={isDisabled}
                             onClick={() => handleSelectDate(cell.key)}
                             className={cn(
-                              "flex size-10 items-center justify-center rounded-lg text-sm transition-all duration-150",
+                              "flex size-8 sm:size-10 items-center justify-center rounded-lg text-sm transition-all duration-150",
                             isDisabled && isPastDay && "cursor-not-allowed bg-slate-100 text-slate-400",
                             isDisabled && !isPastDay && !isBlackoutDay && "cursor-not-allowed text-slate-300",
                             isDisabled && isBlackoutDay && "cursor-not-allowed bg-red-100 text-red-700",

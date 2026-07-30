@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ChevronDown } from "lucide-react";
 
 import { getPublicUserSession } from "@/lib/auth";
+import { cn } from "@/lib/utils";
 
 interface PublicHeaderProps {
   currentPath?: string;
@@ -33,17 +34,18 @@ export async function PublicHeader({ currentPath }: PublicHeaderProps) {
 
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-md">
-      <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4 text-slate-900">
-        <Link href="/" className="text-xl font-bold tracking-tight text-slate-900 transition-colors hover:text-blue-600 [font-family:var(--font-cal-sans),sans-serif]">
+      <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4 text-slate-900 sm:px-6">
+        <Link href="/" className="text-lg font-bold tracking-tight text-slate-900 transition-colors hover:text-blue-600 sm:text-xl [font-family:var(--font-cal-sans),sans-serif]">
           Rdv.mathieucerenzia.fr
         </Link>
 
-        <nav className="flex items-center gap-6 text-sm">
+        <nav className="flex items-center gap-3 text-sm sm:gap-6">
           {session.isAuthenticated ? (
             <>
               <div className="group relative">
                 <Link href="/compte" className={`inline-flex items-center gap-1 ${getLinkClass("/compte", currentPath)}`}>
-                  <span>Bonjour, {session.fullName}</span>
+                  <span className="hidden sm:inline">Bonjour, {session.fullName}</span>
+                  <span className="sm:hidden">Mon compte</span>
                   <ChevronDown className="size-4" />
                 </Link>
 
@@ -63,14 +65,14 @@ export async function PublicHeader({ currentPath }: PublicHeaderProps) {
                 </div>
               </div>
               {session.isAdmin ? (
-                <Link href="/admin" className={getLinkClass("/admin", currentPath)}>
+                <Link href="/admin" className={cn(getLinkClass("/admin", currentPath), "hidden sm:inline-block")}>
                   AdminPanel
                 </Link>
               ) : null}
             </>
           ) : (
-            <div className="flex items-center gap-4">
-              <Link href="/inscription" className={getLinkClass("/inscription", currentPath)}>
+            <div className="flex items-center gap-2 sm:gap-4">
+              <Link href="/inscription" className={cn(getLinkClass("/inscription", currentPath), "hidden sm:inline-block")}>
                 S&apos;inscrire
               </Link>
               <Link href="/connexion" className={getLinkClass("/connexion", currentPath)}>

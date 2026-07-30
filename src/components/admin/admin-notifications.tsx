@@ -32,8 +32,8 @@ export function AdminNotifications() {
 
   useEffect(() => {
     // We create audio objects only on the client side
-    newNotificationAudio.current = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
-    approachingAudio.current = new Audio("https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg");
+    newNotificationAudio.current = new Audio("/sounds/notification.mp3");
+    approachingAudio.current = new Audio("/sounds/notification.mp3");
   }, []);
 
   const playNotificationSound = () => {
