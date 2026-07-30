@@ -1,10 +1,22 @@
+import { redirect } from "next/navigation";
 import { LoginForm } from "@/components/auth/login-form";
 import { PublicFooter } from "@/components/public/public-footer";
 import { PublicHeader } from "@/components/public/public-header";
+import { getPublicUserSession } from "@/lib/auth";
 
 import { loginAction } from "./actions";
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const session = await getPublicUserSession();
+
+  if (session.isAuthenticated) {
+    if (session.isAdmin) {
+      redirect("/admin");
+    } else {
+      redirect("/compte");
+    }
+  }
+
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
       <PublicHeader currentPath="/connexion" />

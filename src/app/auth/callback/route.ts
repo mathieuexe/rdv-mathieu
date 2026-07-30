@@ -2,6 +2,8 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 
+import { isUserAdmin } from "@/lib/auth";
+
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
@@ -27,8 +29,15 @@ export async function GET(request: Request) {
         },
       }
     );
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error) {
+    const { data: { user }, error } = await supabase.auth.exchangeCodeForSession(code);
+    if (!error && user) {
+      // Si l'utilisateur est admin, on le redirige vers l'admin par défaut (sauf si une URL "next" spécifique autre que /compte a été demandée)
+      if (next === "/compte") {
+        const isAdmin = await isUserAdmin(user.id);
+        if (isAdmin) {
+          return NextResponse.redirect(`${origin}/admin`);
+        }
+      }
       return NextResponse.redirect(`${origin}${next}`);
     }
   }

@@ -8,6 +8,7 @@ import { createAccountActivityLog } from "@/lib/data-access";
 import { isSupabaseConfigured } from "@/lib/env";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { loginSchema } from "@/lib/validators";
+import { isUserAdmin } from "@/lib/auth";
 
 export interface PublicLoginActionState {
   status: "idle" | "error";
@@ -85,7 +86,12 @@ export async function loginAction(
     if (profile?.requires_password_change) {
       redirect("/compte/securite");
     }
+
+    const isAdmin = await isUserAdmin(data.user.id);
+    if (isAdmin) {
+      redirect("/admin");
+    }
   }
 
-  redirect("/");
+  redirect("/compte");
 }
