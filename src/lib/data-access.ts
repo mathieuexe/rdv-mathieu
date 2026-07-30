@@ -29,11 +29,6 @@ const defaultSiteSettings: SiteSettings = {
   globalBlackoutPeriods: [],
 };
 
-async function getPublicReadClient() {
-  const publicClient = await getSupabaseServerClient();
-  return publicClient ?? getSupabaseAdminClient();
-}
-
 function getAppointmentWriteErrorMessage(error: { code?: string; message?: string } | null | undefined) {
   if (!error) {
     return "Impossible d'enregistrer le rendez-vous.";
@@ -237,7 +232,7 @@ function mapAccountActivityLogRow(row: Record<string, unknown>): AccountActivity
 }
 
 export const getSiteSettings = unstable_cache(async () => {
-  const supabase = await getPublicReadClient();
+  const supabase = getSupabaseAdminClient();
 
   if (supabase) {
     const [{ data: settingsRow }, { data: blackoutRows }] = await Promise.all([
@@ -266,7 +261,7 @@ export const getSiteSettings = unstable_cache(async () => {
 }, ["site-settings"], { revalidate: 60, tags: ["site-settings"] });
 
 export const getPublicCategories = unstable_cache(async () => {
-  const supabase = await getPublicReadClient();
+  const supabase = getSupabaseAdminClient();
 
   if (supabase) {
     const [{ data: categoryRows }, { data: ruleRows }, { data: blackoutRows }] = await Promise.all([
@@ -314,7 +309,7 @@ export async function getCategories() {
 }
 
 export const getPublicCategoryBySlug = unstable_cache(async (slug: string) => {
-  const supabase = await getPublicReadClient();
+  const supabase = getSupabaseAdminClient();
 
   if (supabase) {
     const [{ data: categoryRow }, { data: ruleRows }, { data: blackoutRows }] = await Promise.all([
