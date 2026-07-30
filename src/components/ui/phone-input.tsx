@@ -32,7 +32,6 @@ export const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
       <div className="relative">
         <PhoneInputLib
           ref={ref as any}
-          international
           defaultCountry="FR"
           countries={["FR", "CA", "BE", "CH"]}
           value={value}

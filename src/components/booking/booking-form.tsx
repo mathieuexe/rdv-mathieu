@@ -247,7 +247,7 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
             <div className="mt-6 space-y-3 text-sm text-slate-500">
               <div className="flex items-start gap-3">
                 <CheckSquare className="mt-0.5 size-4 shrink-0 text-slate-500" />
-                <span>{helperMessage}</span>
+                <span>{category.customMessage || "Choisissez le créneau qui vous convient."}</span>
               </div>
               <div className="flex items-center gap-3">
                 <Clock className="size-4 shrink-0 text-slate-500" />

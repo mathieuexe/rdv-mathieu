@@ -13,8 +13,8 @@ export function formatPhone(phone: string | null | undefined): string {
   try {
     const phoneNumber = parsePhoneNumber(phone);
     if (phoneNumber) {
-      // Pour forcer l'affichage avec des espaces (ex: +33 6 01 02 03 04)
-      return phoneNumber.formatInternational();
+      // Pour forcer l'affichage avec des espaces (ex: 06 01 02 03 04)
+      return phoneNumber.formatNational();
     }
   } catch (e) {
     // ignore
