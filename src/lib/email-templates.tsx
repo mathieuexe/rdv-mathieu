@@ -10,6 +10,7 @@ interface MailLayoutProps {
   title: string;
   greeting: string;
   lead: string;
+  userEmail?: string;
   details?: MailDetail[];
   paragraphs?: string[];
   highlightedParagraphs?: string[];
@@ -22,6 +23,7 @@ function MailLayout({
   title,
   greeting,
   lead,
+  userEmail,
   details = [],
   paragraphs = [],
   highlightedParagraphs = [],
@@ -61,6 +63,18 @@ function MailLayout({
         <h1 style={{ margin: "0 0 24px", fontSize: "24px", lineHeight: "1.3", color: "#0f172a", fontWeight: 700 }}>
           {title}
         </h1>
+
+        {userEmail ? (
+          <div style={{ margin: "0 0 24px", padding: "16px", backgroundColor: "#f1f5f9", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+            <p style={{ margin: "0 0 12px", color: "#0f172a", fontWeight: 600, fontSize: "14px" }}>Vos identifiants de connexion :</p>
+            <p style={{ margin: "0 0 6px", color: "#334155", fontSize: "14px" }}>
+              <strong style={{ color: "#0f172a" }}>E-mail :</strong> {userEmail}
+            </p>
+            <p style={{ margin: "0", color: "#334155", fontSize: "14px" }}>
+              <strong style={{ color: "#0f172a" }}>Mot de passe :</strong> ****** <span style={{ fontSize: "12px", color: "#64748b" }}>(vous êtes le seul à le connaître, ne le communiquez à personne.)</span>
+            </p>
+          </div>
+        ) : null}
         
         <p style={{ margin: "0 0 16px", color: "#334155", fontWeight: 500 }}>{greeting}</p>
         <p style={{ margin: "0 0 24px", color: "#475569" }}>{lead}</p>
@@ -133,6 +147,7 @@ export function SignupConfirmationEmail({ firstName, email, reference }: SignupC
       title="Confirmation d'inscription"
       greeting={`Bonjour ${firstName},`}
       lead="Votre compte a bien été créé."
+      userEmail={email}
       details={[
         { label: "Email", value: email, underline: true },
       ]}
@@ -185,6 +200,7 @@ export function AdminCreatedSignupEmail({
 
 interface ProvisionalAppointmentEmailProps {
   firstName: string;
+  email: string;
   categoryTitle: string;
   startsAtLabel: string;
   appointmentModeLabel: string;
@@ -194,6 +210,7 @@ interface ProvisionalAppointmentEmailProps {
 
 export function ProvisionalAppointmentEmail({
   firstName,
+  email,
   categoryTitle,
   startsAtLabel,
   appointmentModeLabel,
@@ -205,6 +222,7 @@ export function ProvisionalAppointmentEmail({
       title="Confirmation de prise de rendez-vous (provisoire)"
       greeting={`Bonjour ${firstName},`}
       lead={`Votre demande de rendez-vous pour « ${categoryTitle} » a bien été enregistrée à titre provisoire.`}
+      userEmail={email}
       details={[
         { label: "Catégorie", value: categoryTitle, underline: true },
         { label: "Date et heure", value: startsAtLabel, underline: true },
@@ -212,11 +230,6 @@ export function ProvisionalAppointmentEmail({
         { label: "Statut", value: "En attente de validation", underline: true },
       ]}
       highlightedParagraphs={["Votre demande reste provisoire tant qu'un administrateur ne l'a pas validée."]}
-      paragraphs={[
-        ...(appointmentModeLabel === "Téléphonique" && phone
-          ? [`Je vous appellerai sur le numéro de téléphone inscrit sur votre fiche client à savoir le : ${phone}.`]
-          : []),
-      ]}
       linkLabel="Site"
       linkHref={getAppUrl()}
       reference={reference}
@@ -226,6 +239,7 @@ export function ProvisionalAppointmentEmail({
 
 interface ValidatedAppointmentEmailProps {
   firstName: string;
+  email: string;
   categoryTitle: string;
   startsAtLabel: string;
   appointmentModeLabel: string;
@@ -235,6 +249,7 @@ interface ValidatedAppointmentEmailProps {
 
 export function ValidatedAppointmentEmail({
   firstName,
+  email,
   categoryTitle,
   startsAtLabel,
   appointmentModeLabel,
@@ -246,6 +261,7 @@ export function ValidatedAppointmentEmail({
       title="Confirmation de rendez-vous validé"
       greeting={`Bonjour ${firstName},`}
       lead={`Votre rendez-vous pour « ${categoryTitle} » a bien été validé.`}
+      userEmail={email}
       details={[
         { label: "Catégorie", value: categoryTitle, underline: true },
         { label: "Date et heure", value: startsAtLabel, underline: true },
@@ -267,6 +283,7 @@ export function ValidatedAppointmentEmail({
 
 interface AppointmentCancellationEmailProps {
   firstName: string;
+  email: string;
   categoryTitle: string;
   startsAtLabel: string;
   reason: string;
@@ -275,6 +292,7 @@ interface AppointmentCancellationEmailProps {
 
 export function AppointmentCancellationEmail({
   firstName,
+  email,
   categoryTitle,
   startsAtLabel,
   reason,
@@ -285,6 +303,7 @@ export function AppointmentCancellationEmail({
       title="Confirmation d'annulation de rendez-vous"
       greeting={`Bonjour ${firstName},`}
       lead={`L'annulation de votre rendez-vous pour « ${categoryTitle} » a bien été prise en compte.`}
+      userEmail={email}
       details={[
         { label: "Catégorie", value: categoryTitle, underline: true },
         { label: "Date et heure", value: startsAtLabel, underline: true },
@@ -347,6 +366,7 @@ export function AdminAppointmentRequestNotificationEmail({
 
 interface AdminBlackoutCancellationEmailProps {
   firstName: string;
+  email: string;
   categoryTitle: string;
   appointmentDateLabel: string;
   appointmentTimeLabel: string;
@@ -356,6 +376,7 @@ interface AdminBlackoutCancellationEmailProps {
 
 export function AdminBlackoutCancellationEmail({
   firstName,
+  email,
   categoryTitle,
   appointmentDateLabel,
   appointmentTimeLabel,
@@ -367,6 +388,7 @@ export function AdminBlackoutCancellationEmail({
       title="Annulation de rendez-vous"
       greeting={`Bonjour ${firstName},`}
       lead="Je vous informe que votre rendez-vous a été annulé en raison d'une indisponibilité."
+      userEmail={email}
       details={[
         { label: "Date", value: appointmentDateLabel, underline: true },
         { label: "Heure", value: appointmentTimeLabel, underline: true },
@@ -387,6 +409,7 @@ export function AdminBlackoutCancellationEmail({
 
 interface RefusedAppointmentEmailProps {
   firstName: string;
+  email: string;
   categoryTitle: string;
   startsAtLabel: string;
   reason: string;
@@ -395,6 +418,7 @@ interface RefusedAppointmentEmailProps {
 
 export function RefusedAppointmentEmail({
   firstName,
+  email,
   categoryTitle,
   startsAtLabel,
   reason,
@@ -405,6 +429,7 @@ export function RefusedAppointmentEmail({
       title="Demande de rendez-vous refusée"
       greeting={`Bonjour ${firstName},`}
       lead={`Votre demande pour « ${categoryTitle} » n'a pas pu être validée.`}
+      userEmail={email}
       details={[
         { label: "Catégorie", value: categoryTitle, underline: true },
         { label: "Date et heure", value: startsAtLabel, underline: true },

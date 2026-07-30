@@ -355,6 +355,7 @@ export async function sendProvisionalAppointmentEmail(input: {
     buildTemplate: (reference) =>
       ProvisionalAppointmentEmail({
         firstName: input.firstName,
+        email: input.to,
         categoryTitle: input.categoryTitle,
         startsAtLabel: input.startsAtLabel,
         appointmentModeLabel: formatAppointmentMode(input.appointmentMode),
@@ -434,6 +435,7 @@ export async function sendValidatedAppointmentEmail(input: {
     buildTemplate: (reference) =>
       ValidatedAppointmentEmail({
         firstName: input.firstName,
+        email: input.to,
         categoryTitle: input.categoryTitle,
         startsAtLabel: input.startsAtLabel,
         appointmentModeLabel: formatAppointmentMode(input.appointmentMode),
@@ -466,6 +468,7 @@ export async function sendAppointmentCancellationEmail(input: {
     buildTemplate: (reference) =>
       AppointmentCancellationEmail({
         firstName: input.firstName,
+        email: input.to,
         categoryTitle: input.categoryTitle,
         startsAtLabel: input.startsAtLabel,
         reason: input.reason,
@@ -499,6 +502,7 @@ export async function sendBlackoutAppointmentCancellationEmail(input: {
     buildTemplate: (reference) =>
       AdminBlackoutCancellationEmail({
         firstName: input.firstName,
+        email: input.to,
         categoryTitle: input.categoryTitle,
         appointmentDateLabel: input.appointmentDateLabel,
         appointmentTimeLabel: input.appointmentTimeLabel,
@@ -531,6 +535,7 @@ export async function sendRefusedAppointmentEmail(input: {
     buildTemplate: (reference) =>
       RefusedAppointmentEmail({
         firstName: input.firstName,
+        email: input.to,
         categoryTitle: input.categoryTitle,
         startsAtLabel: input.startsAtLabel,
         reason: input.reason,
