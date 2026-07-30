@@ -124,7 +124,9 @@ export function buildBookingSlots({
     }
   }
 
-  return slots;
+  const sortedSlots = slots.sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
+
+  return sortedSlots;
 }
 
 export function groupSlotsByDay(slots: BookingSlot[]) {
