@@ -1,7 +1,7 @@
 import { CalendarDays } from "lucide-react";
 
-import { AdminAgendaCalendar } from "@/components/admin/admin-agenda-calendar";
 import { getAgendaAppointmentsView } from "@/lib/data-access";
+import { DynamicAdminAgendaCalendar } from "@/components/admin/dynamic-admin-agenda-calendar";
 
 export default async function AgendaAppointmentsPage() {
   const appointments = await getAgendaAppointmentsView();
@@ -23,7 +23,7 @@ export default async function AgendaAppointmentsPage() {
           <h2 className="font-semibold text-slate-800">Calendrier</h2>
         </div>
         <div className="p-4 md:p-6">
-          <AdminAgendaCalendar appointments={appointments} />
+          <DynamicAdminAgendaCalendar appointments={appointments} />
         </div>
       </section>
     </div>

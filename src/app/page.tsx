@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, Clock, MapPin, CalendarDays } from "lucide-react";
 
 import { PublicFooter } from "@/components/public/public-footer";
@@ -60,7 +61,7 @@ export default async function Home() {
             </section>
           ) : (
             <section className="grid gap-6 sm:grid-cols-2">
-              {categories.map((category) => (
+              {categories.map((category, index) => (
                 <Link
                   href={`/rdv/${category.slug}`}
                   key={category.id}
@@ -68,10 +69,13 @@ export default async function Home() {
                 >
                   <div className="relative aspect-[21/9] w-full overflow-hidden bg-slate-100">
                     {category.bannerImageUrl ? (
-                      <img 
+                      <Image 
                         src={category.bannerImageUrl} 
                         alt="" 
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" 
+                        fill
+                        priority={index === 0}
+                        sizes="(max-width: 640px) 100vw, 50vw"
+                        className="object-cover transition-transform duration-500 group-hover:scale-105" 
                       />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center bg-slate-100">
@@ -83,9 +87,9 @@ export default async function Home() {
 
                   <div className="flex flex-1 flex-col p-6">
                     <div className="flex items-start gap-4">
-                      <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-md border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-900 shadow-sm">
+                      <div className="relative flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-md border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-900 shadow-sm">
                         {category.thumbnailImageUrl ? (
-                          <img src={category.thumbnailImageUrl} alt="" className="h-full w-full object-cover" />
+                          <Image src={category.thumbnailImageUrl} alt="" fill priority={index === 0} sizes="48px" className="object-cover" />
                         ) : (
                           category.title
                             .split(" ")

@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import {
   CalendarDays,
   CheckSquare,
@@ -226,18 +227,18 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
         <div className="grid lg:grid-cols-[280px_minmax(0,1fr)_240px]">
           <aside className="border-b border-slate-200 bg-white p-6 lg:border-r lg:border-b-0 lg:p-8">
             {category.bannerImageUrl ? (
-              <div className="-m-6 mb-6 overflow-hidden border-b border-slate-200 bg-slate-100 rounded-t-2xl lg:-m-8 lg:mb-8 lg:rounded-tr-none">
-                <div className="h-[240px] w-full">
-                  <img src={category.bannerImageUrl} alt="" className="h-full w-full object-cover object-center" />
+              <div className="relative -m-6 mb-6 overflow-hidden border-b border-slate-200 bg-slate-100 rounded-t-2xl lg:-m-8 lg:mb-8 lg:rounded-tr-none">
+                <div className="relative h-[240px] w-full">
+                  <Image src={category.bannerImageUrl} alt="" fill sizes="(max-width: 1024px) 100vw, 280px" className="object-cover object-center" priority />
                 </div>
               </div>
             ) : (
               <div className="-m-6 mb-6 h-[240px] rounded-t-2xl border-b border-slate-200 bg-slate-100 lg:-m-8 lg:mb-8 lg:rounded-tr-none" />
             )}
 
-            <div className="flex size-16 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-slate-100 text-sm font-semibold text-slate-900">
+            <div className="relative flex size-16 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-slate-100 text-sm font-semibold text-slate-900">
               {category.thumbnailImageUrl ? (
-                <img src={category.thumbnailImageUrl} alt="" className="h-full w-full object-cover" />
+                <Image src={category.thumbnailImageUrl} alt="" fill priority sizes="64px" className="object-cover" />
               ) : (
                 initials || "RDV"
               )}
@@ -586,27 +587,28 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
 
           {activeStep === 1 ? (
             <section className="p-6 lg:p-8">
-              <div className="mb-5 flex flex-col gap-3">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-semibold text-slate-900">Créneaux horaires</p>
-                  <label className="flex cursor-pointer items-center gap-2">
-                    <span className="text-xs text-slate-500">Heures disponibles uniquement</span>
-                    <div
+              <div className="mb-6 space-y-4">
+                <p className="text-sm font-semibold text-slate-900">Créneaux horaires</p>
+                <label className="flex cursor-pointer items-center justify-between rounded-lg border border-slate-200 bg-slate-50 p-3 transition-colors hover:bg-slate-100">
+                  <span className="text-xs font-medium text-slate-700">Masquer les indisponibles</span>
+                  <div
+                    className={cn(
+                      "relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors",
+                      showOnlyAvailable ? "bg-blue-600" : "bg-slate-300"
+                    )}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setShowOnlyAvailable(!showOnlyAvailable);
+                    }}
+                  >
+                    <span
                       className={cn(
-                        "relative inline-flex h-5 w-9 items-center rounded-full transition-colors",
-                        showOnlyAvailable ? "bg-blue-600" : "bg-slate-200"
+                        "inline-block size-3.5 transform rounded-full bg-white transition-transform",
+                        showOnlyAvailable ? "translate-x-4" : "translate-x-1"
                       )}
-                      onClick={() => setShowOnlyAvailable(!showOnlyAvailable)}
-                    >
-                      <span
-                        className={cn(
-                          "inline-block size-3.5 transform rounded-full bg-white transition-transform",
-                          showOnlyAvailable ? "translate-x-4" : "translate-x-1"
-                        )}
-                      />
-                    </div>
-                  </label>
-                </div>
+                    />
+                  </div>
+                </label>
               </div>
 
               <div className="max-h-[460px] space-y-3 overflow-y-auto pr-1">

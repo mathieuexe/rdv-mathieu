@@ -1,7 +1,7 @@
 import { getPublicUserSession } from "@/lib/auth";
-import { Tracker } from "./tracker";
+import { DynamicTracker } from "./dynamic-tracker";
 
 export async function TrackingWrapper() {
   const session = await getPublicUserSession();
-  return <Tracker userId={session.userId || undefined} />;
+  return <DynamicTracker userId={session.userId || undefined} />;
 }

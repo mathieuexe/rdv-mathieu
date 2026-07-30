@@ -1,6 +1,7 @@
 import { randomBytes, randomUUID } from "node:crypto";
 
 import { addMinutes, parseISO } from "date-fns";
+import { unstable_cache } from "next/cache";
 
 import { buildBookingSlots } from "@/lib/booking";
 import { getEffectiveSiteSettings, normalizeAllowedIps } from "@/lib/maintenance";
@@ -235,7 +236,7 @@ function mapAccountActivityLogRow(row: Record<string, unknown>): AccountActivity
   };
 }
 
-export async function getSiteSettings() {
+export const getSiteSettings = unstable_cache(async () => {
   const supabase = await getPublicReadClient();
 
   if (supabase) {
@@ -262,9 +263,9 @@ export async function getSiteSettings() {
   }
 
   return defaultSiteSettings;
-}
+}, ["site-settings"], { revalidate: 60, tags: ["site-settings"] });
 
-export async function getPublicCategories() {
+export const getPublicCategories = unstable_cache(async () => {
   const supabase = await getPublicReadClient();
 
   if (supabase) {
@@ -286,7 +287,7 @@ export async function getPublicCategories() {
   }
 
   return [];
-}
+}, ["public-categories"], { revalidate: 60, tags: ["categories"] });
 
 export async function getCategories() {
   const supabase = getSupabaseAdminClient();
@@ -312,7 +313,7 @@ export async function getCategories() {
   return [];
 }
 
-export async function getPublicCategoryBySlug(slug: string) {
+export const getPublicCategoryBySlug = unstable_cache(async (slug: string) => {
   const supabase = await getPublicReadClient();
 
   if (supabase) {
@@ -332,7 +333,7 @@ export async function getPublicCategoryBySlug(slug: string) {
   }
 
   return null;
-}
+}, ["public-category-by-slug"], { revalidate: 60, tags: ["categories"] });
 
 export async function getCategoryById(categoryId: string) {
   const supabase = getSupabaseAdminClient();

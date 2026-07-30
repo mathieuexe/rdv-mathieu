@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Plus, TimerReset, Settings, CalendarRange, MapPin } from "lucide-react";
 
 import { getCategories } from "@/lib/data-access";
@@ -40,8 +41,8 @@ export default async function CategoriesPage() {
               className="flex flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition-colors hover:border-slate-300"
             >
               {category.bannerImageUrl ? (
-                <div className="aspect-[8/3] w-full overflow-hidden border-b border-slate-200 bg-slate-100">
-                  <img src={category.bannerImageUrl} alt="" className="h-full w-full object-cover" />
+                <div className="relative aspect-[8/3] w-full overflow-hidden border-b border-slate-200 bg-slate-100">
+                  <Image src={category.bannerImageUrl} alt="" fill sizes="(max-width: 1280px) 100vw, 50vw" className="object-cover" />
                 </div>
               ) : null}
 
@@ -49,8 +50,8 @@ export default async function CategoriesPage() {
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-4">
                     {category.thumbnailImageUrl ? (
-                      <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-md border border-slate-200 bg-slate-100">
-                        <img src={category.thumbnailImageUrl} alt="" className="h-full w-full object-cover" />
+                      <div className="relative flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-md border border-slate-200 bg-slate-100">
+                        <Image src={category.thumbnailImageUrl} alt="" fill sizes="48px" className="object-cover" />
                       </div>
                     ) : (
                       <div className="flex size-12 shrink-0 items-center justify-center rounded-md border border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wider text-slate-400">

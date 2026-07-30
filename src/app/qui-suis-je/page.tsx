@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Globe, LayoutTemplate, Search, Terminal, Star, CheckCircle, MapPin, ArrowRight, Server } from "lucide-react";
 
 import { PublicFooter } from "@/components/public/public-footer";
@@ -66,11 +67,14 @@ export default function AboutPage() {
               </div>
 
               <div className="relative mx-auto w-full max-w-sm lg:max-w-[320px]">
-                <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-slate-200 shadow-xl border border-slate-200">
-                  <img
+                <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-slate-200 shadow-xl border border-slate-200">
+                  <Image
                     src="/images/mathieu.jpeg"
                     alt="Mathieu CERENZIA"
-                    className="h-full w-full object-cover"
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 320px"
+                    priority
+                    className="object-cover"
                   />
                 </div>
                 {/* Décoration */}
