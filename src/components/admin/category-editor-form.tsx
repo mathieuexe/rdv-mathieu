@@ -88,7 +88,7 @@ function getDayDefaults(category: AppointmentCategory | null | undefined, weekda
   const secondWindow = sortedWindows[1];
 
   return {
-    enabled: sortedWindows.length > 0,
+    enabled: category ? sortedWindows.length > 0 : weekday !== "samedi" && weekday !== "dimanche",
     startTime: firstWindow?.start ?? "09:00",
     endTime: sortedWindows[sortedWindows.length - 1]?.end ?? "18:00",
     breakStart: sortedWindows.length >= 2 ? firstWindow?.end ?? "" : "",
@@ -97,6 +97,18 @@ function getDayDefaults(category: AppointmentCategory | null | undefined, weekda
 }
 
 export function CategoryEditorForm({ action, category, title, returnPath, saved, error }: CategoryEditorFormProps) {
+  const [categoryTitle, setCategoryTitle] = useState(category?.title ?? "");
+  const [slug, setSlug] = useState(category?.slug ?? "");
+  const [description, setDescription] = useState(category?.description ?? "");
+  const [durationMinutes, setDurationMinutes] = useState(category?.durationMinutes ?? 30);
+  const [appointmentMode, setAppointmentMode] = useState<AppointmentCategory["appointmentMode"]>(category?.appointmentMode ?? "visioconference");
+  const [isOnline, setIsOnline] = useState(category?.isOnline ?? true);
+  const [isHidden, setIsHidden] = useState(category?.isHidden ?? false);
+  const [thumbnailImageUrl, setThumbnailImageUrl] = useState(category?.thumbnailImageUrl ?? "");
+  const [bannerImageUrl, setBannerImageUrl] = useState(category?.bannerImageUrl ?? "");
+  const [customMessage, setCustomMessage] = useState(category?.customMessage ?? "");
+  const [isBookingBlocked, setIsBookingBlocked] = useState(category?.isBookingBlocked ?? false);
+  const [bookingBlockMessage, setBookingBlockMessage] = useState(category?.bookingBlockMessage ?? "");
   const [thumbnailPreview, setThumbnailPreview] = useState(category?.thumbnailImageUrl ?? "");
   const [bannerPreview, setBannerPreview] = useState(category?.bannerImageUrl ?? "");
   const [imageError, setImageError] = useState("");
@@ -149,6 +161,10 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
     }
   }
 
+  async function handleFormAction(formData: FormData) {
+    await action(formData);
+  }
+
   return (
     <div className="mx-auto max-w-7xl space-y-6 pb-12">
       <section className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -178,7 +194,7 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
         </div>
       )}
 
-      <form action={action} className="grid items-start gap-6 lg:grid-cols-3">
+      <form action={handleFormAction} className="grid items-start gap-6 lg:grid-cols-3">
         <input type="hidden" name="categoryId" value={category?.id ?? ""} />
         <input type="hidden" name="returnPath" value={returnPath} />
         <input type="hidden" name="thumbnailImageDataUrl" value={thumbnailPreview} />
