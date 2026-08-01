@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Clock, MapPin, CalendarDays } from "lucide-react";
+import { ArrowRight, Clock, MapPin, CalendarDays, MessageSquare } from "lucide-react";
 
 import { PublicFooter } from "@/components/public/public-footer";
 import { PublicHeader } from "@/components/public/public-header";
@@ -128,6 +128,26 @@ export default async function Home() {
               ))}
             </section>
           )}
+
+          <div className="mt-16 rounded-2xl border border-indigo-200 bg-indigo-50 p-8 shadow-sm sm:flex sm:items-center sm:justify-between sm:gap-8">
+            <div className="mb-6 sm:mb-0">
+              <h3 className="text-xl font-bold text-indigo-900 flex items-center gap-2">
+                <MessageSquare className="size-6" />
+                Rejoignez la communauté Discord
+              </h3>
+              <p className="mt-2 text-indigo-800">
+                Venez échanger avec la communauté, partager vos idées et soumettre votre projet directement sur notre serveur Discord.
+              </p>
+            </div>
+            <a
+              href="https://discord.mathieucerenzia.fr"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex shrink-0 items-center justify-center rounded-xl bg-indigo-600 px-6 py-3 text-base font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            >
+              Rejoindre le serveur
+            </a>
+          </div>
         </div>
         )}
       </main>

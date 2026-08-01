@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { CalendarDays, CheckCircle2, Clock, MapPin, Phone, Video, XCircle, CalendarCheck, CalendarX, CalendarClock } from "lucide-react";
+import { CalendarDays, CheckCircle2, Clock, MapPin, Phone, Video, XCircle, CalendarCheck, CalendarX, CalendarClock, MessageSquare } from "lucide-react";
 
 import { AppointmentCancelForm } from "@/components/account/appointment-cancel-form";
 import { AccountShell } from "@/components/account/account-shell";
@@ -122,6 +122,26 @@ export default async function AccountPage() {
           </div>
           <p className="text-2xl font-bold text-slate-900">{cancelledCount}</p>
         </div>
+      </div>
+
+      <div className="mb-8 rounded-xl border border-indigo-200 bg-indigo-50 p-6 shadow-sm sm:flex sm:items-center sm:justify-between sm:gap-6">
+        <div className="mb-4 sm:mb-0">
+          <h3 className="text-lg font-bold text-indigo-900 flex items-center gap-2">
+            <MessageSquare className="size-5" />
+            Rejoignez la communauté Discord
+          </h3>
+          <p className="mt-1 text-sm text-indigo-800">
+            Venez échanger avec la communauté, partager vos idées et soumettre votre projet directement sur notre serveur Discord.
+          </p>
+        </div>
+        <a
+          href="https://discord.mathieucerenzia.fr"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex shrink-0 items-center justify-center rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+        >
+          Rejoindre le serveur
+        </a>
       </div>
 
       {appointments.length === 0 ? (
