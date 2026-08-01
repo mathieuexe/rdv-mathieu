@@ -111,9 +111,9 @@ export default async function AppointmentDetailPage({
                 </div>
                 <div>
                   <p className="text-xs text-slate-500">Mode</p>
-                  <p className="mt-1 text-sm font-medium text-slate-900">
-                    {category ? formatAppointmentMode(category.appointmentMode) : "Mode indisponible"}
-                  </p>
+                  <p className="text-sm font-medium text-slate-900">
+              {category ? formatAppointmentMode(category.appointmentMode) : "Mode indisponible"}
+            </p>
                 </div>
                 <div className="sm:col-span-2">
                   <p className="text-xs text-slate-500">Message client</p>

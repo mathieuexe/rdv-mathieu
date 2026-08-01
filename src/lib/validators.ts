@@ -43,7 +43,12 @@ export const categoryAdminSchema = z
     title: z.string().trim().min(3, "Le titre est requis."),
     slug: z.string().trim().min(3, "Le lien est requis."),
     durationMinutes: z.coerce.number().int().positive("La durée doit être positive."),
-    appointmentMode: z.enum(["telephone", "physique", "visioconference"]),
+    appointmentMode: z.enum([
+      "telephone",
+      "physique",
+      "visioconference",
+      "discord",
+    ]),
     description: z.string().trim().min(10, "La description est requise."),
     isOnline: z.boolean(),
     isHidden: z.boolean().optional(),

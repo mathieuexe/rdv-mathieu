@@ -22,13 +22,17 @@ export function formatPhone(phone: string | null | undefined): string {
   return phone;
 }
 
-export function formatAppointmentMode(mode: "telephone" | "physique" | "visioconference") {
+export function formatAppointmentMode(mode: "telephone" | "physique" | "visioconference" | "discord" | any) {
   if (mode === "telephone") {
     return "Téléphonique";
   }
 
   if (mode === "physique") {
     return "Présentiel";
+  }
+
+  if (mode === "discord") {
+    return "Discord (Vocal ou écrit)";
   }
 
   return "Visioconférence";

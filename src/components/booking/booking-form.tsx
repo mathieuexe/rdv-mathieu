@@ -266,7 +266,10 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                 <span>{category.durationMinutes} min</span>
               </div>
               <div className="flex items-center gap-3">
-                <Video className="size-4 shrink-0 text-slate-500" />
+                {category.appointmentMode === "discord" && <Globe className="size-4 shrink-0 text-slate-500" />}
+                {category.appointmentMode === "physique" && <Globe className="size-4 shrink-0 text-slate-500" />}
+                {category.appointmentMode === "visioconference" && <Video className="size-4 shrink-0 text-slate-500" />}
+                {category.appointmentMode === "telephone" && <Video className="size-4 shrink-0 text-slate-500" />}
                 <span>{formatAppointmentMode(category.appointmentMode)}</span>
               </div>
               <div className="flex items-center gap-3">

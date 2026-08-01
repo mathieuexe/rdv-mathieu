@@ -237,6 +237,7 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
                   >
                     <option value="telephone">Téléphonique</option>
                     <option value="physique">Présentiel</option>
+                    <option value="discord">Discord (Vocal ou écrit)</option>
                     <option value="visioconference">Visioconférence</option>
                   </select>
                 </label>

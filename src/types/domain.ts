@@ -1,4 +1,8 @@
-export type AppointmentMode = "telephone" | "physique" | "visioconference";
+export type AppointmentMode =
+  | "telephone"
+  | "physique"
+  | "visioconference"
+  | "discord";
 
 export type AppointmentStatus = "en_attente" | "accepte" | "refuse" | "annule_client" | "annule_admin";
 
