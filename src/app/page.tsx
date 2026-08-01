@@ -1,7 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Clock, MapPin, CalendarDays, MessageSquare } from "lucide-react";
+import { ArrowRight, Clock, MapPin, CalendarDays } from "lucide-react";
 
+import { DiscordIcon } from "@/components/shared/discord-icon";
 import { PublicFooter } from "@/components/public/public-footer";
 import { PublicHeader } from "@/components/public/public-header";
 import { PublicBlackoutMarquee } from "@/components/public/public-blackout-marquee";
@@ -132,7 +133,7 @@ export default async function Home() {
           <div className="mt-16 rounded-2xl border border-indigo-200 bg-indigo-50 p-8 shadow-sm sm:flex sm:items-center sm:justify-between sm:gap-8">
             <div className="mb-6 sm:mb-0">
               <h3 className="text-xl font-bold text-indigo-900 flex items-center gap-2">
-                <MessageSquare className="size-6" />
+                <DiscordIcon className="size-6" />
                 Rejoignez la communauté Discord
               </h3>
               <p className="mt-2 text-indigo-800">

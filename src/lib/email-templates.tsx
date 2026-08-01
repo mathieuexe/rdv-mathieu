@@ -1,4 +1,5 @@
 import { getAppUrl } from "@/lib/env";
+import { DiscordIcon } from "@/components/shared/discord-icon";
 
 type MailDetail = {
   label: string;
@@ -129,7 +130,8 @@ function MailLayout({
         ) : null}
 
         <div style={{ margin: "40px 0 0", padding: "24px", backgroundColor: "#eef2ff", borderRadius: "8px", border: "1px solid #c7d2fe", textAlign: "center" }}>
-          <h3 style={{ margin: "0 0 8px", fontSize: "16px", color: "#3730a3", fontWeight: 700 }}>
+          <h3 style={{ margin: "0 0 8px", fontSize: "16px", color: "#3730a3", fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+            <DiscordIcon className="size-5" style={{ width: "20px", height: "20px" }} />
             Rejoignez la communauté Discord
           </h3>
           <p style={{ margin: "0 0 16px", fontSize: "14px", color: "#3730a3" }}>

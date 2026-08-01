@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
-import { CalendarDays, CheckCircle2, Clock, MapPin, Phone, Video, XCircle, CalendarCheck, CalendarX, CalendarClock, MessageSquare } from "lucide-react";
+import { CalendarDays, CheckCircle2, Clock, MapPin, Phone, Video, XCircle, CalendarCheck, CalendarX, CalendarClock } from "lucide-react";
 
+import { DiscordIcon } from "@/components/shared/discord-icon";
 import { AppointmentCancelForm } from "@/components/account/appointment-cancel-form";
 import { AccountShell } from "@/components/account/account-shell";
 import { getPublicUserSession } from "@/lib/auth";
@@ -127,7 +128,7 @@ export default async function AccountPage() {
       <div className="mb-8 rounded-xl border border-indigo-200 bg-indigo-50 p-6 shadow-sm sm:flex sm:items-center sm:justify-between sm:gap-6">
         <div className="mb-4 sm:mb-0">
           <h3 className="text-lg font-bold text-indigo-900 flex items-center gap-2">
-            <MessageSquare className="size-5" />
+            <DiscordIcon className="size-5" />
             Rejoignez la communauté Discord
           </h3>
           <p className="mt-1 text-sm text-indigo-800">
