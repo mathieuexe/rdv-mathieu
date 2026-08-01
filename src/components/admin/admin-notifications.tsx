@@ -204,7 +204,11 @@ export function AdminNotifications() {
     setNotifications([]);
     setUnreadCount(0);
 
-    await supabase.from("admin_notifications").delete().neq("id", "0"); // deletes all
+    // Delete all from DB where id is not null (which is all of them)
+    const { error } = await supabase.from("admin_notifications").delete().not("id", "is", null);
+    if (error) {
+      console.error("Erreur lors de la suppression des notifications:", error);
+    }
   };
 
   const getIconForType = (type: NotificationType) => {
