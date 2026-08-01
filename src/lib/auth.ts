@@ -16,10 +16,28 @@ export async function getAdminSession() {
   const email = user?.email?.toLowerCase();
   const isAdmin = user ? await isUserAdmin(user.id) : false;
 
+  let firstName, lastName, fullName, avatarUrl;
+  if (user) {
+    const { data: profile } = await supabase!
+      .from("user_profiles")
+      .select("first_name, last_name, avatar_url")
+      .eq("user_id", user.id)
+      .maybeSingle();
+      
+    firstName = typeof profile?.first_name === "string" ? profile.first_name : user.user_metadata.first_name;
+    lastName = typeof profile?.last_name === "string" ? profile.last_name : user.user_metadata.last_name;
+    fullName = [firstName, lastName].filter(Boolean).join(" ").trim() || email;
+    avatarUrl = typeof profile?.avatar_url === "string" ? profile.avatar_url : undefined;
+  }
+
   return {
     isAuthenticated: Boolean(email && isAdmin),
     email,
     userId: user?.id,
+    firstName,
+    lastName,
+    fullName,
+    avatarUrl,
   };
 }
 
@@ -29,6 +47,7 @@ export interface PublicUserSession {
   firstName?: string;
   lastName?: string;
   fullName?: string;
+  avatarUrl?: string;
   phone?: string;
   userId?: string;
   isAdmin?: boolean;
@@ -76,7 +95,7 @@ export async function getPublicUserSession(): Promise<PublicUserSession> {
 
   const { data: profile } = await supabase
     .from("user_profiles")
-    .select("first_name, last_name, phone, requires_password_change, is_banned")
+    .select("first_name, last_name, avatar_url, phone, requires_password_change, is_banned")
     .eq("user_id", user.id)
     .maybeSingle();
 
@@ -93,6 +112,7 @@ export async function getPublicUserSession(): Promise<PublicUserSession> {
         ? user.user_metadata.last_name
         : undefined;
   const fullName = [firstName, lastName].filter(Boolean).join(" ").trim() || user.email;
+  const avatarUrl = typeof profile?.avatar_url === "string" ? profile.avatar_url : undefined;
   const phone = typeof profile?.phone === "string" ? profile.phone : undefined;
   const requiresPasswordChange = Boolean(profile?.requires_password_change);
   const isBanned = Boolean(profile?.is_banned);
@@ -104,6 +124,7 @@ export async function getPublicUserSession(): Promise<PublicUserSession> {
     firstName,
     lastName,
     fullName,
+    avatarUrl,
     phone,
     isAdmin,
     requiresPasswordChange,

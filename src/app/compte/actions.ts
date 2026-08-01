@@ -142,6 +142,7 @@ export async function updateAccountProfileAction(
     lastName: formData.get("lastName"),
     email: formData.get("email"),
     phone: formData.get("phone"),
+    avatarImageDataUrl: formData.get("avatarImageDataUrl"),
   });
 
   if (!parsed.success) {
@@ -199,6 +200,7 @@ export async function updateAccountProfileAction(
     firstName: nextProfile.firstName,
     lastName: nextProfile.lastName,
     phone: nextProfile.phone,
+    avatarUrl: nextProfile.avatarImageDataUrl,
   });
 
   if (nextProfile.email !== session.email) {

@@ -53,8 +53,12 @@ export default async function AdminUserDetailPage({
       {/* Salesforce Highlights Panel */}
       <section className="flex flex-col gap-6 rounded-lg border border-slate-200 bg-white p-4 shadow-sm md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-4">
-          <div className="flex size-14 shrink-0 items-center justify-center rounded-md bg-blue-600 text-white">
-            <User className="size-8" />
+          <div className="relative flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-md bg-blue-600 text-white shadow-sm">
+            {profile.avatarUrl ? (
+              <img src={profile.avatarUrl} alt="Avatar" className="size-full object-cover" />
+            ) : (
+              <User className="size-8" />
+            )}
           </div>
           <div>
             <div className="flex items-center gap-2">

@@ -51,7 +51,14 @@ export async function PublicHeader({ currentPath }: PublicHeaderProps) {
           {session.isAuthenticated ? (
             <>
               <div className="group relative">
-                <Link href="/compte" className={`inline-flex items-center gap-1 ${getLinkClass("/compte", currentPath)}`}>
+                <Link href="/compte" className={`inline-flex items-center gap-2 ${getLinkClass("/compte", currentPath)}`}>
+                  {session.avatarUrl ? (
+                    <img src={session.avatarUrl} alt={session.fullName || "Avatar"} className="size-8 rounded-full object-cover hidden sm:block" />
+                  ) : (
+                    <div className="hidden sm:flex size-8 items-center justify-center rounded-full bg-slate-100 text-sm font-medium text-slate-600">
+                      {session.firstName?.charAt(0) || ""}{session.lastName?.charAt(0) || ""}
+                    </div>
+                  )}
                   <span className="hidden sm:inline">Bonjour, {session.fullName}</span>
                   <span className="sm:hidden">Mon compte</span>
                   <ChevronDown className="size-4" />

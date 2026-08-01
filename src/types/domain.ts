@@ -105,6 +105,7 @@ export interface UserProfileRecord {
   email: string;
   firstName: string;
   lastName: string;
+  avatarUrl?: string;
   phone?: string;
   requiresPasswordChange: boolean;
   role: string;

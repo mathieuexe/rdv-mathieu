@@ -163,6 +163,7 @@ export const accountProfileSchema = z.object({
   lastName: z.string().trim().min(2, "Le nom est requis."),
   email: z.string().trim().email("Veuillez saisir un email valide."),
   phone: z.string().trim().min(8, "Le numéro de téléphone est requis."),
+  avatarImageDataUrl: z.string().optional(),
 });
 
 export const changePasswordSchema = z

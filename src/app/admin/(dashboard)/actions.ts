@@ -391,6 +391,7 @@ export async function updateAdminUserProfileAction(
   const lastName = String(formData.get("lastName") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim();
   const phone = String(formData.get("phone") ?? "").trim();
+  const avatarImageDataUrl = formData.get("avatarImageDataUrl")?.toString();
 
   if (!userId || firstName.length < 2 || lastName.length < 2 || !email.includes("@") || phone.length < 8) {
     return {
@@ -415,6 +416,7 @@ export async function updateAdminUserProfileAction(
       lastName,
       email,
       phone,
+      avatarUrl: avatarImageDataUrl,
     });
 
     const requestHeaders = await headers();
@@ -424,6 +426,7 @@ export async function updateAdminUserProfileAction(
       previous.profile.lastName !== lastName ? "nom" : null,
       previous.profile.email !== email ? "email" : null,
       (previous.profile.phone ?? "") !== phone ? "téléphone" : null,
+      (previous.profile.avatarUrl ?? "") !== (avatarImageDataUrl ?? "") ? "photo de profil" : null,
     ].filter(Boolean);
 
     await createAccountActivityLog({

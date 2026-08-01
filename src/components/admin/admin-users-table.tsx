@@ -59,11 +59,20 @@ export function AdminUsersTable({ users }: AdminUsersTableProps) {
           <div className="min-w-[800px] divide-y divide-slate-100">
             {filteredUsers.map((user) => (
               <div key={user.userId} className="grid grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_160px_60px] items-center px-5 py-3 text-sm hover:bg-slate-50 transition-colors">
-                <div>
-                  <p className="font-semibold text-slate-900">
-                    {user.firstName} {user.lastName}
-                  </p>
-                  <p className="mt-0.5 text-xs text-slate-500">{user.role}</p>
+                <div className="flex items-center gap-3 pr-4 min-w-0">
+                  <div className="relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-blue-100 text-blue-600 border border-blue-200">
+                    {user.avatarUrl ? (
+                      <img src={user.avatarUrl} alt="Avatar" className="size-full object-cover" />
+                    ) : (
+                      <span className="text-sm font-semibold">{user.firstName.charAt(0)}{user.lastName.charAt(0)}</span>
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate font-semibold text-slate-900">
+                      {user.firstName} {user.lastName}
+                    </p>
+                    <p className="mt-0.5 truncate text-xs text-slate-500">{user.role}</p>
+                  </div>
                 </div>
 
                 <div className="min-w-0 pr-4">

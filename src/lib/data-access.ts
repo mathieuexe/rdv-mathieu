@@ -167,6 +167,7 @@ function mapUserProfileRow(row: Record<string, unknown>): UserProfileRecord {
     email: String(row.email),
     firstName: String(row.first_name ?? ""),
     lastName: String(row.last_name ?? ""),
+    avatarUrl: typeof row.avatar_url === "string" ? row.avatar_url : undefined,
     phone: typeof row.phone === "string" ? row.phone : undefined,
     requiresPasswordChange: Boolean(row.requires_password_change),
     isBanned: Boolean(row.is_banned),
@@ -619,6 +620,7 @@ export async function updateUserProfileByUserId(input: {
   firstName: string;
   lastName: string;
   phone?: string;
+  avatarUrl?: string;
 }) {
   const supabase = getSupabaseAdminClient();
 
@@ -633,6 +635,7 @@ export async function updateUserProfileByUserId(input: {
       first_name: input.firstName,
       last_name: input.lastName,
       phone: input.phone ?? null,
+      avatar_url: input.avatarUrl,
       updated_at: new Date().toISOString(),
     })
     .eq("user_id", input.userId)
@@ -721,6 +724,7 @@ export async function updateManagedUserAccount(input: {
   firstName: string;
   lastName: string;
   phone?: string;
+  avatarUrl?: string;
 }) {
   const supabase = getSupabaseAdminClient();
 
@@ -766,6 +770,7 @@ export async function updateManagedUserAccount(input: {
     firstName: input.firstName,
     lastName: input.lastName,
     phone: input.phone,
+    avatarUrl: input.avatarUrl,
   });
 
   if (normalizedEmail !== existingProfile.email.toLowerCase()) {

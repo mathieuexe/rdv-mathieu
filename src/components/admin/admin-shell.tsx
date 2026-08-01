@@ -59,9 +59,16 @@ function getCurrentSection(pathname: string) {
 
 interface AdminShellProps {
   children: React.ReactNode;
+  session?: {
+    firstName?: string;
+    lastName?: string;
+    fullName?: string;
+    avatarUrl?: string;
+    email?: string;
+  };
 }
 
-export function AdminShell({ children }: AdminShellProps) {
+export function AdminShell({ children, session }: AdminShellProps) {
   const currentPath = usePathname();
   const currentSection = getCurrentSection(currentPath);
 
@@ -142,6 +149,22 @@ export function AdminShell({ children }: AdminShellProps) {
                Site
                <ArrowUpRight className="size-3" />
             </Link>
+
+            {session && (
+              <div className="flex items-center gap-3 border-l border-slate-200 pl-4">
+                <div className="hidden text-right sm:block">
+                  <p className="text-sm font-medium text-slate-900">{session.fullName}</p>
+                  <p className="text-xs text-slate-500">Administrateur</p>
+                </div>
+                {session.avatarUrl ? (
+                  <img src={session.avatarUrl} alt={session.fullName || "Avatar"} className="size-8 rounded-full object-cover" />
+                ) : (
+                  <div className="flex size-8 items-center justify-center rounded-full bg-slate-100 text-sm font-medium text-slate-600">
+                    {session.firstName?.charAt(0)}{session.lastName?.charAt(0)}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </header>
 
