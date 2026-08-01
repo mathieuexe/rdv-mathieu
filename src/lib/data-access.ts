@@ -88,11 +88,13 @@ function mapCategoryRow(
     durationMinutes: Number(row.duration_minutes),
     appointmentMode: row.appointment_mode as AppointmentCategory["appointmentMode"],
     isOnline: Boolean(row.is_online),
+    isHidden: Boolean(row.is_hidden),
     customMessage: typeof row.custom_message === "string" ? row.custom_message : undefined,
     thumbnailImageUrl: typeof row.thumbnail_image_url === "string" ? row.thumbnail_image_url : undefined,
     bannerImageUrl: typeof row.banner_image_url === "string" ? row.banner_image_url : undefined,
     isBookingBlocked: Boolean(row.is_booking_blocked),
     bookingBlockMessage: typeof row.booking_block_message === "string" ? row.booking_block_message : undefined,
+    customFields: Array.isArray(row.custom_fields) ? (row.custom_fields as any) : undefined,
     availabilityRules: categoryRules.reduce<AppointmentCategory["availabilityRules"]>((acc, rule) => {
       const weekdayValue = Number(rule.weekday);
       const weekdayMap = ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"];
@@ -128,6 +130,7 @@ function mapAppointmentRow(row: Record<string, unknown>): AppointmentRecord {
     email: String(row.email),
     phone: String(row.phone),
     clientMessage: typeof row.client_message === "string" ? row.client_message : undefined,
+    customFieldResponses: row.custom_field_responses && typeof row.custom_field_responses === "object" ? (row.custom_field_responses as Record<string, string>) : undefined,
     startsAt: String(row.starts_at),
     endsAt: String(row.ends_at),
     status: row.status as AppointmentRecord["status"],
@@ -265,7 +268,7 @@ export const getPublicCategories = unstable_cache(async () => {
 
   if (supabase) {
     const [{ data: categoryRows }, { data: ruleRows }, { data: blackoutRows }] = await Promise.all([
-      supabase.from("categories").select("*").eq("is_online", true).order("created_at"),
+      supabase.from("categories").select("*").eq("is_online", true).eq("is_hidden", false).order("created_at"),
       supabase.from("category_availability_rules").select("*").order("weekday"),
       supabase.from("category_blackout_periods").select("*").order("start_date"),
     ]);
@@ -460,6 +463,7 @@ export async function createAppointmentRequest(
     email: payload.email,
     phone: payload.phone,
     clientMessage: payload.message,
+    customFieldResponses: payload.customFieldResponses,
     startsAt: startsAt.toISOString(),
     endsAt: endsAt.toISOString(),
     status: "en_attente",
@@ -480,6 +484,7 @@ export async function createAppointmentRequest(
         email: record.email,
         phone: record.phone,
         client_message: record.clientMessage ?? null,
+        custom_field_responses: record.customFieldResponses ?? {},
         starts_at: record.startsAt,
         ends_at: record.endsAt,
         status: record.status,
@@ -991,11 +996,13 @@ export async function saveCategory(input: {
   appointmentMode: AppointmentCategory["appointmentMode"];
   description: string;
   isOnline: boolean;
+  isHidden?: boolean;
   customMessage?: string;
   thumbnailImageUrl?: string;
   bannerImageUrl?: string;
   isBookingBlocked?: boolean;
   bookingBlockMessage?: string;
+  customFields?: AppointmentCategory["customFields"];
   availabilityRules: Array<{
     weekday: "lundi" | "mardi" | "mercredi" | "jeudi" | "vendredi" | "samedi" | "dimanche";
     enabled: boolean;
@@ -1022,11 +1029,13 @@ export async function saveCategory(input: {
     appointment_mode: input.appointmentMode,
     description: input.description,
     is_online: input.isOnline,
+    is_hidden: input.isHidden ?? false,
     custom_message: input.customMessage ?? null,
     thumbnail_image_url: input.thumbnailImageUrl ?? null,
     banner_image_url: input.bannerImageUrl ?? null,
     is_booking_blocked: input.isBookingBlocked ?? false,
     booking_block_message: input.bookingBlockMessage ?? null,
+    custom_fields: input.customFields ?? [],
     updated_at: new Date().toISOString(),
   };
 
@@ -1220,6 +1229,7 @@ export async function createAdminAppointment(input: {
   email: string;
   phone: string;
   message?: string;
+  customFieldResponses?: Record<string, string>;
   startsAt: string;
   linkedUserId?: string;
   adminUserId: string;
@@ -1256,6 +1266,7 @@ export async function createAdminAppointment(input: {
     email: input.email,
     phone: input.phone,
     clientMessage: input.message,
+    customFieldResponses: input.customFieldResponses,
     startsAt: startsAt.toISOString(),
     endsAt: endsAt.toISOString(),
     status: "accepte",
@@ -1276,6 +1287,7 @@ export async function createAdminAppointment(input: {
         email: record.email,
         phone: record.phone,
         client_message: record.clientMessage ?? null,
+        custom_field_responses: record.customFieldResponses ?? {},
         starts_at: record.startsAt,
         ends_at: record.endsAt,
         status: record.status,

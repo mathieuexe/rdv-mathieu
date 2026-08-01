@@ -121,6 +121,26 @@ export default async function AppointmentDetailPage({
                     {appointment.clientMessage || "Aucun message complémentaire."}
                   </div>
                 </div>
+
+                {category?.customFields && Object.keys(appointment.customFieldResponses || {}).length > 0 && (
+                  <div className="sm:col-span-2">
+                    <p className="text-xs text-slate-500 mb-2">Informations complémentaires (Champs personnalisés)</p>
+                    <div className="rounded-md border border-slate-200 bg-white">
+                      <dl className="divide-y divide-slate-200">
+                        {category.customFields.map((field) => {
+                          const response = appointment.customFieldResponses?.[field.id];
+                          if (!response) return null;
+                          return (
+                            <div key={field.id} className="flex justify-between p-3 text-sm">
+                              <dt className="font-medium text-slate-700">{field.label}</dt>
+                              <dd className="text-slate-900">{response}</dd>
+                            </div>
+                          );
+                        })}
+                      </dl>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {appointment.rejectionReason && (

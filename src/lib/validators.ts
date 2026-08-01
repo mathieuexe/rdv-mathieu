@@ -7,6 +7,7 @@ export const appointmentRequestSchema = z.object({
   email: z.string().trim().email("Veuillez saisir un email valide."),
   phone: z.string().trim().min(8, "Le téléphone est requis."),
   message: z.string().trim().max(800, "Le message est trop long.").optional().or(z.literal("")),
+  customFieldResponsesJson: z.string().optional().or(z.literal("")),
   startsAt: z.string().trim().min(10, "Le créneau sélectionné est invalide."),
 });
 
@@ -45,11 +46,13 @@ export const categoryAdminSchema = z
     appointmentMode: z.enum(["telephone", "physique", "visioconference"]),
     description: z.string().trim().min(10, "La description est requise."),
     isOnline: z.boolean(),
+    isHidden: z.boolean().optional(),
     isBookingBlocked: z.boolean().optional(),
     bookingBlockMessage: z.string().trim().max(500).optional().or(z.literal("")),
     customMessage: z.string().trim().max(500).optional().or(z.literal("")),
     thumbnailImageDataUrl: z.string().trim().max(5_000_000).optional().or(z.literal("")),
     bannerImageDataUrl: z.string().trim().max(8_000_000).optional().or(z.literal("")),
+    customFieldsJson: z.string().optional().or(z.literal("")),
     availabilityRules: z
       .array(
         z

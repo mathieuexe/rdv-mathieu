@@ -45,7 +45,18 @@ export async function POST(request: Request) {
     }
 
     const session = await getPublicUserSession();
-    const result = await createAppointmentRequest(parsed.data, {
+    
+    let customFieldResponses = {};
+    if (parsed.data.customFieldResponsesJson) {
+      try {
+        customFieldResponses = JSON.parse(parsed.data.customFieldResponsesJson);
+      } catch (e) {}
+    }
+
+    const result = await createAppointmentRequest({
+      ...parsed.data,
+      customFieldResponses
+    }, {
       requestedByUserId:
         session.isAuthenticated && session.userId && session.email === parsed.data.email.toLowerCase() ? session.userId : undefined,
     });

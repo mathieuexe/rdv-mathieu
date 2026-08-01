@@ -1,9 +1,9 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Info, Calendar, Image as ImageIcon, Globe, MessageSquare, Save, Lock } from "lucide-react";
+import { Info, Calendar, Image as ImageIcon, Globe, MessageSquare, Save, Lock, Plus, Trash2, GripVertical, Settings } from "lucide-react";
 
-import type { AppointmentCategory } from "@/types/domain";
+import type { AppointmentCategory, CustomField } from "@/types/domain";
 
 const weekdayOptions = [
   { key: "lundi", label: "Lundi" },
@@ -100,6 +100,7 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
   const [thumbnailPreview, setThumbnailPreview] = useState(category?.thumbnailImageUrl ?? "");
   const [bannerPreview, setBannerPreview] = useState(category?.bannerImageUrl ?? "");
   const [imageError, setImageError] = useState("");
+  const [customFields, setCustomFields] = useState<CustomField[]>(category?.customFields ?? []);
   const thumbnailInputRef = useRef<HTMLInputElement | null>(null);
   const bannerInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -182,6 +183,7 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
         <input type="hidden" name="returnPath" value={returnPath} />
         <input type="hidden" name="thumbnailImageDataUrl" value={thumbnailPreview} />
         <input type="hidden" name="bannerImageDataUrl" value={bannerPreview} />
+        <input type="hidden" name="customFieldsJson" value={JSON.stringify(customFields)} />
 
         {/* Left Column */}
         <div className="space-y-6 lg:col-span-2">
@@ -351,6 +353,169 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
             </div>
           </section>
 
+          {/* Custom Fields Card */}
+          <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
+            <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-3">
+              <div className="flex items-center gap-2">
+                <Settings className="size-4 text-slate-600" />
+                <h2 className="font-semibold text-slate-800">Champs personnalisés</h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setCustomFields([...customFields, { id: crypto.randomUUID(), type: "text", label: "", required: false, placeholder: "" }])}
+                className="flex items-center gap-1.5 rounded-md bg-white px-2.5 py-1.5 text-xs font-medium text-blue-600 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50"
+              >
+                <Plus className="size-3.5" />
+                Ajouter un champ
+              </button>
+            </div>
+            <div className="p-4 md:p-6">
+              {customFields.length === 0 ? (
+                <p className="text-sm text-slate-500 text-center py-4">Aucun champ personnalisé configuré pour cette catégorie.</p>
+              ) : (
+                <div className="space-y-6">
+                  {customFields.map((field, index) => (
+                    <div key={field.id} className="relative rounded-lg border border-slate-200 bg-slate-50 p-4">
+                      <button
+                        type="button"
+                        onClick={() => setCustomFields(customFields.filter(f => f.id !== field.id))}
+                        className="absolute right-3 top-3 text-slate-400 hover:text-rose-600"
+                      >
+                        <Trash2 className="size-4" />
+                      </button>
+                      <div className="grid gap-4 sm:grid-cols-2 pr-6">
+                        <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+                          <span>Label du champ</span>
+                          <input
+                            value={field.label}
+                            onChange={(e) => {
+                              const newFields = [...customFields];
+                              newFields[index].label = e.target.value;
+                              setCustomFields(newFields);
+                            }}
+                            placeholder="Ex: Motif de la consultation"
+                            className="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                          />
+                        </label>
+                        <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+                          <span>Type</span>
+                          <select
+                            value={field.type}
+                            onChange={(e) => {
+                              const newFields = [...customFields];
+                              newFields[index].type = e.target.value as "text" | "select";
+                              if (e.target.value === "select" && !newFields[index].options) {
+                                newFields[index].options = [{ label: "", value: "" }];
+                              }
+                              setCustomFields(newFields);
+                            }}
+                            className="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                          >
+                            <option value="text">Texte court</option>
+                            <option value="select">Menu déroulant (Choix)</option>
+                          </select>
+                        </label>
+                      </div>
+
+                      <div className="mt-4 flex items-center gap-3">
+                        <label className="flex items-center gap-2 text-sm text-slate-700">
+                          <input
+                            type="checkbox"
+                            checked={field.required}
+                            onChange={(e) => {
+                              const newFields = [...customFields];
+                              newFields[index].required = e.target.checked;
+                              setCustomFields(newFields);
+                            }}
+                            className="size-4 rounded border-slate-300 text-blue-600"
+                          />
+                          Champ obligatoire
+                        </label>
+                      </div>
+
+                      {field.type === "text" && (
+                        <div className="mt-4">
+                          <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+                            <span>Texte indicatif (Placeholder)</span>
+                            <input
+                              value={field.placeholder || ""}
+                              onChange={(e) => {
+                                const newFields = [...customFields];
+                                newFields[index].placeholder = e.target.value;
+                                setCustomFields(newFields);
+                              }}
+                              className="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                            />
+                          </label>
+                        </div>
+                      )}
+
+                      {field.type === "select" && (
+                        <div className="mt-4 space-y-3">
+                          <p className="text-sm font-medium text-slate-700">Options du menu déroulant</p>
+                          {field.options?.map((opt, optIndex) => (
+                            <div key={optIndex} className="flex items-center gap-2">
+                              <input
+                                value={opt.label}
+                                onChange={(e) => {
+                                  const newFields = [...customFields];
+                                  if (newFields[index].options) {
+                                    newFields[index].options![optIndex].label = e.target.value;
+                                    newFields[index].options![optIndex].value = e.target.value;
+                                  }
+                                  setCustomFields(newFields);
+                                }}
+                                placeholder={`Option ${optIndex + 1}`}
+                                className="flex-1 rounded-md border border-slate-300 px-3 py-1.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                              />
+                              <input
+                                value={opt.icon || ""}
+                                onChange={(e) => {
+                                  const newFields = [...customFields];
+                                  if (newFields[index].options) {
+                                    newFields[index].options![optIndex].icon = e.target.value;
+                                  }
+                                  setCustomFields(newFields);
+                                }}
+                                placeholder="Nom icône (ex: User)"
+                                className="w-40 rounded-md border border-slate-300 px-3 py-1.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const newFields = [...customFields];
+                                  if (newFields[index].options) {
+                                    newFields[index].options = newFields[index].options!.filter((_, i) => i !== optIndex);
+                                  }
+                                  setCustomFields(newFields);
+                                }}
+                                className="p-1.5 text-slate-400 hover:text-rose-600"
+                              >
+                                <Trash2 className="size-4" />
+                              </button>
+                            </div>
+                          ))}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newFields = [...customFields];
+                              if (!newFields[index].options) newFields[index].options = [];
+                              newFields[index].options!.push({ label: "", value: "" });
+                              setCustomFields(newFields);
+                            }}
+                            className="text-xs font-medium text-blue-600 hover:text-blue-700"
+                          >
+                            + Ajouter une option
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
+
           {/* Visuals Card */}
           <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
             <div className="flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3">
@@ -446,10 +611,14 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
               <Globe className="size-4 text-slate-600" />
               <h2 className="font-semibold text-slate-800">Publication</h2>
             </div>
-            <div className="p-4">
+            <div className="p-4 space-y-4">
               <label className="flex items-center gap-3 text-sm text-slate-700">
                 <input type="checkbox" name="isOnline" defaultChecked={category?.isOnline ?? true} className="size-4 rounded border-slate-300 text-blue-600" />
                 <span className="font-medium">Catégorie visible au public</span>
+              </label>
+              <label className="flex items-center gap-3 text-sm text-slate-700">
+                <input type="checkbox" name="isHidden" defaultChecked={category?.isHidden ?? false} className="size-4 rounded border-slate-300 text-blue-600" />
+                <span className="font-medium">Catégorie privée (masquée de l'accueil, accessible par lien)</span>
               </label>
             </div>
           </section>

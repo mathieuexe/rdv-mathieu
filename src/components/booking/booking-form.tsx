@@ -90,6 +90,7 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
   const [email, setEmail] = useState(initialUser?.email ?? "");
   const [phone, setPhone] = useState(initialUser?.phone ?? "");
   const [message, setMessage] = useState("");
+  const [customFieldResponses, setCustomFieldResponses] = useState<Record<string, string>>({});
   const shouldSuggestSavedPhone = category.appointmentMode === "telephone" && Boolean(initialUser?.phone?.trim());
   const [phoneConfirmation, setPhoneConfirmation] = useState<"pending" | "yes" | "no">(shouldSuggestSavedPhone ? "pending" : "yes");
   const activeDateKey = selectedDateKey || firstAvailableDateKey;
@@ -124,6 +125,14 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
 
     if (phone.trim().length < 8) {
       return "Le téléphone est requis.";
+    }
+
+    if (category.customFields) {
+      for (const field of category.customFields) {
+        if (field.required && (!customFieldResponses[field.id] || !customFieldResponses[field.id].trim())) {
+          return `Le champ "${field.label}" est requis.`;
+        }
+      }
     }
 
     return null;
@@ -180,6 +189,7 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
       email: email.trim(),
       phone: phone.trim(),
       message: message.trim(),
+      customFieldResponsesJson: JSON.stringify(customFieldResponses),
       startsAt: activeSelectedSlot,
     };
 
@@ -490,6 +500,36 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                   />
                 </label>
 
+                {category.customFields && category.customFields.length > 0 && (
+                  <div className="space-y-4 pt-2 border-t border-slate-100">
+                    <p className="text-sm font-semibold text-slate-900">Informations complémentaires</p>
+                    {category.customFields.map((field) => (
+                      <label key={field.id} className="block space-y-2 text-sm font-medium text-slate-700">
+                        <span>{field.label} {field.required && <span className="text-rose-600">*</span>}</span>
+                        {field.type === "text" ? (
+                          <input
+                            value={customFieldResponses[field.id] || ""}
+                            onChange={(e) => setCustomFieldResponses({ ...customFieldResponses, [field.id]: e.target.value })}
+                            placeholder={field.placeholder || ""}
+                            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                          />
+                        ) : (
+                          <select
+                            value={customFieldResponses[field.id] || ""}
+                            onChange={(e) => setCustomFieldResponses({ ...customFieldResponses, [field.id]: e.target.value })}
+                            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                          >
+                            <option value="" disabled>Sélectionnez une option...</option>
+                            {field.options?.map((opt, i) => (
+                              <option key={i} value={opt.value}>{opt.label}</option>
+                            ))}
+                          </select>
+                        )}
+                      </label>
+                    ))}
+                  </div>
+                )}
+
                 {error ? <p className="text-sm font-medium text-rose-600">{error}</p> : null}
 
                 <div className="flex gap-3">
@@ -545,6 +585,15 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                       <dt className="font-medium text-slate-900">Message</dt>
                       <dd>{message.trim() || "Aucun message"}</dd>
                     </div>
+                    {category.customFields?.map((field) => {
+                      if (!customFieldResponses[field.id]) return null;
+                      return (
+                        <div key={field.id}>
+                          <dt className="font-medium text-slate-900">{field.label}</dt>
+                          <dd>{customFieldResponses[field.id]}</dd>
+                        </div>
+                      );
+                    })}
                   </dl>
                 </div>
 

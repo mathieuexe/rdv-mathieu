@@ -30,6 +30,23 @@ export interface BlackoutPeriod {
   message?: string;
 }
 
+export type CustomFieldType = "text" | "select";
+
+export interface CustomFieldOption {
+  label: string;
+  value: string;
+  icon?: string;
+}
+
+export interface CustomField {
+  id: string;
+  type: CustomFieldType;
+  label: string;
+  required: boolean;
+  options?: CustomFieldOption[];
+  placeholder?: string;
+}
+
 export interface AppointmentCategory {
   id: string;
   slug: string;
@@ -38,6 +55,7 @@ export interface AppointmentCategory {
   durationMinutes: number;
   appointmentMode: AppointmentMode;
   isOnline: boolean;
+  isHidden?: boolean;
   customMessage?: string;
   thumbnailImageUrl?: string;
   bannerImageUrl?: string;
@@ -45,6 +63,7 @@ export interface AppointmentCategory {
   blackoutPeriods: BlackoutPeriod[];
   isBookingBlocked?: boolean;
   bookingBlockMessage?: string;
+  customFields?: CustomField[];
 }
 
 export interface SiteSettings {
@@ -65,6 +84,7 @@ export interface AppointmentRecord {
   email: string;
   phone: string;
   clientMessage?: string;
+  customFieldResponses?: Record<string, string>;
   startsAt: string;
   endsAt: string;
   status: AppointmentStatus;
@@ -124,6 +144,7 @@ export interface AppointmentRequestPayload {
   email: string;
   phone: string;
   message?: string;
+  customFieldResponses?: Record<string, string>;
   startsAt: string;
 }
 

@@ -91,11 +91,13 @@ export async function saveCategoryAction(formData: FormData) {
     appointmentMode: formData.get("appointmentMode"),
     description: formData.get("description"),
     isOnline: formData.get("isOnline") === "on",
+    isHidden: formData.get("isHidden") === "on",
     isBookingBlocked: formData.get("isBookingBlocked") === "on",
     bookingBlockMessage: formData.get("bookingBlockMessage"),
     customMessage: formData.get("customMessage"),
     thumbnailImageDataUrl: formData.get("thumbnailImageDataUrl"),
     bannerImageDataUrl: formData.get("bannerImageDataUrl"),
+    customFieldsJson: formData.get("customFieldsJson"),
     availabilityRules: parseCategoryAvailabilityRules(formData),
   });
 
@@ -115,11 +117,13 @@ export async function saveCategoryAction(formData: FormData) {
       appointmentMode: parsed.data.appointmentMode,
       description: parsed.data.description,
       isOnline: parsed.data.isOnline,
+      isHidden: parsed.data.isHidden,
       isBookingBlocked: parsed.data.isBookingBlocked,
       bookingBlockMessage: parsed.data.bookingBlockMessage || undefined,
       customMessage: parsed.data.customMessage || undefined,
       thumbnailImageUrl: parsed.data.thumbnailImageDataUrl || undefined,
       bannerImageUrl: parsed.data.bannerImageDataUrl || undefined,
+      customFields: parsed.data.customFieldsJson ? JSON.parse(String(parsed.data.customFieldsJson)) : undefined,
       availabilityRules: parsed.data.availabilityRules,
     });
 
@@ -241,6 +245,7 @@ export async function createAdminAppointmentAction(formData: FormData) {
     email: formData.get("email"),
     phone: formData.get("phone"),
     message: formData.get("message"),
+    customFieldResponsesJson: formData.get("customFieldResponsesJson"),
     startsAt: formData.get("startsAt"),
     updateLinkedUserProfile: formData.get("updateLinkedUserProfile") === "on",
   });
@@ -281,8 +286,16 @@ export async function createAdminAppointmentAction(formData: FormData) {
       effectiveLinkedUserId = createdAccount.userId;
     }
 
+    let customFieldResponses = {};
+    if (parsed.data.customFieldResponsesJson) {
+      try {
+        customFieldResponses = JSON.parse(parsed.data.customFieldResponsesJson);
+      } catch (e) {}
+    }
+
     const appointment = await createAdminAppointment({
       ...parsed.data,
+      customFieldResponses,
       linkedUserId: effectiveLinkedUserId,
       message: parsed.data.message || undefined,
       adminUserId: session.userId,

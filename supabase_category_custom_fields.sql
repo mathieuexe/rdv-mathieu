@@ -1,0 +1,6 @@
+ALTER TABLE categories
+ADD COLUMN IF NOT EXISTS is_hidden BOOLEAN NOT NULL DEFAULT FALSE,
+ADD COLUMN IF NOT EXISTS custom_fields JSONB NOT NULL DEFAULT '[]'::jsonb;
+
+ALTER TABLE appointments
+ADD COLUMN IF NOT EXISTS custom_field_responses JSONB NOT NULL DEFAULT '{}'::jsonb;

@@ -56,6 +56,7 @@ export function AdminAppointmentForm({ categories, registeredClients, action, er
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
+  const [customFieldResponses, setCustomFieldResponses] = useState<Record<string, string>>({});
   const [slots, setSlots] = useState<BookingSlot[]>([]);
   const [selectedSlot, setSelectedSlot] = useState("");
   const [selectedDateKey, setSelectedDateKey] = useState("");
@@ -183,6 +184,7 @@ export function AdminAppointmentForm({ categories, registeredClients, action, er
       )}
 
       <form action={action} className="grid items-start gap-6 lg:grid-cols-3">
+        <input type="hidden" name="customFieldResponsesJson" value={JSON.stringify(customFieldResponses)} />
         <div className="space-y-6 lg:col-span-2">
           {/* Client Info Card */}
           <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
@@ -314,6 +316,36 @@ export function AdminAppointmentForm({ categories, registeredClients, action, er
                   className="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 />
               </label>
+
+              {selectedCategory?.customFields && selectedCategory.customFields.length > 0 && (
+                <div className="space-y-4 pt-4 border-t border-slate-200">
+                  <h3 className="font-semibold text-slate-800">Champs personnalisés</h3>
+                  {selectedCategory.customFields.map((field) => (
+                    <label key={field.id} className="block space-y-1.5 text-sm font-medium text-slate-700">
+                      <span>{field.label} {field.required && <span className="text-rose-600">*</span>}</span>
+                      {field.type === "text" ? (
+                        <input
+                          value={customFieldResponses[field.id] || ""}
+                          onChange={(e) => setCustomFieldResponses({ ...customFieldResponses, [field.id]: e.target.value })}
+                          placeholder={field.placeholder || ""}
+                          className="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                        />
+                      ) : (
+                        <select
+                          value={customFieldResponses[field.id] || ""}
+                          onChange={(e) => setCustomFieldResponses({ ...customFieldResponses, [field.id]: e.target.value })}
+                          className="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                        >
+                          <option value="" disabled>Sélectionnez une option...</option>
+                          {field.options?.map((opt, i) => (
+                            <option key={i} value={opt.value}>{opt.label}</option>
+                          ))}
+                        </select>
+                      )}
+                    </label>
+                  ))}
+                </div>
+              )}
             </div>
           </section>
         </div>
