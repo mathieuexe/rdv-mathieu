@@ -129,7 +129,7 @@ export async function saveCategoryAction(formData: FormData) {
 
     revalidatePath("/admin");
     revalidatePath("/admin/categories");
-    revalidatePath("/");
+    revalidatePath("/", "layout");
 
     successPath = `/admin/categories/${category.slug}`;
   } catch (error) {
@@ -218,7 +218,7 @@ export async function saveSettingsAction(formData: FormData) {
     revalidatePath("/admin/rendez-vous");
     revalidatePath("/admin/rendez-vous/agenda");
     revalidatePath("/maintenance");
-    revalidatePath("/");
+    revalidatePath("/", "layout");
     revalidatePath("/compte");
     revalidatePath("/compte/logs");
   } catch (error) {

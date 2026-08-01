@@ -163,13 +163,22 @@ export default async function AdminDashboardPage() {
                         <p className="text-sm font-medium text-slate-900">{category.title}</p>
                         <p className="text-xs text-slate-500">/{category.slug}</p>
                       </div>
-                      <span
-                        className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
-                          category.isOnline ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600"
-                        }`}
-                      >
-                        {category.isOnline ? "En ligne" : "Hors ligne"}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        {category.isHidden && (
+                          <span className="shrink-0 rounded-full bg-purple-50 px-2.5 py-0.5 text-xs font-medium text-purple-700 ring-1 ring-inset ring-purple-600/20">
+                            Privée
+                          </span>
+                        )}
+                        <span
+                          className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                            category.isOnline
+                              ? "bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/20"
+                              : "bg-slate-100 text-slate-700 ring-1 ring-inset ring-slate-500/20"
+                          }`}
+                        >
+                          {category.isOnline ? "En ligne" : "Hors ligne"}
+                        </span>
+                      </div>
                     </div>
                   ))}
                 </div>

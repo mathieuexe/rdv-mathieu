@@ -268,7 +268,7 @@ export const getPublicCategories = unstable_cache(async () => {
 
   if (supabase) {
     const [{ data: categoryRows }, { data: ruleRows }, { data: blackoutRows }] = await Promise.all([
-      supabase.from("categories").select("*").eq("is_online", true).eq("is_hidden", false).order("created_at"),
+      supabase.from("categories").select("*").eq("is_online", true).or("is_hidden.eq.false,is_hidden.is.null").order("created_at"),
       supabase.from("category_availability_rules").select("*").order("weekday"),
       supabase.from("category_blackout_periods").select("*").order("start_date"),
     ]);
