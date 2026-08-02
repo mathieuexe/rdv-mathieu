@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { Globe, LayoutTemplate, Search, Terminal, Star, CheckCircle, MapPin, ArrowRight, Server } from "lucide-react";
+import { DiscordIcon } from "@/components/shared/discord-icon";
 
 import { PublicFooter } from "@/components/public/public-footer";
 import { PublicHeader } from "@/components/public/public-header";
@@ -138,7 +139,7 @@ export default function AboutPage() {
                 </p>
               </div>
 
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-8 transition-shadow hover:shadow-md sm:col-span-2 lg:col-span-1">
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-8 transition-shadow hover:shadow-md">
                 <div className="mb-4 inline-flex size-12 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
                   <Terminal className="size-6" />
                 </div>
@@ -150,19 +151,28 @@ export default function AboutPage() {
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="size-5 shrink-0 text-blue-600" />
-                    <span>Création sur mesure de serveur Discord ou Stoat</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="size-5 shrink-0 text-blue-600" />
-                    <span>Création sur mesure de bot Discord ou Stoat</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="size-5 shrink-0 text-blue-600" />
                     <span>Administration de serveurs Windows</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="size-5 shrink-0 text-blue-600" />
                     <span>Déploiement et gestion de solutions sous Linux</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-8 transition-shadow hover:shadow-md">
+                <div className="mb-4 inline-flex size-12 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600">
+                  <DiscordIcon className="size-6" />
+                </div>
+                <h3 className="mb-3 text-xl font-bold text-slate-900">Communautés Discord & Stoat</h3>
+                <ul className="space-y-2 text-slate-600">
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="size-5 shrink-0 text-blue-600" />
+                    <span>Création sur mesure de serveur Discord ou Stoat</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="size-5 shrink-0 text-blue-600" />
+                    <span>Création sur mesure de bot Discord ou Stoat</span>
                   </li>
                 </ul>
               </div>
