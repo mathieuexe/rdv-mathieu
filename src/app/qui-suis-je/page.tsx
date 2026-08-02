@@ -69,7 +69,7 @@ export default function AboutPage() {
               <div className="relative mx-auto w-full max-w-sm lg:max-w-[320px]">
                 <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-slate-200 shadow-xl border border-slate-200">
                   <Image
-                    src="/images/mathieu.jpeg"
+                    src="/images/mathieu-upscale.png"
                     alt="Mathieu CERENZIA"
                     fill
                     sizes="(max-width: 1024px) 100vw, 320px"
