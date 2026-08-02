@@ -32,7 +32,7 @@ export default function AboutPage() {
                     Je m'appelle Mathieu, j'ai 25 ans et je suis originaire de Sauvian. Passionné d'informatique depuis mon plus jeune âge, j'ai obtenu un BTS Technicien Systèmes Réseaux et Sécurité avant de me lancer à mon compte en 2020.
                   </p>
                   <p className="text-lg leading-relaxed text-slate-600">
-                    Depuis six ans, je conçois des sites internet et accompagne mes clients dans leur transformation digitale avec des solutions concrètes et sur mesure.
+                    Depuis six ans, je conçois des sites internet et accompagne mes clients dans leur transformation digitale avec des solutions concrètes et sur mesure. Je propose également la création sur mesure de serveurs et de bots Discord ou Stoat.
                   </p>
                 </div>
 
@@ -150,7 +150,11 @@ export default function AboutPage() {
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="size-5 shrink-0 text-blue-600" />
-                    <span>Création de bots Discord sur mesure</span>
+                    <span>Création sur mesure de serveur Discord ou Stoat</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="size-5 shrink-0 text-blue-600" />
+                    <span>Création sur mesure de bot Discord ou Stoat</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="size-5 shrink-0 text-blue-600" />
