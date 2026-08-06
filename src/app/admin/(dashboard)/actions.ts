@@ -16,6 +16,7 @@ import {
   getAdminUserDetail,
   getCategoryById,
   saveCategory,
+  getSiteSettings,
   saveSiteSettings,
   setUserPasswordChangeRequirement,
   updateManagedUserAccount,
@@ -26,6 +27,7 @@ import {
   sendValidatedAppointmentEmail,
   sendAdminCustomEmailToUser
 } from "@/lib/email";
+import { sendDiscordNotification } from "@/lib/discord";
 import { adminAppointmentSchema, categoryAdminSchema, settingsSchema } from "@/lib/validators";
 import { formatDateTimeFr } from "@/lib/utils";
 
@@ -168,11 +170,31 @@ export async function saveSettingsAction(formData: FormData) {
     const currentIp = formData.get("allowCurrentIp") === "on" ? extractClientIpFromHeaders(requestHeaders) : null;
     const clientContext = extractClientContextFromHeaders(requestHeaders);
 
+    const oldSettings = await getSiteSettings();
+
     await saveSiteSettings({
       ...parsed.data,
       bookingBlockedMessage: parsed.data.bookingBlockedMessage || null,
       maintenanceAllowedIps: mergeAllowedIps(splitAllowedIpsInput(parsed.data.maintenanceAllowedIps), [currentIp]),
     });
+
+    // Discord Notifications
+    if (parsed.data.maintenanceMode && !oldSettings.maintenanceMode) {
+      await sendDiscordNotification(`⚠️ **Site en maintenance** : Le mode maintenance vient d'être activé.`);
+    }
+
+    if (parsed.data.bookingBlocked && !oldSettings.bookingBlocked) {
+      await sendDiscordNotification(`🚫 **Réservations suspendues** : ${parsed.data.bookingBlockedMessage || 'La prise de rendez-vous a été bloquée.'}`);
+    }
+
+    // Check for newly added blackout periods
+    const oldBlackouts = oldSettings.globalBlackoutPeriods.map(p => `${p.startDate}-${p.startTime}-${p.endDate}-${p.endTime}`);
+    for (const newPeriod of parsed.data.globalBlackoutPeriods) {
+      const key = `${newPeriod.startDate}-${newPeriod.startTime}-${newPeriod.endDate}-${newPeriod.endTime}`;
+      if (!oldBlackouts.includes(key)) {
+        await sendDiscordNotification(`📅 **Nouvelle indisponibilité** : Du ${newPeriod.startDate} à ${newPeriod.startTime} jusqu'au ${newPeriod.endDate} à ${newPeriod.endTime}. Motif : ${newPeriod.message || 'Non spécifié'}`);
+      }
+    }
 
     const cancelledAppointments = await cancelAppointmentsOverlappingGlobalBlackouts(AUTOMATIC_BLACKOUT_CANCELLATION_REASON);
 
