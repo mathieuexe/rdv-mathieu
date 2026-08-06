@@ -49,10 +49,12 @@ export async function middleware(request: NextRequest) {
 
   const siteSettings: SiteSettings = {
     maintenanceMode: Boolean(settingsRow?.maintenance_mode),
-    maintenanceMessage: typeof settingsRow?.maintenance_message === "string" ? settingsRow.maintenance_message : "",
+    maintenanceMessage: settingsRow?.maintenance_message || "",
     maintenanceAllowedIps: normalizeAllowedIps(settingsRow?.maintenance_allowed_ips),
     enableWhatsappWidget: Boolean(settingsRow?.enable_whatsapp_widget),
     enableBlackoutMarquee: settingsRow?.enable_blackout_marquee !== false,
+    bookingBlocked: Boolean(settingsRow?.booking_blocked),
+    bookingBlockedMessage: typeof settingsRow?.booking_blocked_message === "string" ? settingsRow.booking_blocked_message : null,
     globalBlackoutPeriods: [],
   };
 

@@ -26,6 +26,8 @@ const defaultSiteSettings: SiteSettings = {
   maintenanceAllowedIps: [],
   enableWhatsappWidget: false,
   enableBlackoutMarquee: true,
+  bookingBlocked: false,
+  bookingBlockedMessage: null,
   globalBlackoutPeriods: [],
 };
 
@@ -254,6 +256,8 @@ export const getSiteSettings = unstable_cache(async () => {
         maintenanceAllowedIps: normalizeAllowedIps(settingsRow.maintenance_allowed_ips),
         enableWhatsappWidget: Boolean(settingsRow.enable_whatsapp_widget),
         enableBlackoutMarquee: settingsRow.enable_blackout_marquee !== false, // Default to true
+        bookingBlocked: Boolean(settingsRow.booking_blocked),
+        bookingBlockedMessage: typeof settingsRow.booking_blocked_message === "string" ? settingsRow.booking_blocked_message : null,
         globalBlackoutPeriods: (blackoutRows ?? []).map((row) => mapBlackoutPeriod(row as Record<string, unknown>)),
       };
 
@@ -1156,6 +1160,8 @@ export async function saveSiteSettings(input: {
   maintenanceAllowedIps: string[];
   enableWhatsappWidget: boolean;
   enableBlackoutMarquee: boolean;
+  bookingBlocked: boolean;
+  bookingBlockedMessage: string | null;
   globalBlackoutPeriods: Array<{
     startDate: string;
     startTime: string;
@@ -1181,6 +1187,8 @@ export async function saveSiteSettings(input: {
         maintenance_allowed_ips: input.maintenanceAllowedIps,
         enable_whatsapp_widget: input.enableWhatsappWidget,
         enable_blackout_marquee: input.enableBlackoutMarquee,
+        booking_blocked: input.bookingBlocked,
+        booking_blocked_message: input.bookingBlockedMessage,
         updated_at: new Date().toISOString(),
       })
       .eq("id", existing.id);
@@ -1195,6 +1203,8 @@ export async function saveSiteSettings(input: {
       maintenance_allowed_ips: input.maintenanceAllowedIps,
       enable_whatsapp_widget: input.enableWhatsappWidget,
       enable_blackout_marquee: input.enableBlackoutMarquee,
+      booking_blocked: input.bookingBlocked,
+      booking_blocked_message: input.bookingBlockedMessage,
     });
 
     if (error) {

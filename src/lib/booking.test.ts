@@ -26,6 +26,8 @@ const testSiteSettings: SiteSettings = {
   maintenanceAllowedIps: [],
   enableWhatsappWidget: false,
   enableBlackoutMarquee: true,
+  bookingBlocked: false,
+  bookingBlockedMessage: null,
   globalBlackoutPeriods: [],
 };
 

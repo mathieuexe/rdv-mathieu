@@ -125,6 +125,8 @@ export const settingsSchema = z
     maintenanceAllowedIps: z.string().trim().max(2000, "La liste des IP autorisées est trop longue."),
     enableWhatsappWidget: z.boolean(),
     enableBlackoutMarquee: z.boolean().default(true),
+    bookingBlocked: z.boolean().default(false),
+    bookingBlockedMessage: z.string().trim().max(300, "Le motif est trop long.").nullable().optional().or(z.literal("")),
     globalBlackoutPeriods: z
       .array(
         z

@@ -33,6 +33,13 @@ export async function POST(request: Request) {
 
     const selectedSlot = categoryPayload.slots.find((slot) => slot.start === parsed.data.startsAt);
 
+    if (categoryPayload.siteSettings.bookingBlocked) {
+      return Response.json(
+        { error: categoryPayload.siteSettings.bookingBlockedMessage || "La prise de rendez-vous est actuellement suspendue." },
+        { status: 403 }
+      );
+    }
+
     if (!selectedSlot || selectedSlot.isBlocked) {
       return Response.json(
         {

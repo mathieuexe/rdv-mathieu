@@ -58,7 +58,7 @@ export function buildBookingSlots({
   appointments: AppointmentRecord[];
   daysToShow?: number;
 }): BookingSlot[] {
-  if (!category.isOnline || siteSettings.maintenanceMode || category.isBookingBlocked) {
+  if (!category.isOnline || siteSettings.maintenanceMode || siteSettings.bookingBlocked || category.isBookingBlocked) {
     return [];
   }
 
@@ -150,6 +150,14 @@ export function getBookingState(category: AppointmentCategory, siteSettings: Sit
       available: false,
       title: "Site en maintenance",
       message: siteSettings.maintenanceMessage,
+    };
+  }
+
+  if (siteSettings.bookingBlocked) {
+    return {
+      available: false,
+      title: "Prise de rendez-vous suspendue",
+      message: siteSettings.bookingBlockedMessage || "La prise de rendez-vous est actuellement suspendue.",
     };
   }
 

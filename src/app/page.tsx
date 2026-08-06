@@ -54,7 +54,15 @@ export default async function Home() {
               </p>
             </section>
 
-            {categories.length === 0 ? (
+            {settings.bookingBlocked ? (
+              <section className="rounded-2xl border border-rose-200 bg-rose-50 px-6 py-16 text-center shadow-sm">
+                <CalendarDays className="mx-auto size-12 text-rose-400 mb-4" />
+                <p className="text-lg font-medium text-rose-900">La prise de rendez-vous est actuellement suspendue.</p>
+                {settings.bookingBlockedMessage && (
+                  <p className="mt-4 mx-auto max-w-2xl text-rose-800">{settings.bookingBlockedMessage}</p>
+                )}
+              </section>
+            ) : categories.length === 0 ? (
             <section className="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-16 text-center shadow-sm">
               <CalendarDays className="mx-auto size-12 text-slate-400 mb-4" />
               <p className="text-lg font-medium text-slate-900">Aucun calendrier n&apos;est disponible pour le moment.</p>

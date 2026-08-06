@@ -153,6 +153,8 @@ export async function saveSettingsAction(formData: FormData) {
     maintenanceAllowedIps: formData.get("maintenanceAllowedIps"),
     enableWhatsappWidget: formData.get("enableWhatsappWidget") === "on",
     enableBlackoutMarquee: formData.get("enableBlackoutMarquee") === "on",
+    bookingBlocked: formData.get("bookingBlocked") === "on",
+    bookingBlockedMessage: formData.get("bookingBlockedMessage"),
     globalBlackoutPeriods: parseGlobalBlackoutPeriods(formData),
   });
 
@@ -168,6 +170,7 @@ export async function saveSettingsAction(formData: FormData) {
 
     await saveSiteSettings({
       ...parsed.data,
+      bookingBlockedMessage: parsed.data.bookingBlockedMessage || null,
       maintenanceAllowedIps: mergeAllowedIps(splitAllowedIpsInput(parsed.data.maintenanceAllowedIps), [currentIp]),
     });
 

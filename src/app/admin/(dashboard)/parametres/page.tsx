@@ -95,6 +95,32 @@ export default async function SettingsPage({
               </div>
             </div>
           </section>
+
+          {/* Booking Blocking Card */}
+          <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
+            <div className="flex items-center gap-2 border-b border-slate-200 bg-rose-50 px-4 py-3">
+              <h2 className="font-semibold text-rose-800">Blocage des rendez-vous</h2>
+            </div>
+            <div className="space-y-6 p-4 md:p-6">
+              <div className="flex flex-col gap-4 rounded-md border border-slate-200 bg-slate-50 p-4">
+                <label className="flex items-center gap-3 text-sm font-medium text-slate-900">
+                  <input type="checkbox" name="bookingBlocked" defaultChecked={settings.bookingBlocked} className="size-4 rounded border-slate-300" />
+                  <span>Bloquer totalement la prise de rendez-vous</span>
+                </label>
+              </div>
+
+              <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+                <span>Motif du blocage (affiché publiquement)</span>
+                <textarea
+                  name="bookingBlockedMessage"
+                  rows={3}
+                  defaultValue={settings.bookingBlockedMessage || ""}
+                  placeholder="Ex: Les prises de rendez-vous sont actuellement suspendues pour l'été."
+                  className="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500"
+                />
+              </label>
+            </div>
+          </section>
         </div>
 
         <div className="space-y-6">
