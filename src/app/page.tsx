@@ -6,6 +6,7 @@ import { DiscordIcon } from "@/components/shared/discord-icon";
 import { PublicFooter } from "@/components/public/public-footer";
 import { PublicHeader } from "@/components/public/public-header";
 import { PublicBlackoutMarquee } from "@/components/public/public-blackout-marquee";
+import { ContactButton } from "@/components/public/contact-button";
 import { getPublicCategories, getSiteSettings } from "@/lib/data-access";
 import { getPublicUserSession } from "@/lib/auth";
 import { formatAppointmentMode } from "@/lib/utils";
@@ -61,6 +62,9 @@ export default async function Home() {
                 {settings.bookingBlockedMessage && (
                   <p className="mt-4 mx-auto max-w-2xl text-rose-800">{settings.bookingBlockedMessage}</p>
                 )}
+                <div className="mt-8 flex justify-center">
+                  <ContactButton />
+                </div>
               </section>
             ) : categories.length === 0 ? (
             <section className="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-16 text-center shadow-sm">

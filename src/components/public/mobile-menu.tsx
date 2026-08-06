@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Menu, X, AlertCircle } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { logoutAccountAction } from "@/app/compte/actions";
-import { ContactModal } from "./contact-modal";
 
 interface MobileMenuProps {
   isAuthenticated: boolean;
@@ -13,7 +12,6 @@ interface MobileMenuProps {
 
 export function MobileMenu({ isAuthenticated, isAdmin }: MobileMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
   return (
     <div className="md:hidden flex items-center">
@@ -23,8 +21,6 @@ export function MobileMenu({ isAuthenticated, isAdmin }: MobileMenuProps) {
       >
         {isOpen ? <X className="size-6" /> : <Menu className="size-6" />}
       </button>
-
-      <ContactModal isOpen={isContactModalOpen} onClose={() => setIsContactModalOpen(false)} />
 
       {isOpen && (
         <div className="absolute top-full left-0 right-0 border-b border-slate-200 bg-white p-4 shadow-lg flex flex-col gap-4">
@@ -42,19 +38,6 @@ export function MobileMenu({ isAuthenticated, isAdmin }: MobileMenuProps) {
           >
             Qui suis-je ?
           </Link>
-
-          <div className="py-2">
-            <button
-              onClick={() => {
-                setIsOpen(false);
-                setIsContactModalOpen(true);
-              }}
-              className="flex w-full items-center gap-2 rounded-md bg-amber-100 px-3 py-2 text-sm font-semibold text-amber-800 transition-colors hover:bg-amber-200"
-            >
-              <AlertCircle className="size-4" />
-              Urgence / Contact
-            </button>
-          </div>
           
           {isAuthenticated ? (
             <>

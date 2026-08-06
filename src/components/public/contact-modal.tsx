@@ -68,15 +68,15 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 md:p-6">
       <div 
         className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
       
-      <div className="relative w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl transition-all flex flex-col max-h-[90vh]">
-        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-          <h2 className="text-xl font-bold text-slate-900">Urgence / Contactez-moi</h2>
+      <div className="relative w-full max-w-lg flex flex-col overflow-hidden bg-white shadow-2xl transition-all h-[95dvh] rounded-t-2xl sm:h-auto sm:max-h-[90vh] sm:rounded-2xl">
+        <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-4 sm:px-6 py-4">
+          <h2 className="text-lg sm:text-xl font-bold text-slate-900">Urgence / Contactez-moi</h2>
           <button
             onClick={onClose}
             className="rounded-full p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
@@ -85,7 +85,7 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
           </button>
         </div>
 
-        <div className="overflow-y-auto p-6">
+        <div className="overflow-y-auto p-4 sm:p-6 flex-1">
           {success ? (
             <div className="flex flex-col items-center justify-center py-8 text-center">
               <div className="mb-4 flex size-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
@@ -112,9 +112,9 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
 
               <div className="space-y-2">
                 <label className="text-sm font-medium text-slate-700">Civilité <span className="text-rose-500">*</span></label>
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <div className="grid grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-4">
                   {["Monsieur", "Madame", "Maître", "Professeur"].map((c) => (
-                    <label key={c} className="flex cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50 has-[:checked]:text-blue-700">
+                    <label key={c} className="flex cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-white px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50 has-[:checked]:text-blue-700">
                       <input type="radio" name="civility" value={c} required className="sr-only" />
                       {c}
                     </label>
@@ -122,7 +122,7 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
                 </div>
               </div>
 
-              <div className="grid gap-5 sm:grid-cols-2">
+              <div className="grid gap-4 sm:gap-5 sm:grid-cols-2">
                 <div className="space-y-2">
                   <label htmlFor="email" className="text-sm font-medium text-slate-700">
                     Adresse e-mail <span className="text-rose-500">*</span>
@@ -180,13 +180,13 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
                 />
               </div>
 
-              <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+              <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 sm:p-4">
                 <div className="space-y-2">
                   <label htmlFor="captcha" className="text-sm font-medium text-slate-700">
                     Vérification anti-spam <span className="text-rose-500">*</span>
                   </label>
                   <div className="flex items-center gap-3">
-                    <span className="font-medium text-slate-900">
+                    <span className="text-sm sm:text-base font-medium text-slate-900">
                       Combien font {captchaParams.num1} + {captchaParams.num2} ?
                     </span>
                     <input
@@ -194,7 +194,7 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
                       id="captcha"
                       name="captcha"
                       required
-                      className="w-24 rounded-lg border border-slate-300 px-3 py-2 outline-none transition-all focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+                      className="w-20 sm:w-24 rounded-lg border border-slate-300 px-3 py-2 outline-none transition-all focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
                     />
                   </div>
                 </div>
