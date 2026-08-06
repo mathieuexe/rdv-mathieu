@@ -321,6 +321,8 @@ export async function sendContactAcknowledgementEmail(input: {
   subject: string;
   message: string;
   pdfAttachmentBase64: string;
+  isBookingBlocked?: boolean;
+  bookingBlockedMessage?: string | null;
 }) {
   return sendTransactionalEmail({
     to: input.email,
@@ -344,6 +346,8 @@ export async function sendContactAcknowledgementEmail(input: {
         email: input.email,
         subject: input.subject,
         message: input.message,
+        isBookingBlocked: input.isBookingBlocked,
+        bookingBlockedMessage: input.bookingBlockedMessage,
         reference,
       }),
   });

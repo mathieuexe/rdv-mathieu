@@ -505,6 +505,8 @@ export interface ContactAcknowledgementEmailProps {
   phone?: string;
   subject: string;
   message: string;
+  isBookingBlocked?: boolean;
+  bookingBlockedMessage?: string | null;
   reference: string;
 }
 
@@ -512,8 +514,25 @@ export function ContactAcknowledgementEmail({
   civility,
   email,
   subject,
+  isBookingBlocked,
+  bookingBlockedMessage,
   reference,
 }: ContactAcknowledgementEmailProps) {
+  const paragraphs = [
+    "Nous traiterons votre demande dans les plus brefs délais.",
+    "Vous trouverez en pièce jointe de cet e-mail un récapitulatif de votre demande au format PDF.",
+  ];
+
+  const highlightedParagraphs = [];
+  
+  if (isBookingBlocked) {
+    highlightedParagraphs.push(
+      bookingBlockedMessage 
+        ? `Information importante : ${bookingBlockedMessage}`
+        : "Information importante : La prise de rendez-vous est actuellement suspendue."
+    );
+  }
+
   return (
     <MailLayout
       title="Accusé de réception de votre message"
@@ -523,10 +542,8 @@ export function ContactAcknowledgementEmail({
       details={[
         { label: "Objet", value: subject, underline: true },
       ]}
-      paragraphs={[
-        "Nous traiterons votre demande dans les plus brefs délais.",
-        "Vous trouverez en pièce jointe de cet e-mail un récapitulatif de votre demande au format PDF.",
-      ]}
+      paragraphs={paragraphs}
+      highlightedParagraphs={highlightedParagraphs}
       reference={reference}
     />
   );

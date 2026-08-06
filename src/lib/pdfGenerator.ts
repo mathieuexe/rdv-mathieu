@@ -69,8 +69,7 @@ export async function generateContactPdf(data: {
   };
 
   // Header
-  drawText("Maître Mathieu Cerenzia", { font: boldFont, size: 14 });
-  drawText("Cabinet d'Avocats", { size: 11 });
+  drawText("GenDoc", { font: boldFont, size: 14 });
   cursorY -= 20;
 
   // Date (right aligned)
@@ -113,9 +112,6 @@ export async function generateContactPdf(data: {
   // Footer
   drawText("Nous traiterons votre demande dans les plus brefs délais et reviendrons vers vous rapidement.");
   cursorY -= 20;
-  drawText("Veuillez agréer, l'expression de nos salutations distinguées.");
-  cursorY -= 30;
-  drawText("Le Cabinet", { font: boldFont });
 
   const pdfBytes = await pdfDoc.save();
   return Buffer.from(pdfBytes).toString("base64");

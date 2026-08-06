@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { generateContactPdf } from "@/lib/pdfGenerator";
 import { sendContactAcknowledgementEmail, sendAdminContactNotificationEmail } from "@/lib/email";
+import { getSiteSettings } from "@/lib/data-access";
 
 const contactSchema = z.object({
   civility: z.enum(["Monsieur", "Madame", "Maître", "Professeur"], {
@@ -28,6 +29,11 @@ export async function POST(request: Request) {
     }
 
     const { civility, email, phone, subject, message } = parsed.data;
+    
+    // Fetch site settings to check for booking blocked status
+    const siteSettings = await getSiteSettings();
+    const isBookingBlocked = siteSettings.bookingBlocked;
+    const bookingBlockedMessage = siteSettings.bookingBlockedMessage;
 
     // Generate PDF base64
     const pdfAttachmentBase64 = await generateContactPdf({
@@ -47,6 +53,8 @@ export async function POST(request: Request) {
         subject,
         message,
         pdfAttachmentBase64,
+        isBookingBlocked,
+        bookingBlockedMessage,
       }),
       sendAdminContactNotificationEmail({
         civility,
