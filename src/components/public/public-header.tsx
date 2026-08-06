@@ -5,6 +5,7 @@ import { logoutAccountAction } from "@/app/compte/actions";
 import { getPublicUserSession } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import { MobileMenu } from "./mobile-menu";
+import { ContactButton } from "./contact-button";
 
 interface PublicHeaderProps {
   currentPath?: string;
@@ -48,6 +49,7 @@ export async function PublicHeader({ currentPath }: PublicHeaderProps) {
           <Link href="/qui-suis-je" className={getLinkClass("/qui-suis-je", currentPath)}>
             Qui suis-je ?
           </Link>
+          <ContactButton />
           {session.isAuthenticated ? (
             <>
               <div className="group relative">

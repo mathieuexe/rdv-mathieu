@@ -154,11 +154,11 @@ function MailLayout({
           </a>
         </div>
 
-        <div style={{ marginTop: "40px", paddingTop: "24px", borderTop: "1px solid #e2e8f0" }}>
-          <p style={{ margin: "0 0 8px", fontSize: "12px", color: "#94a3b8" }}>
-            Cet email a été envoyé automatiquement, merci de ne pas y répondre.
+        <div style={{ marginTop: "24px", paddingTop: "24px", borderTop: "1px solid #e2e8f0" }}>
+          <p style={{ margin: "0", color: "#64748b", fontSize: "13px" }}>
+            Cet e-mail a été envoyé automatiquement. Merci de ne pas y répondre.
           </p>
-          <p style={{ margin: 0, fontSize: "12px", color: "#cbd5e1" }}>Réf : {reference}</p>
+          <p style={{ margin: "4px 0 0", color: "#94a3b8", fontSize: "12px" }}>Réf : {reference}</p>
         </div>
       </div>
     </div>
@@ -495,6 +495,75 @@ export function RefusedAppointmentEmail({
       paragraphs={["Vous pouvez choisir un autre créneau si vous souhaitez effectuer une nouvelle demande."]}
       linkLabel="Choisir un autre créneau"
       linkHref={getAppUrl()}
+      reference={reference}
+    />
+  );
+}
+export interface ContactAcknowledgementEmailProps {
+  civility: string;
+  email: string;
+  phone?: string;
+  subject: string;
+  message: string;
+  reference: string;
+}
+
+export function ContactAcknowledgementEmail({
+  civility,
+  email,
+  subject,
+  reference,
+}: ContactAcknowledgementEmailProps) {
+  return (
+    <MailLayout
+      title="Accusé de réception de votre message"
+      greeting={`Bonjour ${civility},`}
+      lead="Nous avons bien reçu votre message."
+      userEmail={email}
+      details={[
+        { label: "Objet", value: subject, underline: true },
+      ]}
+      paragraphs={[
+        "Nous traiterons votre demande dans les plus brefs délais.",
+        "Vous trouverez en pièce jointe de cet e-mail un récapitulatif de votre demande au format PDF.",
+      ]}
+      reference={reference}
+    />
+  );
+}
+
+export interface AdminContactNotificationEmailProps {
+  civility: string;
+  email: string;
+  phone?: string;
+  subject: string;
+  message: string;
+  reference: string;
+}
+
+export function AdminContactNotificationEmail({
+  civility,
+  email,
+  phone,
+  subject,
+  message,
+  reference,
+}: AdminContactNotificationEmailProps) {
+  return (
+    <MailLayout
+      title="Nouveau message de contact"
+      greeting="Bonjour,"
+      lead="Vous avez reçu un nouveau message via le formulaire de contact urgence."
+      details={[
+        { label: "Civilité", value: civility },
+        { label: "Email", value: email, underline: true },
+        { label: "Téléphone", value: phone || "Non renseigné" },
+        { label: "Objet", value: subject, underline: true },
+      ]}
+      paragraphs={[
+        "Message :",
+        message,
+      ]}
       reference={reference}
     />
   );

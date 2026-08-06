@@ -13,6 +13,8 @@ import {
   SignupConfirmationEmail,
   ValidatedAppointmentEmail,
   CustomAdminEmail,
+  ContactAcknowledgementEmail,
+  AdminContactNotificationEmail,
 } from "@/lib/email-templates";
 import { getAppUrl } from "@/lib/env";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
@@ -28,7 +30,9 @@ type AppMailTemplateKey =
   | "rendez_vous_annule_indisponibilite"
   | "rendez_vous_refuse"
   | "alerte_admin_nouvelle_demande"
-  | "admin_message_personnalise";
+  | "admin_message_personnalise"
+  | "contact_accuse_reception"
+  | "alerte_admin_nouveau_contact";
 
 interface TransactionalEmailPayload {
   to: string;
@@ -38,6 +42,7 @@ interface TransactionalEmailPayload {
   sourceLabel: string;
   appointmentId?: string;
   metadata?: Record<string, unknown>;
+  attachments?: { filename: string; content: string | Buffer }[];
   buildTemplate: (reference: string) => ReactElement;
 }
 
@@ -163,6 +168,7 @@ export async function sendTransactionalEmail({
   sourceLabel,
   appointmentId,
   metadata,
+  attachments,
   buildTemplate,
 }: TransactionalEmailPayload): Promise<TransactionalEmailResult> {
   const reference = createMailReference();
@@ -204,6 +210,7 @@ export async function sendTransactionalEmail({
       to,
       subject,
       html,
+      attachments,
     });
 
     if (error) {
@@ -302,6 +309,72 @@ export async function sendSignupConfirmationEmail(input: {
       SignupConfirmationEmail({
         firstName: input.firstName,
         email: input.to,
+        reference,
+      }),
+  });
+}
+
+export async function sendContactAcknowledgementEmail(input: {
+  civility: string;
+  email: string;
+  phone?: string;
+  subject: string;
+  message: string;
+  pdfAttachmentBase64: string;
+}) {
+  return sendTransactionalEmail({
+    to: input.email,
+    subject: "Accusé de réception de votre demande",
+    templateKey: "contact_accuse_reception",
+    sourceType: "formulaire_contact",
+    sourceLabel: "Accusé de réception formulaire de contact",
+    metadata: {
+      civility: input.civility,
+      subject: input.subject,
+    },
+    attachments: [
+      {
+        filename: "recapitulatif_demande.pdf",
+        content: input.pdfAttachmentBase64,
+      },
+    ],
+    buildTemplate: (reference) =>
+      ContactAcknowledgementEmail({
+        civility: input.civility,
+        email: input.email,
+        subject: input.subject,
+        message: input.message,
+        reference,
+      }),
+  });
+}
+
+export async function sendAdminContactNotificationEmail(input: {
+  civility: string;
+  email: string;
+  phone?: string;
+  subject: string;
+  message: string;
+}) {
+  return sendTransactionalEmail({
+    to: ADMIN_APPOINTMENT_REQUEST_NOTIFICATION_EMAIL,
+    subject: `Nouveau message de contact : ${input.subject}`,
+    templateKey: "alerte_admin_nouveau_contact",
+    sourceType: "alerte_admin_nouveau_contact",
+    sourceLabel: "Alerte administrateur nouveau message de contact",
+    metadata: {
+      civility: input.civility,
+      clientEmail: input.email,
+      clientPhone: input.phone,
+      subject: input.subject,
+    },
+    buildTemplate: (reference) =>
+      AdminContactNotificationEmail({
+        civility: input.civility,
+        email: input.email,
+        phone: input.phone,
+        subject: input.subject,
+        message: input.message,
         reference,
       }),
   });
