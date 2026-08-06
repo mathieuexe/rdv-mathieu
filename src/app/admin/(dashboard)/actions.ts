@@ -109,6 +109,7 @@ export async function saveCategoryAction(formData: FormData) {
   }
 
   let successPath = returnPath;
+  const isNewCategory = !parsed.data.categoryId;
 
   try {
     const category = await saveCategory({
@@ -128,6 +129,10 @@ export async function saveCategoryAction(formData: FormData) {
       customFields: parsed.data.customFieldsJson ? JSON.parse(String(parsed.data.customFieldsJson)) : undefined,
       availabilityRules: parsed.data.availabilityRules,
     });
+
+    if (isNewCategory && parsed.data.isOnline && !parsed.data.isHidden && !parsed.data.isBookingBlocked) {
+      await sendDiscordNotification(`✨ **Nouvelle catégorie disponible** : ${parsed.data.title}\nN'hésitez pas à prendre rendez-vous !`);
+    }
 
     revalidatePath("/admin");
     revalidatePath("/admin/categories");
@@ -181,10 +186,14 @@ export async function saveSettingsAction(formData: FormData) {
     // Discord Notifications
     if (parsed.data.maintenanceMode && !oldSettings.maintenanceMode) {
       await sendDiscordNotification(`⚠️ **Site en maintenance** : Le mode maintenance vient d'être activé.`);
+    } else if (!parsed.data.maintenanceMode && oldSettings.maintenanceMode) {
+      await sendDiscordNotification(`✅ **Maintenance terminée** : Le site est de nouveau accessible.`);
     }
 
     if (parsed.data.bookingBlocked && !oldSettings.bookingBlocked) {
       await sendDiscordNotification(`🚫 **Réservations suspendues** : ${parsed.data.bookingBlockedMessage || 'La prise de rendez-vous a été bloquée.'}`);
+    } else if (!parsed.data.bookingBlocked && oldSettings.bookingBlocked) {
+      await sendDiscordNotification(`✅ **Réservations activées** : Les prises de rendez-vous sont de nouveau possibles.`);
     }
 
     // Check for newly added blackout periods
