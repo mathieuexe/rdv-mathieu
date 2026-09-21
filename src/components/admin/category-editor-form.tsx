@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { Info, Calendar, Image as ImageIcon, Globe, MessageSquare, Save, Lock, Plus, Trash2, GripVertical, Settings } from "lucide-react";
 
+import { ImagePicker } from "@/components/admin/image-picker";
 import type { AppointmentCategory, CustomField } from "@/types/domain";
 
 const weekdayOptions = [
@@ -26,50 +27,6 @@ const bannerConfig = {
   height: 600,
   label: "Bannière",
 };
-
-function readFileAsDataUrl(file: File) {
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : "");
-    reader.onerror = () => reject(new Error("Impossible de lire le fichier."));
-    reader.readAsDataURL(file);
-  });
-}
-
-function loadImage(src: string) {
-  return new Promise<HTMLImageElement>((resolve, reject) => {
-    const image = new Image();
-    image.onload = () => resolve(image);
-    image.onerror = () => reject(new Error("Impossible de charger l'image."));
-    image.src = src;
-  });
-}
-
-async function resizeImageToJpeg(file: File, width: number, height: number) {
-  const src = await readFileAsDataUrl(file);
-  const image = await loadImage(src);
-  const canvas = document.createElement("canvas");
-  const context = canvas.getContext("2d");
-
-  if (!context) {
-    throw new Error("Le navigateur ne permet pas de traiter cette image.");
-  }
-
-  canvas.width = width;
-  canvas.height = height;
-
-  const scale = Math.max(width / image.width, height / image.height);
-  const drawWidth = image.width * scale;
-  const drawHeight = image.height * scale;
-  const offsetX = (width - drawWidth) / 2;
-  const offsetY = (height - drawHeight) / 2;
-
-  context.fillStyle = "#ffffff";
-  context.fillRect(0, 0, width, height);
-  context.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
-
-  return canvas.toDataURL("image/jpeg", 0.86);
-}
 
 interface CategoryEditorFormProps {
   action: (formData: FormData) => Promise<void>;
@@ -104,8 +61,6 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
   const [appointmentMode, setAppointmentMode] = useState<AppointmentCategory["appointmentMode"]>(category?.appointmentMode ?? "visioconference");
   const [isOnline, setIsOnline] = useState(category?.isOnline ?? true);
   const [isHidden, setIsHidden] = useState(category?.isHidden ?? false);
-  const [thumbnailImageUrl, setThumbnailImageUrl] = useState(category?.thumbnailImageUrl ?? "");
-  const [bannerImageUrl, setBannerImageUrl] = useState(category?.bannerImageUrl ?? "");
   const [customMessage, setCustomMessage] = useState(category?.customMessage ?? "");
   const [isBookingBlocked, setIsBookingBlocked] = useState(category?.isBookingBlocked ?? false);
   const [bookingBlockMessage, setBookingBlockMessage] = useState(category?.bookingBlockMessage ?? "");
@@ -113,53 +68,6 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
   const [bannerPreview, setBannerPreview] = useState(category?.bannerImageUrl ?? "");
   const [imageError, setImageError] = useState("");
   const [customFields, setCustomFields] = useState<CustomField[]>(category?.customFields ?? []);
-  const thumbnailInputRef = useRef<HTMLInputElement | null>(null);
-  const bannerInputRef = useRef<HTMLInputElement | null>(null);
-
-  async function handleImageChange(
-    event: React.ChangeEvent<HTMLInputElement>,
-    kind: "thumbnail" | "banner",
-  ) {
-    const file = event.target.files?.[0];
-
-    if (!file) {
-      return;
-    }
-
-    try {
-      setImageError("");
-      const config = kind === "thumbnail" ? thumbnailConfig : bannerConfig;
-      const jpegDataUrl = await resizeImageToJpeg(file, config.width, config.height);
-
-      if (kind === "thumbnail") {
-        setThumbnailPreview(jpegDataUrl);
-      } else {
-        setBannerPreview(jpegDataUrl);
-      }
-    } catch (processingError) {
-      setImageError(
-        processingError instanceof Error ? processingError.message : "Impossible de traiter cette image.",
-      );
-    }
-  }
-
-  function clearImage(kind: "thumbnail" | "banner") {
-    setImageError("");
-
-    if (kind === "thumbnail") {
-      setThumbnailPreview("");
-
-      if (thumbnailInputRef.current) {
-        thumbnailInputRef.current.value = "";
-      }
-    } else {
-      setBannerPreview("");
-
-      if (bannerInputRef.current) {
-        bannerInputRef.current.value = "";
-      }
-    }
-  }
 
   async function handleFormAction(formData: FormData) {
     await action(formData);
@@ -540,82 +448,33 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
               <h2 className="font-semibold text-slate-800">Visuels</h2>
             </div>
             <div className="p-4 md:p-6">
-              <p className="text-sm text-slate-600 mb-6">
-                Chaque image est automatiquement recadrée, redimensionnée puis enregistrée au format JPEG.
+              <p className="mb-6 text-sm text-slate-600">
+                Importez votre propre photo, collez un lien, ou piochez dans une banque d&apos;images libres de droits.
+                Chaque visuel est recadré, redimensionné puis enregistré au format JPEG.
               </p>
 
               <div className="grid gap-8 sm:grid-cols-2">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between gap-4">
-                    <div>
-                      <p className="text-sm font-medium text-slate-900">{thumbnailConfig.label}</p>
-                      <p className="text-xs text-slate-500">
-                        {thumbnailConfig.width} x {thumbnailConfig.height} px
-                      </p>
-                    </div>
-                    {thumbnailPreview && (
-                      <button
-                        type="button"
-                        onClick={() => clearImage("thumbnail")}
-                        className="text-xs font-medium text-rose-600 hover:text-rose-700"
-                      >
-                        Supprimer
-                      </button>
-                    )}
-                  </div>
+                <ImagePicker
+                  label={thumbnailConfig.label}
+                  width={thumbnailConfig.width}
+                  height={thumbnailConfig.height}
+                  value={thumbnailPreview}
+                  onChange={setThumbnailPreview}
+                  onError={setImageError}
+                  previewClassName="size-32"
+                  emptyLabel="Aucun visuel"
+                />
 
-                  <input
-                    ref={thumbnailInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={(event) => void handleImageChange(event, "thumbnail")}
-                    className="block w-full text-xs text-slate-600 file:mr-4 file:rounded-md file:border file:border-slate-200 file:bg-slate-50 file:px-3 file:py-1.5 file:font-medium file:text-slate-700 hover:file:bg-slate-100 cursor-pointer"
-                  />
-
-                  <div className="flex h-32 w-32 items-center justify-center overflow-hidden rounded-md border border-slate-200 bg-slate-50">
-                    {thumbnailPreview ? (
-                      <img src={thumbnailPreview} alt="Aperçu image catégorie" className="h-full w-full object-cover" />
-                    ) : (
-                      <span className="px-4 text-center text-xs text-slate-400">Aucun visuel</span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between gap-4">
-                    <div>
-                      <p className="text-sm font-medium text-slate-900">{bannerConfig.label}</p>
-                      <p className="text-xs text-slate-500">
-                        {bannerConfig.width} x {bannerConfig.height} px
-                      </p>
-                    </div>
-                    {bannerPreview && (
-                      <button
-                        type="button"
-                        onClick={() => clearImage("banner")}
-                        className="text-xs font-medium text-rose-600 hover:text-rose-700"
-                      >
-                        Supprimer
-                      </button>
-                    )}
-                  </div>
-
-                  <input
-                    ref={bannerInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={(event) => void handleImageChange(event, "banner")}
-                    className="block w-full text-xs text-slate-600 file:mr-4 file:rounded-md file:border file:border-slate-200 file:bg-slate-50 file:px-3 file:py-1.5 file:font-medium file:text-slate-700 hover:file:bg-slate-100 cursor-pointer"
-                  />
-
-                  <div className="flex aspect-[8/3] w-full items-center justify-center overflow-hidden rounded-md border border-slate-200 bg-slate-50">
-                    {bannerPreview ? (
-                      <img src={bannerPreview} alt="Aperçu bannière catégorie" className="h-full w-full object-cover" />
-                    ) : (
-                      <span className="px-4 text-center text-xs text-slate-400">Aucune bannière</span>
-                    )}
-                  </div>
-                </div>
+                <ImagePicker
+                  label={bannerConfig.label}
+                  width={bannerConfig.width}
+                  height={bannerConfig.height}
+                  value={bannerPreview}
+                  onChange={setBannerPreview}
+                  onError={setImageError}
+                  previewClassName="aspect-[8/3] w-full"
+                  emptyLabel="Aucune bannière"
+                />
               </div>
             </div>
           </section>

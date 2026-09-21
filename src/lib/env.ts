@@ -107,3 +107,13 @@ export function getGoogleCalendarSyncSecret() {
 export function getAdminEmail() {
   return process.env.ADMIN_EMAIL?.toLowerCase() ?? "mathieucerenzia@gmail.com";
 }
+
+const unsplashAccessKey = process.env.UNSPLASH_ACCESS_KEY?.trim();
+const pexelsApiKey = process.env.PEXELS_API_KEY?.trim();
+
+export function getStockPhotoEnv() {
+  return {
+    unsplashAccessKey: unsplashAccessKey ?? "",
+    pexelsApiKey: pexelsApiKey ?? "",
+  };
+}

@@ -71,7 +71,26 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 RESEND_API_KEY=
 RESEND_FROM_NAME=NOREPLY
 RESEND_FROM_EMAIL=info@mathieucerenzia.fr
+
+# Synchronisation Google Agenda (rendez-vous personnels -> indisponibilités)
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_CALENDAR_SYNC_SECRET=
+
+# Banques d'images pour les visuels de catégories (optionnel)
+UNSPLASH_ACCESS_KEY=
+PEXELS_API_KEY=
 ```
+
+`GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` proviennent d'un identifiant OAuth
+« Application Web » dans Google Cloud, avec l'URI de redirection
+`<NEXT_PUBLIC_APP_URL>/api/admin/google-calendar/callback` et l'API Google
+Calendar activée. `GOOGLE_CALENDAR_SYNC_SECRET` protège la route de
+synchronisation planifiée `/api/cron/google-calendar-sync`.
+
+Les clés Unsplash et Pexels sont facultatives : sans elles, l'administration
+permet toujours l'upload d'un fichier ou l'import par URL ; avec elles, la
+recherche dans les banques d'images est activée.
 
 ### 3. Lancer le projet
 
@@ -140,6 +159,8 @@ Ajoutez dans Vercel :
 - `RESEND_API_KEY`
 - `RESEND_FROM_NAME`
 - `RESEND_FROM_EMAIL`
+- `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_CALENDAR_SYNC_SECRET`
+- `UNSPLASH_ACCESS_KEY`, `PEXELS_API_KEY` (facultatif)
 
 ### 3. Déployer
 

@@ -39,11 +39,14 @@ export async function PublicFooter() {
 
       {settings.bookingBlocked ? null : (
         <BookingWidget
+          avatarUrl="/images/mathieu-upscale.png"
           categories={categories.map((category) => ({
             slug: category.slug,
             title: category.title,
             durationMinutes: category.durationMinutes,
             modeLabel: formatAppointmentMode(category.appointmentMode),
+            thumbnailUrl: category.thumbnailImageUrl,
+            bannerUrl: category.bannerImageUrl,
           }))}
         />
       )}
