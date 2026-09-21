@@ -85,6 +85,25 @@ export function getAppUrl() {
   return process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 }
 
+const googleClientId = process.env.GOOGLE_CLIENT_ID?.trim();
+const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET?.trim();
+
+export function isGoogleCalendarConfigured() {
+  return Boolean(googleClientId && googleClientSecret);
+}
+
+export function getGoogleOAuthEnv() {
+  return {
+    clientId: googleClientId ?? "",
+    clientSecret: googleClientSecret ?? "",
+    redirectUri: `${getAppUrl().replace(/\/+$/, "")}/api/admin/google-calendar/callback`,
+  };
+}
+
+export function getGoogleCalendarSyncSecret() {
+  return process.env.GOOGLE_CALENDAR_SYNC_SECRET?.trim() ?? "";
+}
+
 export function getAdminEmail() {
   return process.env.ADMIN_EMAIL?.toLowerCase() ?? "mathieucerenzia@gmail.com";
 }

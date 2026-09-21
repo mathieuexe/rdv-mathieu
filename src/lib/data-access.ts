@@ -14,8 +14,11 @@ import type {
   AppointmentRecord,
   AppointmentRequestPayload,
   BlackoutPeriod,
+  BusyPeriod,
   DashboardMetrics,
   EmailLogRecord,
+  GoogleCalendarAccount,
+  GoogleCalendarEventRecord,
   SiteSettings,
   UserProfileRecord,
 } from "@/types/domain";
@@ -430,7 +433,11 @@ export async function getCategorySlots(slug: string, options?: { bypassMaintenan
     return null;
   }
 
-  const [siteSettings, appointments] = await Promise.all([getSiteSettings(), getAppointments()]);
+  const [siteSettings, appointments, busyPeriods] = await Promise.all([
+    getSiteSettings(),
+    getAppointments(),
+    getPersonalBusyPeriods(),
+  ]);
   const effectiveSiteSettings = getEffectiveSiteSettings(siteSettings, Boolean(options?.bypassMaintenance));
 
   return {
@@ -440,6 +447,7 @@ export async function getCategorySlots(slug: string, options?: { bypassMaintenan
       category,
       siteSettings: effectiveSiteSettings,
       appointments,
+      busyPeriods,
     }),
   };
 }
@@ -1389,4 +1397,372 @@ export async function getRecentEmailLogs(limit = 20) {
     .limit(limit);
 
   return (data ?? []).map((row) => mapEmailLogRow(row as Record<string, unknown>));
+}
+
+/* ------------------------------------------------------------------ */
+/* Synchronisation Google Calendar (agenda personnel de l'administrateur) */
+/* ------------------------------------------------------------------ */
+
+function mapGoogleCalendarAccountRow(row: Record<string, unknown>): GoogleCalendarAccount {
+  return {
+    id: String(row.id),
+    googleEmail: String(row.google_email ?? ""),
+    calendarIds: Array.isArray(row.calendar_ids) ? (row.calendar_ids as string[]) : ["primary"],
+    syncEnabled: row.sync_enabled !== false,
+    tokenExpiresAt: String(row.token_expires_at ?? new Date().toISOString()),
+    hasRefreshToken: typeof row.refresh_token === "string" && row.refresh_token.length > 0,
+    lastSyncedAt: typeof row.last_synced_at === "string" ? row.last_synced_at : undefined,
+    lastSyncError: typeof row.last_sync_error === "string" ? row.last_sync_error : undefined,
+    lastSyncedEventCount: Number(row.last_synced_event_count ?? 0),
+    createdAt: String(row.created_at ?? new Date().toISOString()),
+  };
+}
+
+function mapGoogleCalendarEventRow(row: Record<string, unknown>): GoogleCalendarEventRecord {
+  return {
+    id: String(row.id),
+    googleEventId: String(row.google_event_id),
+    calendarId: String(row.calendar_id),
+    calendarSummary: typeof row.calendar_summary === "string" ? row.calendar_summary : undefined,
+    summary: typeof row.summary === "string" && row.summary.trim() ? row.summary : "Occupé",
+    startsAt: String(row.starts_at),
+    endsAt: String(row.ends_at),
+    isAllDay: Boolean(row.is_all_day),
+    htmlLink: typeof row.html_link === "string" ? row.html_link : undefined,
+    syncedAt: String(row.synced_at ?? new Date().toISOString()),
+  };
+}
+
+/** Compte Google connecté, jetons exclus (utilisable côté UI). */
+export async function getGoogleCalendarAccount(): Promise<GoogleCalendarAccount | null> {
+  const supabase = getSupabaseAdminClient();
+
+  if (!supabase) {
+    return null;
+  }
+
+  const { data } = await supabase
+    .from("google_calendar_accounts")
+    .select("*")
+    .order("created_at")
+    .limit(1)
+    .maybeSingle();
+
+  return data ? mapGoogleCalendarAccountRow(data as Record<string, unknown>) : null;
+}
+
+/** Variante interne : inclut les jetons OAuth. Ne jamais exposer au client. */
+export async function getGoogleCalendarAccountWithTokens() {
+  const supabase = getSupabaseAdminClient();
+
+  if (!supabase) {
+    return null;
+  }
+
+  const { data } = await supabase
+    .from("google_calendar_accounts")
+    .select("*")
+    .order("created_at")
+    .limit(1)
+    .maybeSingle();
+
+  if (!data) {
+    return null;
+  }
+
+  const row = data as Record<string, unknown>;
+
+  return {
+    ...mapGoogleCalendarAccountRow(row),
+    accessToken: String(row.access_token ?? ""),
+    refreshToken: typeof row.refresh_token === "string" ? row.refresh_token : undefined,
+    scope: typeof row.scope === "string" ? row.scope : undefined,
+  };
+}
+
+export async function upsertGoogleCalendarAccount(input: {
+  googleEmail: string;
+  accessToken: string;
+  refreshToken?: string;
+  tokenExpiresAt: string;
+  scope?: string;
+  calendarIds?: string[];
+}) {
+  const supabase = getSupabaseAdminClient();
+
+  if (!supabase) {
+    throw new Error("La synchronisation Google est indisponible tant que Supabase n'est pas configuré.");
+  }
+
+  const existing = await getGoogleCalendarAccountWithTokens();
+
+  if (existing) {
+    const { data, error } = await supabase
+      .from("google_calendar_accounts")
+      .update({
+        google_email: input.googleEmail,
+        access_token: input.accessToken,
+        // Google ne renvoie un refresh_token que lors du premier consentement.
+        refresh_token: input.refreshToken ?? existing.refreshToken ?? null,
+        token_expires_at: input.tokenExpiresAt,
+        scope: input.scope ?? null,
+        calendar_ids: input.calendarIds ?? existing.calendarIds,
+        last_sync_error: null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", existing.id)
+      .select("*")
+      .single();
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return mapGoogleCalendarAccountRow(data as Record<string, unknown>);
+  }
+
+  const { data, error } = await supabase
+    .from("google_calendar_accounts")
+    .insert({
+      google_email: input.googleEmail,
+      access_token: input.accessToken,
+      refresh_token: input.refreshToken ?? null,
+      token_expires_at: input.tokenExpiresAt,
+      scope: input.scope ?? null,
+      calendar_ids: input.calendarIds ?? ["primary"],
+    })
+    .select("*")
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return mapGoogleCalendarAccountRow(data as Record<string, unknown>);
+}
+
+export async function updateGoogleCalendarAccessToken(accountId: string, accessToken: string, tokenExpiresAt: string) {
+  const supabase = getSupabaseAdminClient();
+
+  if (!supabase) {
+    return;
+  }
+
+  await supabase
+    .from("google_calendar_accounts")
+    .update({ access_token: accessToken, token_expires_at: tokenExpiresAt, updated_at: new Date().toISOString() })
+    .eq("id", accountId);
+}
+
+export async function updateGoogleCalendarPreferences(input: {
+  accountId: string;
+  calendarIds: string[];
+  syncEnabled: boolean;
+}) {
+  const supabase = getSupabaseAdminClient();
+
+  if (!supabase) {
+    throw new Error("La synchronisation Google est indisponible tant que Supabase n'est pas configuré.");
+  }
+
+  const { error } = await supabase
+    .from("google_calendar_accounts")
+    .update({
+      calendar_ids: input.calendarIds.length > 0 ? input.calendarIds : ["primary"],
+      sync_enabled: input.syncEnabled,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", input.accountId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
+export async function setGoogleCalendarSyncResult(input: {
+  accountId: string;
+  eventCount: number;
+  error?: string | null;
+}) {
+  const supabase = getSupabaseAdminClient();
+
+  if (!supabase) {
+    return;
+  }
+
+  await supabase
+    .from("google_calendar_accounts")
+    .update({
+      last_synced_at: new Date().toISOString(),
+      last_synced_event_count: input.eventCount,
+      last_sync_error: input.error ?? null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", input.accountId);
+}
+
+export async function deleteGoogleCalendarAccount(accountId: string) {
+  const supabase = getSupabaseAdminClient();
+
+  if (!supabase) {
+    return;
+  }
+
+  // Les évènements sont supprimés en cascade.
+  await supabase.from("google_calendar_accounts").delete().eq("id", accountId);
+}
+
+/** Remplace les évènements importés sur la fenêtre synchronisée. */
+export async function replaceGoogleCalendarEvents(input: {
+  accountId: string;
+  calendarIds: string[];
+  windowStartIso: string;
+  windowEndIso: string;
+  events: Array<{
+    googleEventId: string;
+    calendarId: string;
+    calendarSummary?: string;
+    summary: string;
+    startsAt: string;
+    endsAt: string;
+    isAllDay: boolean;
+    htmlLink?: string;
+  }>;
+}) {
+  const supabase = getSupabaseAdminClient();
+
+  if (!supabase) {
+    throw new Error("La synchronisation Google est indisponible tant que Supabase n'est pas configuré.");
+  }
+
+  const syncedAt = new Date().toISOString();
+
+  if (input.events.length > 0) {
+    const { error } = await supabase.from("google_calendar_events").upsert(
+      input.events.map((event) => ({
+        account_id: input.accountId,
+        google_event_id: event.googleEventId,
+        calendar_id: event.calendarId,
+        calendar_summary: event.calendarSummary ?? null,
+        summary: event.summary,
+        starts_at: event.startsAt,
+        ends_at: event.endsAt,
+        is_all_day: event.isAllDay,
+        html_link: event.htmlLink ?? null,
+        synced_at: syncedAt,
+      })),
+      { onConflict: "calendar_id,google_event_id" },
+    );
+
+    if (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  // Évènements supprimés/déplacés côté Google, ou agendas décochés.
+  const { error: cleanupError } = await supabase
+    .from("google_calendar_events")
+    .delete()
+    .eq("account_id", input.accountId)
+    .lt("starts_at", input.windowEndIso)
+    .gt("ends_at", input.windowStartIso)
+    .neq("synced_at", syncedAt);
+
+  if (cleanupError) {
+    throw new Error(cleanupError.message);
+  }
+
+  if (input.calendarIds.length > 0) {
+    const { error: staleCalendarsError } = await supabase
+      .from("google_calendar_events")
+      .delete()
+      .eq("account_id", input.accountId)
+      .not("calendar_id", "in", `(${input.calendarIds.map((id) => `"${id}"`).join(",")})`);
+
+    if (staleCalendarsError) {
+      throw new Error(staleCalendarsError.message);
+    }
+  }
+
+  return input.events.length;
+}
+
+export async function deleteAllGoogleCalendarEvents(accountId: string) {
+  const supabase = getSupabaseAdminClient();
+
+  if (!supabase) {
+    return;
+  }
+
+  await supabase.from("google_calendar_events").delete().eq("account_id", accountId);
+}
+
+/** Évènements importés chevauchant une fenêtre donnée. */
+export async function getGoogleCalendarEventsBetween(startIso: string, endIso: string) {
+  const supabase = getSupabaseAdminClient();
+
+  if (!supabase) {
+    return [];
+  }
+
+  const { data } = await supabase
+    .from("google_calendar_events")
+    .select("*")
+    .lt("starts_at", endIso)
+    .gt("ends_at", startIso)
+    .order("starts_at");
+
+  return (data ?? []).map((row) => mapGoogleCalendarEventRow(row as Record<string, unknown>));
+}
+
+/** Évènements importés à venir, pour l'agenda d'administration. */
+export async function getUpcomingGoogleCalendarEvents(daysAhead = 120) {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const end = new Date(now.getTime() + daysAhead * 24 * 60 * 60 * 1000);
+
+  return getGoogleCalendarEventsBetween(start.toISOString(), end.toISOString());
+}
+
+/** Périodes occupées à prendre en compte dans le calcul des créneaux publics. */
+export async function getPersonalBusyPeriods(daysToShow = 21): Promise<BusyPeriod[]> {
+  const start = new Date();
+  const end = new Date(start.getTime() + daysToShow * 24 * 60 * 60 * 1000);
+  const events = await getGoogleCalendarEventsBetween(start.toISOString(), end.toISOString());
+
+  return events.map((event) => ({ start: event.startsAt, end: event.endsAt }));
+}
+
+/** Rendez-vous du site qui entrent en conflit avec un évènement personnel importé. */
+export async function getGoogleCalendarConflicts() {
+  const [events, appointments, categories] = await Promise.all([
+    getUpcomingGoogleCalendarEvents(),
+    getAppointments(),
+    getCategories(),
+  ]);
+
+  const activeAppointments = appointments.filter(
+    (appointment) =>
+      (appointment.status === "en_attente" || appointment.status === "accepte") &&
+      new Date(appointment.endsAt) >= new Date(),
+  );
+
+  return activeAppointments
+    .map((appointment) => {
+      const appointmentStart = parseISO(appointment.startsAt).getTime();
+      const appointmentEnd = parseISO(appointment.endsAt).getTime();
+      const event = events.find(
+        (item) =>
+          appointmentStart < parseISO(item.endsAt).getTime() && appointmentEnd > parseISO(item.startsAt).getTime(),
+      );
+
+      return event
+        ? {
+            appointment,
+            event,
+            category: categories.find((category) => category.id === appointment.categoryId),
+          }
+        : null;
+    })
+    .filter((item): item is NonNullable<typeof item> => item !== null);
 }

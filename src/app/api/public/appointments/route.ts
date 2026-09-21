@@ -2,6 +2,7 @@ import { createAppointmentRequest, getCategorySlots } from "@/lib/data-access";
 import { extractClientContextFromHeaders } from "@/lib/account-activity";
 import { createAccountActivityLog } from "@/lib/data-access";
 import { getPublicUserSession } from "@/lib/auth";
+import { refreshPersonalAvailabilityIfStale } from "@/lib/google-calendar-sync";
 import { sendAdminAppointmentRequestNotificationEmail, sendProvisionalAppointmentEmail } from "@/lib/email";
 import { isMaintenanceBypassedForHeaders } from "@/lib/maintenance";
 import { formatDateTimeFr } from "@/lib/utils";
@@ -15,6 +16,8 @@ export async function POST(request: Request) {
     if (!parsed.success) {
       return Response.json({ error: parsed.error.issues[0]?.message ?? "Données invalides." }, { status: 400 });
     }
+
+    await refreshPersonalAvailabilityIfStale();
 
     const initialPayload = await getCategorySlots(parsed.data.categorySlug);
 
