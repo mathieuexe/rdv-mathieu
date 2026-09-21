@@ -16,7 +16,7 @@ export default function LegalNoticePage() {
             <h2 className="da-title text-[20px]">Éditeur du site</h2>
             <p>Nom ou raison sociale : M. CERENZIA Mathieu</p>
             <p>Responsable de la publication : M. CERENZIA Mathieu</p>
-            <p>Adresse : Sauvian, France</p>
+            <p>Adresse : Denain, France</p>
             <p>Email : info@mathieucerenzia.fr</p>
             <p>SIREN / SIRET : 883272437</p>
           </section>

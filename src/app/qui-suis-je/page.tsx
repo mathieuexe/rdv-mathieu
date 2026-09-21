@@ -70,7 +70,7 @@ export default function AboutPage() {
 
             <div className="da-pill mt-4">
               <MapPin className="size-4" />
-              Sauvian, Hérault (France)
+              Denain, Hauts-de-France (France)
             </div>
 
             <h1 className="da-display mt-6 text-center text-[32px] leading-[1.15] sm:text-[42px]">
@@ -80,7 +80,7 @@ export default function AboutPage() {
             </h1>
 
             <p className="mt-4 text-center text-[16px] leading-relaxed text-slate-900">
-              Je m&apos;appelle Mathieu, j&apos;ai 25 ans et je suis originaire de Sauvian. Passionné d&apos;informatique
+              Je m&apos;appelle Mathieu, j&apos;ai 25 ans et je suis originaire de Denain. Passionné d&apos;informatique
               depuis mon plus jeune âge, j&apos;ai obtenu un BTS Technicien Systèmes Réseaux et Sécurité avant de me
               lancer à mon compte en 2020.
             </p>
