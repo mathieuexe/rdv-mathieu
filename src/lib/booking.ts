@@ -5,9 +5,13 @@ import type {
   AppointmentRecord,
   BlackoutPeriod,
   BookingSlot,
+  BusyPeriod,
   SiteSettings,
   Weekday,
 } from "@/types/domain";
+
+/** Motif affiché publiquement pour un créneau bloqué par l'agenda personnel importé. */
+export const PERSONAL_BUSY_REASON = "Indisponible : rendez-vous personnel.";
 
 const weekdays: Weekday[] = [
   "dimanche",
@@ -47,15 +51,22 @@ function overlaps(start: Date, end: Date, appointment: AppointmentRecord) {
   return start < appointmentEnd && end > appointmentStart;
 }
 
+function findOverlappingBusyPeriod(start: Date, end: Date, periods: BusyPeriod[]) {
+  return periods.find((period) => start < parseISO(period.end) && end > parseISO(period.start));
+}
+
 export function buildBookingSlots({
   category,
   siteSettings,
   appointments,
+  busyPeriods = [],
   daysToShow = 14,
 }: {
   category: AppointmentCategory;
   siteSettings: SiteSettings;
   appointments: AppointmentRecord[];
+  /** Périodes occupées externes (agenda Google personnel synchronisé). */
+  busyPeriods?: BusyPeriod[];
   daysToShow?: number;
 }): BookingSlot[] {
   if (!category.isOnline || siteSettings.maintenanceMode || siteSettings.bookingBlocked || category.isBookingBlocked) {
@@ -99,8 +110,10 @@ export function buildBookingSlots({
               overlaps(slotStart, slotEnd, appointment),
           );
 
+          const personalBusyPeriod = findOverlappingBusyPeriod(slotStart, slotEnd, busyPeriods);
+
           const blackoutReason = globalBlackout?.message ?? categoryBlackout?.message;
-          const isBlocked = Boolean(isPast || busyAppointment || blackoutReason);
+          const isBlocked = Boolean(isPast || busyAppointment || blackoutReason || personalBusyPeriod);
 
           const slotStartIso = slotStart.toISOString();
           if (!seenSlots.has(slotStartIso)) {
@@ -114,6 +127,7 @@ export function buildBookingSlots({
               reason:
                 blackoutReason ??
                 (busyAppointment ? "Créneau déjà occupé par un autre rendez-vous." : undefined) ??
+                (personalBusyPeriod ? PERSONAL_BUSY_REASON : undefined) ??
                 (isPast ? "Créneau déjà passé." : undefined),
             });
           }

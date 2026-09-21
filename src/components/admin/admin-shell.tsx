@@ -7,6 +7,7 @@ import {
   BarChart3,
   CalendarPlus2,
   CalendarRange,
+  CalendarSync,
   Clock3,
   LayoutDashboard,
   Search,
@@ -32,6 +33,7 @@ const navigationSections = [
       { href: "/admin/rendez-vous/en-attente", label: "En attente", icon: Clock3 },
       { href: "/admin/rendez-vous/agenda", label: "Agenda", icon: CalendarRange },
       { href: "/admin/rendez-vous/nouveau", label: "Nouveau rendez-vous", icon: CalendarPlus2 },
+      { href: "/admin/google-calendar", label: "Google Agenda", icon: CalendarSync },
     ],
   },
   {

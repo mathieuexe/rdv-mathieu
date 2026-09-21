@@ -155,6 +155,37 @@ export interface AppointmentRequestPayload {
   startsAt: string;
 }
 
+export interface GoogleCalendarAccount {
+  id: string;
+  googleEmail: string;
+  calendarIds: string[];
+  syncEnabled: boolean;
+  tokenExpiresAt: string;
+  hasRefreshToken: boolean;
+  lastSyncedAt?: string;
+  lastSyncError?: string;
+  lastSyncedEventCount: number;
+  createdAt: string;
+}
+
+export interface GoogleCalendarEventRecord {
+  id: string;
+  googleEventId: string;
+  calendarId: string;
+  calendarSummary?: string;
+  summary: string;
+  startsAt: string;
+  endsAt: string;
+  isAllDay: boolean;
+  htmlLink?: string;
+  syncedAt: string;
+}
+
+export interface BusyPeriod {
+  start: string;
+  end: string;
+}
+
 export interface BookingSlot {
   start: string;
   end: string;

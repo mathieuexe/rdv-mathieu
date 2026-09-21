@@ -1,8 +1,10 @@
 import { getCategorySlots } from "@/lib/data-access";
+import { refreshPersonalAvailabilityIfStale } from "@/lib/google-calendar-sync";
 import { isMaintenanceBypassedForHeaders } from "@/lib/maintenance";
 
 export async function GET(request: Request, context: { params: Promise<{ slug: string }> }) {
   const { slug } = await context.params;
+  await refreshPersonalAvailabilityIfStale();
   const initialPayload = await getCategorySlots(slug);
 
   if (!initialPayload) {

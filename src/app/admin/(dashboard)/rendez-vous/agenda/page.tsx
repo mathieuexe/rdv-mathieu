@@ -1,10 +1,22 @@
+import Link from "next/link";
 import { CalendarDays } from "lucide-react";
 
-import { getAgendaAppointmentsView } from "@/lib/data-access";
+import { getAgendaAppointmentsView, getUpcomingGoogleCalendarEvents } from "@/lib/data-access";
 import { DynamicAdminAgendaCalendar } from "@/components/admin/dynamic-admin-agenda-calendar";
+import { GoogleCalendarBadge } from "@/components/shared/google-calendar-badge";
+import { isGoogleCalendarConfigured } from "@/lib/env";
+import { syncGoogleCalendarIfStale } from "@/lib/google-calendar-sync";
 
 export default async function AgendaAppointmentsPage() {
-  const appointments = await getAgendaAppointmentsView();
+  if (isGoogleCalendarConfigured()) {
+    // Rafraîchit l'agenda personnel si la dernière synchronisation date de plus de 10 minutes.
+    await syncGoogleCalendarIfStale();
+  }
+
+  const [appointments, googleEvents] = await Promise.all([
+    getAgendaAppointmentsView(),
+    getUpcomingGoogleCalendarEvents(),
+  ]);
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 pb-12">
@@ -15,6 +27,16 @@ export default async function AgendaAppointmentsPage() {
             Cette page regroupe les rendez-vous pris et confirmés, qu&apos;ils aient été créés par un utilisateur ou par un administrateur.
           </p>
         </div>
+
+        <Link
+          href="/admin/google-calendar"
+          className="inline-flex items-center gap-2 self-start rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+        >
+          <GoogleCalendarBadge compact />
+          {googleEvents.length > 0
+            ? `${googleEvents.length} indisponibilité(s) perso`
+            : "Synchroniser Google Agenda"}
+        </Link>
       </section>
 
       <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
@@ -23,7 +45,7 @@ export default async function AgendaAppointmentsPage() {
           <h2 className="font-semibold text-slate-800">Calendrier</h2>
         </div>
         <div className="p-4 md:p-6">
-          <DynamicAdminAgendaCalendar appointments={appointments} />
+          <DynamicAdminAgendaCalendar appointments={appointments} googleEvents={googleEvents} />
         </div>
       </section>
     </div>

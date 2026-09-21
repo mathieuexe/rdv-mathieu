@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildBookingSlots, groupSlotsByDay } from "./booking";
+import { buildBookingSlots, groupSlotsByDay, PERSONAL_BUSY_REASON } from "./booking";
 import type { AppointmentCategory, AppointmentRecord, SiteSettings } from "@/types/domain";
 
 function getNextWeekdayAtTime(weekday: number, hour: number, minute: number) {
@@ -147,5 +147,40 @@ describe("buildBookingSlots", () => {
     expect(slotAtNine?.isBlocked).toBe(false);
     expect(slotAtNineThirty?.isBlocked).toBe(true);
     expect(slotAtNineThirty?.reason).toContain("Indisponibilité ponctuelle");
+  });
+});
+
+describe("buildBookingSlots avec agenda personnel synchronisé", () => {
+  const busyStart = getNextWeekdayAtTime(2, 9, 0);
+  const busyEnd = getNextWeekdayAtTime(2, 9, 30);
+  const busyDayKey = busyStart.toISOString().slice(0, 10);
+
+  it("bloque les créneaux couverts par un rendez-vous personnel importé", () => {
+    const slots = buildBookingSlots({
+      category: testCategories[0],
+      siteSettings: testSiteSettings,
+      appointments: [],
+      busyPeriods: [{ start: busyStart.toISOString(), end: busyEnd.toISOString() }],
+      daysToShow: 10,
+    });
+
+    const blockedSlot = slots.find((slot) => slot.label === "09:00" && slot.start.slice(0, 10) === busyDayKey);
+    const freeSlot = slots.find((slot) => slot.label === "09:30" && slot.start.slice(0, 10) === busyDayKey);
+
+    expect(blockedSlot?.isBlocked).toBe(true);
+    expect(blockedSlot?.reason).toBe(PERSONAL_BUSY_REASON);
+    expect(freeSlot?.isBlocked).toBe(false);
+  });
+
+  it("ne divulgue pas le titre de l'évènement personnel", () => {
+    const slots = buildBookingSlots({
+      category: testCategories[0],
+      siteSettings: testSiteSettings,
+      appointments: [],
+      busyPeriods: [{ start: busyStart.toISOString(), end: busyEnd.toISOString() }],
+      daysToShow: 10,
+    });
+
+    expect(slots.every((slot) => !slot.reason?.includes("Google"))).toBe(true);
   });
 });

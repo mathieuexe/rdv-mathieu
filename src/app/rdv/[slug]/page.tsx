@@ -8,6 +8,7 @@ import { PublicHeader } from "@/components/public/public-header";
 import { getPublicUserSession } from "@/lib/auth";
 import { getBookingState } from "@/lib/booking";
 import { getCategorySlots } from "@/lib/data-access";
+import { refreshPersonalAvailabilityIfStale } from "@/lib/google-calendar-sync";
 import { isMaintenanceBypassedForHeaders } from "@/lib/maintenance";
 import type { SiteSettings } from "@/types/domain";
 
@@ -18,6 +19,8 @@ export default async function BookingCategoryPage({
 }) {
   const { slug } = await params;
   const requestHeaders = await headers();
+  await refreshPersonalAvailabilityIfStale();
+
   const initialPayload = await getCategorySlots(slug);
 
   if (!initialPayload) {
