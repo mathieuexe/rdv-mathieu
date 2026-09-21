@@ -71,7 +71,7 @@ export function LoginForm({ action }: LoginFormProps) {
       <button
         type="submit"
         disabled={pending}
-        className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+        className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(48,128,238,0.25)]"
       >
         {pending ? <LoaderCircle className="size-4 animate-spin" /> : null}
         <span>{pending ? "Connexion en cours..." : "Se connecter"}</span>

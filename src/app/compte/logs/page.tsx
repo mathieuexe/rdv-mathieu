@@ -45,7 +45,7 @@ export default async function AccountLogsPage() {
       description="Retrouvez ici l'historique de vos actions sur le site, ainsi que les informations techniques liées à vos connexions à votre espace."
     >
       {logs.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-slate-300 bg-white px-6 py-16 text-center shadow-sm">
+        <div className="da-card border-dashed px-6 py-16 text-center">
           <Activity className="mx-auto size-12 text-slate-300 mb-4" />
           <p className="text-lg font-medium text-slate-900">Aucun log n&apos;est encore disponible.</p>
           <p className="mt-2 text-sm text-slate-500">Les prochaines connexions et actions réalisées depuis votre compte apparaîtront ici.</p>
@@ -55,12 +55,12 @@ export default async function AccountLogsPage() {
           {logs.map((log) => (
             <article
               key={log.id}
-              className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden"
+              className="da-card overflow-hidden"
             >
               <div className="border-b border-slate-100 bg-slate-50 px-6 py-4">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <h2 className="text-lg font-bold text-slate-900">
+                    <h2 className="da-title text-[18px]">
                       {formatDateTimeFr(log.createdAt, { dateStyle: "full", timeStyle: "short" })}
                     </h2>
                     <p className="text-sm font-medium text-slate-700 mt-1">{log.actionLabel}</p>

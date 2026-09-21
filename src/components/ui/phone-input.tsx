@@ -40,7 +40,7 @@ export const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
           className={className}
           numberInputProps={{
             required,
-            className: "w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500"
+            className: "da-field disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500"
           }}
         />
         {/* Hidden input to ensure the value is submitted in native forms */}

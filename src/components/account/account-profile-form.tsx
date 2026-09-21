@@ -152,7 +152,7 @@ export function AccountProfileForm({ profile, action }: AccountProfileFormProps)
             defaultValue={profile.firstName}
             required
             disabled={pending}
-            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500"
+            className="da-field disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500"
           />
         </label>
 
@@ -163,7 +163,7 @@ export function AccountProfileForm({ profile, action }: AccountProfileFormProps)
             defaultValue={profile.lastName}
             required
             disabled={pending}
-            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500"
+            className="da-field disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500"
           />
         </label>
       </div>
@@ -176,7 +176,7 @@ export function AccountProfileForm({ profile, action }: AccountProfileFormProps)
           defaultValue={profile.email}
           required
           disabled={pending}
-          className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500"
+          className="da-field disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500"
         />
       </label>
 
@@ -200,7 +200,7 @@ export function AccountProfileForm({ profile, action }: AccountProfileFormProps)
         <button
           type="submit"
           disabled={pending}
-          className="inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(48,128,238,0.25)]"
         >
           {pending ? <LoaderCircle className="size-4 animate-spin" /> : <Save className="size-4" />}
           <span>{pending ? "Enregistrement..." : "Enregistrer mes informations"}</span>

@@ -13,11 +13,17 @@ export default async function AdminLoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-6 py-10 text-slate-900">
-      <div className="w-full max-w-md">
-        <div className="mb-8 text-center">
-          <h1 className="text-2xl font-bold text-slate-900">Administration</h1>
-          <p className="mt-2 text-sm text-slate-500">
+    <main className="flex min-h-screen items-center justify-center bg-white px-6 py-12 text-slate-900">
+      <div className="w-full max-w-[440px]">
+        <div className="mb-10 flex flex-col items-center text-center">
+          <span className="flex size-12 items-center justify-center rounded-full border border-slate-200 bg-accent-soft font-serif text-lg font-black text-accent">
+            M
+          </span>
+          <p className="da-eyebrow mt-5">Back-office</p>
+          <h1 className="da-display mt-2 text-[30px] leading-[1.15]">
+            <span className="text-accent">Administration</span>
+          </h1>
+          <p className="mt-4 text-[15px] leading-relaxed text-slate-500">
             Connectez-vous pour accéder à votre espace de gestion.
           </p>
         </div>

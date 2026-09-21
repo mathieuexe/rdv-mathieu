@@ -18,22 +18,23 @@ export default async function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
+    <div className="flex min-h-screen flex-col bg-white text-slate-900">
       <PublicHeader currentPath="/connexion" />
 
-      <main className="flex-1 px-6 py-10 md:py-16">
-        <div className="mx-auto max-w-5xl">
-          <div className="flex flex-col items-center">
-            <h1 className="max-w-3xl text-center text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
-              Connexion à votre espace
-            </h1>
-            <p className="mt-4 text-center text-slate-600">
-              Gérez vos rendez-vous et vos informations personnelles.
-            </p>
+      <main className="flex-1 px-6 pb-20 pt-12 sm:pt-16">
+        <div className="mx-auto flex max-w-[480px] flex-col items-center">
+          <p className="da-eyebrow">Espace client</p>
+          <h1 className="da-display mt-2 text-center text-[32px] leading-[1.15] sm:text-[42px]">
+            Connexion à
+            <br />
+            <span className="text-accent">votre espace</span>
+          </h1>
+          <p className="mt-4 text-center text-[16px] leading-relaxed text-slate-500">
+            Gérez vos rendez-vous et vos informations personnelles.
+          </p>
 
-            <div className="mt-10 w-full max-w-md">
-              <LoginForm action={loginAction} />
-            </div>
+          <div className="mt-10 w-full">
+            <LoginForm action={loginAction} />
           </div>
         </div>
       </main>

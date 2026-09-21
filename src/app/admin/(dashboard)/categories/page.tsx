@@ -22,7 +22,7 @@ export default async function CategoriesPage() {
 
         <Link
           href="/admin/categories/nouvelle"
-          className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700"
+          className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-all hover:bg-blue-700 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(48,128,238,0.25)]"
         >
           <Plus className="size-4" />
           <span>Nouvelle catégorie</span>

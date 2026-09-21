@@ -29,8 +29,8 @@ export function PublicBlackoutMarquee({ periods }: PublicBlackoutMarqueeProps) {
   });
 
   return (
-    <div className="bg-rose-600 border-b border-rose-700 text-white relative z-40">
-      <div className="mx-auto max-w-5xl px-4 py-3 sm:px-6">
+    <div className="relative z-40 border-b border-rose-200 bg-rose-50 text-rose-900">
+      <div className="mx-auto max-w-[1120px] px-6 py-3">
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-center sm:text-left">
           {upcomingPeriods.map((period, index) => {
             const start = parseISO(`${period.startDate}T${period.startTime}:00`);
@@ -44,20 +44,20 @@ export function PublicBlackoutMarquee({ periods }: PublicBlackoutMarqueeProps) {
             return (
               <div key={index} className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3">
                 <div className="flex items-center gap-2">
-                  <div className="flex items-center justify-center shrink-0 text-rose-600 bg-white rounded-full p-1 shadow-sm">
+                  <div className="flex shrink-0 items-center justify-center rounded-full border border-rose-200 bg-white p-1 text-rose-600">
                     <AlertTriangle className="size-3.5" />
                   </div>
-                  <span className="px-2 py-0.5 rounded text-[10px] sm:text-xs font-bold bg-white text-rose-600 uppercase tracking-wide shadow-sm">
+                  <span className="rounded-full border border-rose-200 bg-white px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-[0.1em] text-rose-600 sm:text-[11px]">
                     {isOngoing ? "En cours" : "À venir"}
                   </span>
                 </div>
                 
-                <span className="text-sm font-semibold text-white">
+                <span className="text-[14px] font-medium text-rose-900">
                   {isSameDay 
                     ? `Indisponibilité le ${formattedStart}`
                     : `Indisponibilité du ${formattedStart} au ${formattedEnd}`
                   }
-                  {period.message ? <span className="ml-1.5 font-normal opacity-90">— {period.message}</span> : null}
+                  {period.message ? <span className="ml-1.5 font-normal text-rose-700">— {period.message}</span> : null}
                 </span>
               </div>
             );

@@ -10,185 +10,179 @@ export const metadata = {
   description: "Découvrez mon profil, mes compétences et mon expertise en développement web et automatisation.",
 };
 
+const services = [
+  {
+    icon: Globe,
+    title: "Création de sites internet",
+    text: "Sites vitrines et boutiques en ligne, pensés pour représenter votre activité et convertir vos visiteurs en clients de manière efficace.",
+  },
+  {
+    icon: LayoutTemplate,
+    title: "Interfaces sur mesure",
+    text: "Selon vos besoins, je développe des solutions dédiées : interfaces de réservation, prise de commande pour restaurants, formulaires de contact, espaces clients, et systèmes de suivi des demandes.",
+  },
+  {
+    icon: Search,
+    title: "Visibilité & présence en ligne",
+    text: "Gestion de vos réseaux sociaux et optimisation du référencement naturel (SEO) de votre site pour améliorer significativement votre visibilité sur le web.",
+  },
+  {
+    icon: Server,
+    title: "Hébergement & Messagerie",
+    text: "Hébergement de votre site internet, enregistrement et gestion des noms de domaine, création et configuration de votre messagerie professionnelle (Microsoft Exchange, Google Workspace).",
+  },
+];
+
+const serviceLists = [
+  {
+    icon: Terminal,
+    title: "Automatisation & développement",
+    points: [
+      "Scripts d'automatisation Windows",
+      "Administration de serveurs Windows",
+      "Déploiement et gestion de solutions sous Linux",
+    ],
+  },
+  {
+    icon: DiscordIcon,
+    title: "Communautés Discord & Stoat",
+    points: ["Création sur mesure de serveur Discord ou Stoat", "Création sur mesure de bot Discord ou Stoat"],
+  },
+];
+
 export default function AboutPage() {
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
+    <div className="flex min-h-screen flex-col bg-white text-slate-900">
       <PublicHeader currentPath="/qui-suis-je" />
 
       <main className="flex-1">
-        {/* Hero Section */}
-        <section className="px-6 py-16 md:py-24">
-          <div className="mx-auto max-w-5xl">
-            <div className="grid gap-12 lg:grid-cols-2 lg:gap-8 items-center">
-              <div className="space-y-8">
-                <div className="space-y-4">
-                  <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-sm font-semibold text-blue-700">
-                    <MapPin className="size-4" />
-                    <span>Sauvian, Hérault (France)</span>
-                  </div>
-                  <h1 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
-                    Développeur Web & <br /> Expert en Automatisation
-                  </h1>
-                  <p className="text-lg leading-relaxed text-slate-600">
-                    Je m'appelle Mathieu, j'ai 25 ans et je suis originaire de Sauvian. Passionné d'informatique depuis mon plus jeune âge, j'ai obtenu un BTS Technicien Systèmes Réseaux et Sécurité avant de me lancer à mon compte en 2020.
-                  </p>
-                  <p className="text-lg leading-relaxed text-slate-600">
-                    Depuis six ans, je conçois des sites internet et accompagne mes clients dans leur transformation digitale avec des solutions concrètes et sur mesure. Je propose également la création sur mesure de serveurs et de bots Discord ou Stoat.
-                  </p>
-                </div>
+        {/* ------------------------------------------------------------ Hero */}
+        <section className="px-6 pb-16 pt-12 sm:pt-16">
+          <div className="mx-auto flex max-w-[620px] flex-col items-center">
+            <Image
+              src="/images/mathieu-upscale.png"
+              alt="Mathieu CERENZIA"
+              width={96}
+              height={96}
+              priority
+              className="size-24 rounded-full border border-slate-200 object-cover object-[45%_47%]"
+            />
 
-                <div className="flex flex-wrap items-center gap-6 pt-4">
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center text-amber-400">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="size-5 fill-current" />
-                      ))}
-                    </div>
-                    <span className="font-semibold text-slate-900">4,8/5</span>
-                    <span className="text-sm text-slate-500">(13 avis)</span>
-                  </div>
-                  <div className="h-6 w-px bg-slate-300 hidden sm:block" />
-                  <div className="flex items-center gap-2 font-semibold text-slate-900">
-                    <CheckCircle className="size-5 text-emerald-500" />
-                    <span>+ de 20 projets réalisés</span>
-                  </div>
-                </div>
+            <div className="da-pill mt-4">
+              <MapPin className="size-4" />
+              Sauvian, Hérault (France)
+            </div>
 
-                <div className="pt-4">
-                  <a
-                    href="https://www.malt.fr/profile/mathieucerenzia"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                  >
-                    Voir mon profil Malt
-                    <ArrowRight className="size-4" />
-                  </a>
-                </div>
-              </div>
+            <h1 className="da-display mt-6 text-center text-[32px] leading-[1.15] sm:text-[42px]">
+              Développeur web &
+              <br />
+              <span className="text-accent">expert en automatisation</span>
+            </h1>
 
-              <div className="relative mx-auto w-full max-w-sm lg:max-w-[320px]">
-                <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-slate-200 shadow-xl border border-slate-200">
-                  <Image
-                    src="/images/mathieu-upscale.png"
-                    alt="Mathieu CERENZIA"
-                    fill
-                    sizes="(max-width: 1024px) 100vw, 320px"
-                    priority
-                    className="object-cover"
-                  />
-                </div>
-                {/* Décoration */}
-                <div className="absolute -bottom-6 -left-6 -z-10 h-64 w-64 rounded-full bg-blue-100 blur-3xl opacity-50" />
-                <div className="absolute -top-6 -right-6 -z-10 h-64 w-64 rounded-full bg-slate-200 blur-3xl opacity-50" />
-              </div>
+            <p className="mt-4 text-center text-[16px] leading-relaxed text-slate-900">
+              Je m&apos;appelle Mathieu, j&apos;ai 25 ans et je suis originaire de Sauvian. Passionné d&apos;informatique
+              depuis mon plus jeune âge, j&apos;ai obtenu un BTS Technicien Systèmes Réseaux et Sécurité avant de me
+              lancer à mon compte en 2020.
+            </p>
+
+            <p className="mt-4 text-center text-[16px] leading-relaxed text-slate-500">
+              Depuis six ans, je conçois des sites internet et accompagne mes clients dans leur transformation digitale
+              avec des solutions concrètes et sur mesure. Je propose également la création sur mesure de serveurs et de
+              bots Discord ou Stoat.
+            </p>
+
+            <a
+              href="https://www.malt.fr/profile/mathieucerenzia"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="da-btn da-btn-primary mt-10 w-full max-w-[420px]"
+            >
+              Voir mon profil Malt
+              <ArrowRight className="size-5" />
+            </a>
+          </div>
+        </section>
+
+        {/* -------------------------------------------------------- Chiffres */}
+        <section className="border-y border-slate-200 px-6 py-12">
+          <div className="mx-auto grid max-w-[720px] grid-cols-1 gap-8 text-center sm:grid-cols-3">
+            <div className="da-reveal">
+              <p className="da-display text-[32px] leading-none text-accent">4,8/5</p>
+              <p className="mt-2 flex items-center justify-center gap-0.5 text-amber-400">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="size-4 fill-current" />
+                ))}
+              </p>
+              <p className="mt-2 text-[14px] text-slate-500">13 avis clients</p>
+            </div>
+            <div className="da-reveal">
+              <p className="da-display text-[32px] leading-none text-accent">+20</p>
+              <p className="mt-2 flex items-center justify-center text-emerald-500">
+                <CheckCircle className="size-4" />
+              </p>
+              <p className="mt-2 text-[14px] text-slate-500">Projets réalisés</p>
+            </div>
+            <div className="da-reveal">
+              <p className="da-display text-[32px] leading-none text-accent">6 ans</p>
+              <p className="mt-2 flex items-center justify-center text-slate-400">
+                <Globe className="size-4" />
+              </p>
+              <p className="mt-2 text-[14px] text-slate-500">À mon compte</p>
             </div>
           </div>
         </section>
 
-        {/* Services Section */}
-        <section className="bg-white px-6 py-16 md:py-24 border-y border-slate-200">
-          <div className="mx-auto max-w-5xl">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-                Ce que je peux faire pour vous
-              </h2>
-              <p className="mt-4 text-lg text-slate-600">
+        {/* -------------------------------------------------------- Services */}
+        <section className="px-6 py-16 sm:py-20">
+          <div className="mx-auto max-w-[960px]">
+            <div className="da-reveal mx-auto max-w-[620px] text-center">
+              <p className="da-eyebrow">Les prestations</p>
+              <h2 className="da-title mt-2 text-[26px] sm:text-[32px]">Ce que je peux faire pour vous</h2>
+              <p className="mt-4 text-[16px] leading-relaxed text-slate-500">
                 Des solutions techniques adaptées à vos besoins et à votre activité.
               </p>
             </div>
 
-            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-8 transition-shadow hover:shadow-md">
-                <div className="mb-4 inline-flex size-12 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
-                  <Globe className="size-6" />
-                </div>
-                <h3 className="mb-3 text-xl font-bold text-slate-900">Création de sites internet</h3>
-                <p className="text-slate-600 leading-relaxed">
-                  Sites vitrines et boutiques en ligne, pensés pour représenter votre activité et convertir vos visiteurs en clients de manière efficace.
-                </p>
-              </div>
+            <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {services.map((service) => (
+                <article key={service.title} className="da-card da-card-hover da-reveal flex flex-col p-6">
+                  <span className="inline-flex size-11 items-center justify-center rounded-full border border-slate-200 bg-accent-soft text-accent">
+                    <service.icon className="size-5" />
+                  </span>
+                  <h3 className="da-title mt-4 text-[18px]">{service.title}</h3>
+                  <p className="mt-2 text-[14px] leading-relaxed text-slate-500">{service.text}</p>
+                </article>
+              ))}
 
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-8 transition-shadow hover:shadow-md">
-                <div className="mb-4 inline-flex size-12 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
-                  <LayoutTemplate className="size-6" />
-                </div>
-                <h3 className="mb-3 text-xl font-bold text-slate-900">Interfaces sur mesure</h3>
-                <p className="text-slate-600 leading-relaxed">
-                  Selon vos besoins, je développe des solutions dédiées : interfaces de réservation, prise de commande pour restaurants, formulaires de contact, espaces clients, et systèmes de suivi des demandes.
-                </p>
-              </div>
-
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-8 transition-shadow hover:shadow-md">
-                <div className="mb-4 inline-flex size-12 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
-                  <Search className="size-6" />
-                </div>
-                <h3 className="mb-3 text-xl font-bold text-slate-900">Visibilité & présence en ligne</h3>
-                <p className="text-slate-600 leading-relaxed">
-                  Gestion de vos réseaux sociaux et optimisation du référencement naturel (SEO) de votre site pour améliorer significativement votre visibilité sur le web.
-                </p>
-              </div>
-
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-8 transition-shadow hover:shadow-md">
-                <div className="mb-4 inline-flex size-12 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
-                  <Server className="size-6" />
-                </div>
-                <h3 className="mb-3 text-xl font-bold text-slate-900">Hébergement & Messagerie</h3>
-                <p className="text-slate-600 leading-relaxed">
-                  Hébergement de votre site internet, enregistrement et gestion des noms de domaine, création et configuration de votre messagerie professionnelle (Microsoft Exchange, Google Workspace).
-                </p>
-              </div>
-
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-8 transition-shadow hover:shadow-md">
-                <div className="mb-4 inline-flex size-12 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
-                  <Terminal className="size-6" />
-                </div>
-                <h3 className="mb-3 text-xl font-bold text-slate-900">Automatisation & développement</h3>
-                <ul className="space-y-2 text-slate-600">
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="size-5 shrink-0 text-blue-600" />
-                    <span>Scripts d'automatisation Windows</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="size-5 shrink-0 text-blue-600" />
-                    <span>Administration de serveurs Windows</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="size-5 shrink-0 text-blue-600" />
-                    <span>Déploiement et gestion de solutions sous Linux</span>
-                  </li>
-                </ul>
-              </div>
-
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-8 transition-shadow hover:shadow-md">
-                <div className="mb-4 inline-flex size-12 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600">
-                  <DiscordIcon className="size-6" />
-                </div>
-                <h3 className="mb-3 text-xl font-bold text-slate-900">Communautés Discord & Stoat</h3>
-                <ul className="space-y-2 text-slate-600">
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="size-5 shrink-0 text-blue-600" />
-                    <span>Création sur mesure de serveur Discord ou Stoat</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="size-5 shrink-0 text-blue-600" />
-                    <span>Création sur mesure de bot Discord ou Stoat</span>
-                  </li>
-                </ul>
-              </div>
+              {serviceLists.map((service) => (
+                <article key={service.title} className="da-card da-card-hover da-reveal flex flex-col p-6">
+                  <span className="inline-flex size-11 items-center justify-center rounded-full border border-slate-200 bg-accent-soft text-accent">
+                    <service.icon className="size-5" />
+                  </span>
+                  <h3 className="da-title mt-4 text-[18px]">{service.title}</h3>
+                  <ul className="mt-5 space-y-2.5 border-t border-slate-200/70 pt-4">
+                    {service.points.map((point) => (
+                      <li key={point} className="flex items-start gap-2.5 text-[14px] leading-snug text-slate-900">
+                        <CheckCircle className="mt-0.5 size-4 shrink-0 text-accent" />
+                        <span>{point}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </article>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* Methodology Section */}
-        <section className="px-6 py-16 md:py-24">
-          <div className="mx-auto max-w-3xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl mb-6">
-              Ma méthode de travail
-            </h2>
-            <p className="text-lg leading-relaxed text-slate-600">
-              Autonome et autodidacte, j'aime relever de nouveaux défis techniques et m'adapter à des besoins variés. 
-              Mon objectif : vous proposer des solutions concrètes, fiables et taillées sur mesure pour votre projet.
+        {/* -------------------------------------------------------- Méthode */}
+        <section className="border-t border-slate-200 px-6 py-16 sm:py-20">
+          <div className="da-reveal mx-auto max-w-[620px] text-center">
+            <p className="da-eyebrow">L&apos;approche</p>
+            <h2 className="da-title mt-2 text-[26px] sm:text-[32px]">Ma méthode de travail</h2>
+            <p className="mt-4 text-[16px] leading-relaxed text-slate-500">
+              Autonome et autodidacte, j&apos;aime relever de nouveaux défis techniques et m&apos;adapter à des besoins
+              variés. Mon objectif : vous proposer des solutions concrètes, fiables et taillées sur mesure pour votre
+              projet.
             </p>
           </div>
         </section>

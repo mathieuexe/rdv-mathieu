@@ -10,75 +10,57 @@ interface MobileMenuProps {
   isAdmin: boolean;
 }
 
+const linkClass =
+  "text-[15px] font-medium text-slate-700 transition-colors hover:text-accent";
+
 export function MobileMenu({ isAuthenticated, isAdmin }: MobileMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="md:hidden flex items-center">
-      <button 
+    <div className="flex items-center md:hidden">
+      <button
         onClick={() => setIsOpen(!isOpen)}
-        className="p-2 text-slate-700 hover:text-slate-900"
+        aria-label={isOpen ? "Fermer le menu" : "Ouvrir le menu"}
+        className="flex size-10 items-center justify-center rounded-xl border border-slate-200 text-slate-700 transition-colors hover:bg-accent-soft hover:text-accent"
       >
-        {isOpen ? <X className="size-6" /> : <Menu className="size-6" />}
+        {isOpen ? <X className="size-5" /> : <Menu className="size-5" />}
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 border-b border-slate-200 bg-white p-4 shadow-lg flex flex-col gap-4">
-          <Link 
-            href="/" 
-            className="font-medium text-slate-700 hover:text-blue-600"
-            onClick={() => setIsOpen(false)}
-          >
+        <div className="absolute left-0 right-0 top-full flex flex-col gap-4 border-b border-slate-200 bg-white px-6 py-6 shadow-lg">
+          <Link href="/" className={linkClass} onClick={() => setIsOpen(false)}>
             Accueil
           </Link>
-          <Link 
-            href="/qui-suis-je" 
-            className="font-medium text-slate-700 hover:text-blue-600"
-            onClick={() => setIsOpen(false)}
-          >
+          <Link href="/qui-suis-je" className={linkClass} onClick={() => setIsOpen(false)}>
             Qui suis-je ?
           </Link>
-          
+
           {isAuthenticated ? (
             <>
-              <div className="font-semibold text-slate-900 border-t border-slate-100 pt-4 mt-2">
-                Mon compte
-              </div>
-              <Link 
-                href="/compte" 
-                className="font-medium text-slate-700 hover:text-blue-600 pl-4"
-                onClick={() => setIsOpen(false)}
-              >
+              <p className="da-eyebrow mt-2 border-t border-slate-200 pt-4">Mon compte</p>
+              <Link href="/compte" className={`${linkClass} pl-1`} onClick={() => setIsOpen(false)}>
                 Mes rendez-vous
               </Link>
-              <Link 
-                href="/compte/parametres" 
-                className="font-medium text-slate-700 hover:text-blue-600 pl-4"
-                onClick={() => setIsOpen(false)}
-              >
+              <Link href="/compte/parametres" className={`${linkClass} pl-1`} onClick={() => setIsOpen(false)}>
                 Paramètres
               </Link>
-              <Link 
-                href="/compte/logs" 
-                className="font-medium text-slate-700 hover:text-blue-600 pl-4"
-                onClick={() => setIsOpen(false)}
-              >
+              <Link href="/compte/logs" className={`${linkClass} pl-1`} onClick={() => setIsOpen(false)}>
                 Logs d&apos;activité
               </Link>
-              
+
               <form action={logoutAccountAction}>
                 <button
                   type="submit"
-                  className="font-medium text-rose-600 hover:text-rose-700 pl-4 text-left w-full"
+                  className="w-full pl-1 text-left text-[15px] font-medium text-rose-600 transition-colors hover:text-rose-700"
                 >
                   Se déconnecter
                 </button>
               </form>
 
               {isAdmin && (
-                <Link 
-                  href="/admin" 
-                  className="font-medium text-white bg-rose-600 px-4 py-2 rounded-md text-center mt-4"
+                <Link
+                  href="/admin"
+                  className="da-btn da-btn-sm mt-2 w-full rounded-xl bg-rose-600 font-semibold text-white hover:bg-rose-700"
                   onClick={() => setIsOpen(false)}
                 >
                   AdminPanel
@@ -87,16 +69,12 @@ export function MobileMenu({ isAuthenticated, isAdmin }: MobileMenuProps) {
             </>
           ) : (
             <>
-              <Link 
-                href="/inscription" 
-                className="font-medium text-slate-700 hover:text-blue-600"
-                onClick={() => setIsOpen(false)}
-              >
+              <Link href="/inscription" className={linkClass} onClick={() => setIsOpen(false)}>
                 S&apos;inscrire
               </Link>
-              <Link 
-                href="/connexion" 
-                className="font-medium text-white bg-blue-600 px-4 py-2 rounded-md text-center mt-2"
+              <Link
+                href="/connexion"
+                className="da-btn da-btn-sm da-btn-primary mt-1 w-full"
                 onClick={() => setIsOpen(false)}
               >
                 Se connecter

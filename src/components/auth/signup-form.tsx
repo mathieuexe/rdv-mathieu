@@ -80,10 +80,10 @@ export function SignUpForm({ action }: SignUpFormProps) {
     <div className="w-full">
       <form
         action={formAction}
-        className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8"
+        className="da-card p-6 sm:p-8"
       >
         <div className="grid gap-4 sm:grid-cols-2">
-          <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+          <label className="block space-y-2 text-[14px] font-medium text-slate-900">
             <span>Prénom</span>
             <div className="relative">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -94,11 +94,11 @@ export function SignUpForm({ action }: SignUpFormProps) {
                 type="text"
                 required
                 placeholder="Prénom"
-                className="w-full rounded-md border border-slate-300 bg-white py-2.5 pl-9 pr-4 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                className="da-field py-2.5 pl-9 pr-4"
               />
             </div>
           </label>
-          <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+          <label className="block space-y-2 text-[14px] font-medium text-slate-900">
             <span>Nom</span>
             <div className="relative">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -109,14 +109,14 @@ export function SignUpForm({ action }: SignUpFormProps) {
                 type="text"
                 required
                 placeholder="Nom"
-                className="w-full rounded-md border border-slate-300 bg-white py-2.5 pl-9 pr-4 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                className="da-field py-2.5 pl-9 pr-4"
               />
             </div>
           </label>
         </div>
 
         <div className="mt-4 space-y-4">
-          <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+          <label className="block space-y-2 text-[14px] font-medium text-slate-900">
             <span>Adresse email</span>
             <div className="relative">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -127,12 +127,12 @@ export function SignUpForm({ action }: SignUpFormProps) {
                 type="email"
                 required
                 placeholder="Ex: jean.dupont@email.com"
-                className="w-full rounded-md border border-slate-300 bg-white py-2.5 pl-9 pr-4 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                className="da-field py-2.5 pl-9 pr-4"
               />
             </div>
           </label>
 
-          <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+          <label className="block space-y-2 text-[14px] font-medium text-slate-900">
             <span>Mot de passe</span>
             <div className="relative">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -146,7 +146,7 @@ export function SignUpForm({ action }: SignUpFormProps) {
                 onChange={(event) => setPassword(event.target.value)}
                 autoComplete="new-password"
                 placeholder="Mot de passe"
-                className="w-full rounded-md border border-slate-300 bg-white py-2.5 pl-9 pr-10 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                className="da-field py-2.5 pl-9 pr-10"
               />
               <button
                 type="button"
@@ -159,7 +159,7 @@ export function SignUpForm({ action }: SignUpFormProps) {
             </div>
           </label>
 
-          <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+          <label className="block space-y-2 text-[14px] font-medium text-slate-900">
             <span>Confirmer le mot de passe</span>
             <div className="relative">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -173,14 +173,14 @@ export function SignUpForm({ action }: SignUpFormProps) {
                 onChange={(event) => setConfirmPassword(event.target.value)}
                 autoComplete="new-password"
                 placeholder="Confirmation"
-                className="w-full rounded-md border border-slate-300 bg-white py-2.5 pl-9 pr-10 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                className="da-field py-2.5 pl-9 pr-10"
               />
             </div>
           </label>
         </div>
 
         {password.length > 0 && (
-          <div className="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-4 transition-all">
+          <div className="da-card mt-5 bg-slate-50 p-4">
             <div className="flex items-center justify-between text-xs font-medium">
               <span className="text-slate-700">Niveau de sécurité</span>
               <span className={passedCount === 5 ? "text-emerald-600" : passedCount >= 3 ? "text-amber-600" : "text-rose-600"}>
@@ -210,7 +210,7 @@ export function SignUpForm({ action }: SignUpFormProps) {
         )}
 
         {state.message ? (
-          <div className={`mt-5 rounded-md p-3 text-sm ${state.status === "error" ? "bg-rose-50 text-rose-700 border border-rose-200" : "bg-blue-50 text-blue-700 border border-blue-200"}`}>
+          <div className={`mt-5 rounded-xl p-3 text-[14px] ${state.status === "error" ? "border border-rose-200 bg-rose-50 text-rose-700" : "border border-blue-200 bg-accent-soft text-accent"}`}>
             {state.message}
           </div>
         ) : null}
@@ -218,7 +218,7 @@ export function SignUpForm({ action }: SignUpFormProps) {
         <button
           type="submit"
           disabled={pending || passedCount < 5 || !passwordsMatch}
-          className="mt-6 flex w-full items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+          className="da-btn da-btn-primary da-btn-sm mt-6 w-full"
         >
           {pending ? <LoaderCircle className="size-4 animate-spin" /> : null}
           <span>{pending ? "Inscription..." : "Créer mon compte"}</span>
@@ -226,14 +226,14 @@ export function SignUpForm({ action }: SignUpFormProps) {
 
         <div className="mt-6 flex items-center gap-4">
           <div className="h-px flex-1 bg-slate-200" />
-          <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">OU</span>
+          <span className="da-eyebrow text-[12px]">OU</span>
           <div className="h-px flex-1 bg-slate-200" />
         </div>
 
         <button
           type="button"
           onClick={handleGoogleSignup}
-          className="mt-6 flex w-full items-center justify-center gap-3 rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+          className="da-btn da-btn-quiet da-btn-sm mt-6 w-full font-medium"
         >
           <CustomGoogleIcon />
           <span>S&apos;inscrire avec Google</span>
@@ -241,9 +241,9 @@ export function SignUpForm({ action }: SignUpFormProps) {
       </form>
 
       <div className="mt-8 text-center">
-        <p className="text-sm text-slate-600">
+        <p className="text-[15px] text-slate-500">
           Vous avez déjà un compte ?{" "}
-          <Link href="/connexion" className="font-semibold text-blue-600 hover:text-blue-700 hover:underline">
+          <Link href="/connexion" className="font-semibold text-accent transition-colors hover:text-accent-hover">
             Connectez-vous
           </Link>
         </p>

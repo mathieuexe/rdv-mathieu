@@ -9,16 +9,29 @@ export async function PublicFooter() {
   return (
     <>
       <footer className="border-t border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-4 px-6 py-6 text-sm text-slate-500 sm:flex-row">
-          <p>Copyright © {new Date().getFullYear()} RDV Mathieu. Tous droits réservés.</p>
-          <div className="flex items-center gap-6">
-            <Link href="/mentions-legales" className="transition-colors hover:text-slate-900">
+        <div className="mx-auto flex max-w-[1120px] flex-col items-center gap-4 px-6 py-10 text-center">
+          <span className="flex size-9 items-center justify-center rounded-full border border-slate-200 bg-accent-soft font-serif text-sm font-black text-accent">
+            M
+          </span>
+
+          <p className="text-[13px] font-medium uppercase tracking-[0.1em] text-slate-900">Mathieu Cerenzia</p>
+          <p className="text-sm text-slate-500">Prise de rendez-vous en ligne, développement web et automatisation.</p>
+
+          <div className="mt-2 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-slate-500">
+            <Link href="/qui-suis-je" className="transition-colors hover:text-accent">
+              Qui suis-je ?
+            </Link>
+            <Link href="/mentions-legales" className="transition-colors hover:text-accent">
               Mentions légales
             </Link>
-            <Link href="/politique-cookies-securite" className="transition-colors hover:text-slate-900">
+            <Link href="/politique-cookies-securite" className="transition-colors hover:text-accent">
               Politique cookies et sécurité
             </Link>
           </div>
+
+          <p className="mt-2 text-[13px] text-slate-400">
+            © {new Date().getFullYear()} Mathieu Cerenzia • Tous droits réservés
+          </p>
         </div>
       </footer>
 

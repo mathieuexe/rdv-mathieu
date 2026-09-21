@@ -80,27 +80,27 @@ export default async function AccountPage() {
       description="Consultez l'historique de vos demandes, leur statut de validation, et gérez vos réservations à venir."
     >
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="da-card p-5">
           <div className="flex items-center gap-3 text-slate-600 mb-3">
             <CalendarDays className="size-5 text-blue-600" />
             <h3 className="text-sm font-medium">Prochain rendez-vous</h3>
           </div>
           {nextAppointment ? (
             <div>
-              <p className="text-lg font-bold text-slate-900">
+              <p className="da-title text-[18px]">
                 {formatDateTimeFr(nextAppointment.startsAt, { dateStyle: "short", timeStyle: "short" })}
               </p>
               <p className="text-sm text-slate-500 truncate mt-0.5">{nextAppointment.category?.title ?? "Rendez-vous"}</p>
             </div>
           ) : (
             <div>
-              <p className="text-lg font-bold text-slate-900">Aucun</p>
+              <p className="da-title text-[18px]">Aucun</p>
               <p className="text-sm text-slate-500 mt-0.5">Pas de RDV à venir</p>
             </div>
           )}
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="da-card p-5">
           <div className="flex items-center gap-3 text-slate-600 mb-3">
             <CalendarCheck className="size-5 text-emerald-600" />
             <h3 className="text-sm font-medium">Confirmés</h3>
@@ -108,7 +108,7 @@ export default async function AccountPage() {
           <p className="text-2xl font-bold text-slate-900">{acceptedCount}</p>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="da-card p-5">
           <div className="flex items-center gap-3 text-slate-600 mb-3">
             <CalendarClock className="size-5 text-amber-600" />
             <h3 className="text-sm font-medium">En attente</h3>
@@ -116,7 +116,7 @@ export default async function AccountPage() {
           <p className="text-2xl font-bold text-slate-900">{pendingCount}</p>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="da-card p-5">
           <div className="flex items-center gap-3 text-slate-600 mb-3">
             <CalendarX className="size-5 text-slate-400" />
             <h3 className="text-sm font-medium">Annulés</h3>
@@ -146,7 +146,7 @@ export default async function AccountPage() {
       </div>
 
       {appointments.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-slate-300 bg-white px-6 py-16 text-center shadow-sm">
+        <div className="da-card border-dashed px-6 py-16 text-center">
           <CalendarDays className="mx-auto size-12 text-slate-300 mb-4" />
           <p className="text-lg font-medium text-slate-900">Aucun rendez-vous n&apos;est associé à ce compte.</p>
           <p className="mt-2 text-sm text-slate-500">Vos prochaines réservations apparaîtront ici.</p>
@@ -161,12 +161,12 @@ export default async function AccountPage() {
             return (
               <article
                 key={appointment.id}
-                className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden"
+                className="da-card overflow-hidden"
               >
                 <div className="border-b border-slate-100 bg-slate-50 px-6 py-4">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
-                      <h3 className="text-lg font-bold text-slate-900">
+                      <h3 className="da-title text-[18px]">
                         {formatDateTimeFr(appointment.startsAt, { dateStyle: "full", timeStyle: "short" })}
                       </h3>
                       <p className="text-sm text-slate-600 mt-1">

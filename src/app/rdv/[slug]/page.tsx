@@ -43,20 +43,19 @@ export default async function BookingCategoryPage({
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
+    <div className="flex min-h-screen flex-col bg-white text-slate-900">
       <PublicHeader />
 
-      <main className="flex-1 px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-6xl">
+      <main className="flex-1 px-6 py-10 sm:py-14">
+        <div className="mx-auto max-w-[1120px]">
           {!bookingState.available ? (
-            <section className="rounded-xl border border-amber-200 bg-amber-50 p-6 shadow-sm sm:p-8">
-              <div className="flex items-start gap-3">
-                <TriangleAlert className="mt-1 size-5 text-amber-600" />
-                <div>
-                  <h2 className="text-xl font-bold text-amber-900">{bookingState.title}</h2>
-                  <p className="mt-2 max-w-2xl text-sm leading-6 text-amber-800">{bookingState.message}</p>
-                </div>
-              </div>
+            <section className="da-card mx-auto max-w-[620px] p-8 text-center">
+              <span className="mx-auto flex size-14 items-center justify-center rounded-full border border-amber-200 bg-amber-50 text-amber-600">
+                <TriangleAlert className="size-7" />
+              </span>
+              <p className="da-eyebrow mt-5">Réservation indisponible</p>
+              <h2 className="da-title mt-2 text-[24px] sm:text-[28px]">{bookingState.title}</h2>
+              <p className="mt-4 text-[15px] leading-relaxed text-slate-500">{bookingState.message}</p>
             </section>
           ) : (
             <BookingForm

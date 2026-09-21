@@ -233,47 +233,47 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
 
   return (
     <div className="mx-auto max-w-[1120px] space-y-6">
-      <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
+      <section className="overflow-hidden rounded-xl border border-slate-200 bg-white">
         <div className="grid lg:grid-cols-[280px_minmax(0,1fr)_240px]">
           <aside className="border-b border-slate-200 bg-white p-6 lg:border-r lg:border-b-0 lg:p-8">
             {category.bannerImageUrl ? (
-              <div className="relative -m-6 mb-6 overflow-hidden border-b border-slate-200 bg-slate-100 rounded-t-2xl lg:-m-8 lg:mb-8 lg:rounded-tr-none">
+              <div className="relative -m-6 mb-6 overflow-hidden border-b border-slate-200 bg-slate-50 rounded-t-xl lg:-m-8 lg:mb-8 lg:rounded-tr-none">
                 <div className="relative h-[240px] w-full">
                   <Image src={category.bannerImageUrl} alt="" fill sizes="(max-width: 1024px) 100vw, 280px" className="object-cover object-center" priority />
                 </div>
               </div>
             ) : (
-              <div className="-m-6 mb-6 h-[240px] rounded-t-2xl border-b border-slate-200 bg-slate-100 lg:-m-8 lg:mb-8 lg:rounded-tr-none" />
+              <div className="-m-6 mb-6 h-[240px] rounded-t-xl border-b border-slate-200 bg-slate-50 lg:-m-8 lg:mb-8 lg:rounded-tr-none" />
             )}
 
-            <div className="relative flex size-16 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-slate-100 text-sm font-semibold text-slate-900">
+            <div className="relative flex size-16 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-accent-soft text-sm font-semibold text-accent">
               {category.thumbnailImageUrl ? (
                 <Image src={category.thumbnailImageUrl} alt="" fill priority sizes="64px" className="object-cover" />
               ) : (
                 initials || "RDV"
               )}
             </div>
-            <p className="mt-4 text-lg font-bold text-slate-900">{category.title}</p>
-            <p className="mt-2 text-sm leading-6 text-slate-500">{category.description}</p>
+            <p className="da-title mt-4 text-[20px]">{category.title}</p>
+            <p className="mt-2 text-[14px] leading-relaxed text-slate-500">{category.description}</p>
 
-            <div className="mt-6 space-y-3 text-sm text-slate-500">
+            <div className="mt-6 space-y-3 border-t border-slate-200/70 pt-5 text-[14px] text-slate-500">
               <div className="flex items-start gap-3">
-                <CheckSquare className="mt-0.5 size-4 shrink-0 text-slate-500" />
+                <CheckSquare className="mt-0.5 size-4 shrink-0 text-accent" />
                 <span>{category.customMessage || "Choisissez le créneau qui vous convient."}</span>
               </div>
               <div className="flex items-center gap-3">
-                <Clock className="size-4 shrink-0 text-slate-500" />
+                <Clock className="size-4 shrink-0 text-accent" />
                 <span>{category.durationMinutes} min</span>
               </div>
               <div className="flex items-center gap-3">
-                {category.appointmentMode === "discord" && <Globe className="size-4 shrink-0 text-slate-500" />}
-                {category.appointmentMode === "physique" && <Globe className="size-4 shrink-0 text-slate-500" />}
-                {category.appointmentMode === "visioconference" && <Video className="size-4 shrink-0 text-slate-500" />}
-                {category.appointmentMode === "telephone" && <Video className="size-4 shrink-0 text-slate-500" />}
+                {category.appointmentMode === "discord" && <Globe className="size-4 shrink-0 text-accent" />}
+                {category.appointmentMode === "physique" && <Globe className="size-4 shrink-0 text-accent" />}
+                {category.appointmentMode === "visioconference" && <Video className="size-4 shrink-0 text-accent" />}
+                {category.appointmentMode === "telephone" && <Video className="size-4 shrink-0 text-accent" />}
                 <span>{formatAppointmentMode(category.appointmentMode)}</span>
               </div>
               <div className="flex items-center gap-3">
-                <Globe className="size-4 shrink-0 text-slate-500" />
+                <Globe className="size-4 shrink-0 text-accent" />
                 <span>Europe, Paris (24h)</span>
               </div>
             </div>
@@ -289,16 +289,16 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
             {activeStep === 1 ? (
               <>
                 <div className="flex items-center gap-3">
-                  <CalendarDays className="size-5 text-slate-500 shrink-0" />
+                  <CalendarDays className="size-5 shrink-0 text-accent" />
                   <div>
-                    <p className="text-base sm:text-lg font-semibold text-slate-900">Sélectionnez la date et l&apos;heure</p>
-                    <p className="text-xs sm:text-sm text-slate-500">Choisissez d&apos;abord un jour, puis un créneau disponible.</p>
+                    <p className="da-title text-[17px] sm:text-[19px]">Sélectionnez la date et l&apos;heure</p>
+                    <p className="text-[13px] text-slate-500 sm:text-[14px]">Choisissez d&apos;abord un jour, puis un créneau disponible.</p>
                   </div>
                 </div>
 
                 <div className="mt-6">
                   <div className="flex items-center justify-between">
-                    <p className="text-sm font-semibold capitalize text-slate-900">
+                    <p className="text-[15px] font-semibold capitalize text-slate-900">
                       {formatMonthLabel(monthKeys[visibleMonthIndex] ?? visibleMonthKey)}
                     </p>
                     <div className="flex items-center gap-2">
@@ -306,7 +306,7 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                         type="button"
                         onClick={() => setVisibleMonthKey(monthKeys[Math.max(0, visibleMonthIndex - 1)] ?? visibleMonthKey)}
                         disabled={visibleMonthIndex === 0}
-                        className="flex size-8 sm:size-9 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition-all duration-150 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+                        className="flex size-8 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition-all hover:border-accent hover:bg-accent-soft hover:text-accent disabled:cursor-not-allowed disabled:opacity-40 sm:size-9"
                       >
                         <ChevronLeft className="size-4" />
                       </button>
@@ -316,14 +316,14 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                           setVisibleMonthKey(monthKeys[Math.min(monthKeys.length - 1, visibleMonthIndex + 1)] ?? visibleMonthKey)
                         }
                         disabled={visibleMonthIndex >= monthKeys.length - 1}
-                        className="flex size-8 sm:size-9 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition-all duration-150 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+                        className="flex size-8 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition-all hover:border-accent hover:bg-accent-soft hover:text-accent disabled:cursor-not-allowed disabled:opacity-40 sm:size-9"
                       >
                         <ChevronRight className="size-4" />
                       </button>
                     </div>
                   </div>
 
-                  <div className="mt-6 grid grid-cols-7 gap-1 sm:gap-2 text-center text-[10px] sm:text-xs uppercase tracking-wide text-slate-400">
+                  <div className="mt-6 grid grid-cols-7 gap-1 text-center text-[10px] uppercase tracking-[0.1em] text-slate-400 sm:gap-2 sm:text-[11px]">
                     {weekdayHeaders.map((label) => (
                       <div key={label} className="hidden sm:block">{label}</div>
                     ))}
@@ -354,12 +354,12 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                             disabled={isDisabled}
                             onClick={() => handleSelectDate(cell.key)}
                             className={cn(
-                              "flex size-8 sm:size-10 items-center justify-center rounded-lg text-sm transition-all duration-150",
-                            isDisabled && isPastDay && "cursor-not-allowed bg-slate-100 text-slate-400",
+                              "flex size-8 items-center justify-center rounded-xl text-sm font-medium transition-all sm:size-10",
+                            isDisabled && isPastDay && "cursor-not-allowed bg-slate-50 text-slate-300",
                             isDisabled && !isPastDay && !isBlackoutDay && "cursor-not-allowed text-slate-300",
-                            isDisabled && isBlackoutDay && "cursor-not-allowed bg-red-100 text-red-700",
-                              !isDisabled && !isSelected && "bg-slate-100 text-slate-700 hover:bg-slate-200",
-                              isSelected && "bg-blue-600 text-white shadow-sm",
+                            isDisabled && isBlackoutDay && "cursor-not-allowed border border-rose-200 bg-rose-50 text-rose-600",
+                              !isDisabled && !isSelected && "border border-slate-200 bg-white text-slate-900 hover:border-accent hover:bg-accent-soft hover:text-accent",
+                              isSelected && "border border-accent bg-accent text-white",
                             )}
                           >
                             {cell.dayNumber}
@@ -369,7 +369,7 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                     })}
                   </div>
 
-                  <div className="mt-8 inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-500">
+                  <div className="da-pill mt-8 py-1.5 text-[13px]">
                     Heure d&apos;Europe, Paris (24h)
                   </div>
                 </div>
@@ -377,7 +377,7 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
             ) : activeStep === 2 ? (
               <div className="mx-auto max-w-2xl space-y-5">
                 <div className="space-y-1">
-                  <p className="text-lg font-semibold text-slate-900">Vos informations</p>
+                  <p className="da-title text-[19px]">Vos informations</p>
                   <p className="text-sm text-slate-500">
                     {activeSelectedSlot
                       ? `Créneau choisi : ${formatDateTimeFr(activeSelectedSlot, { dateStyle: "full", timeStyle: "short" })}`
@@ -386,32 +386,32 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <label className="space-y-2 text-sm font-medium text-slate-700">
+                  <label className="space-y-2 text-[14px] font-medium text-slate-900">
                     <span>Prénom</span>
                     <input
                       value={firstName}
                       onChange={(event) => setFirstName(event.target.value)}
-                      className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      className="da-field"
                     />
                   </label>
 
-                  <label className="space-y-2 text-sm font-medium text-slate-700">
+                  <label className="space-y-2 text-[14px] font-medium text-slate-900">
                     <span>Nom</span>
                     <input
                       value={lastName}
                       onChange={(event) => setLastName(event.target.value)}
-                      className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      className="da-field"
                     />
                   </label>
                 </div>
 
-                <label className="space-y-2 text-sm font-medium text-slate-700">
+                <label className="space-y-2 text-[14px] font-medium text-slate-900">
                   <span>Email</span>
                   <input
                     type="email"
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
-                    className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    className="da-field"
                   />
                 </label>
 
@@ -422,7 +422,7 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                 ) : null}
 
                 {shouldSuggestSavedPhone ? (
-                  <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm leading-7 text-slate-600">
+                  <div className="da-card bg-slate-50 px-5 py-4 text-[14px] leading-relaxed text-slate-500">
                     <p className="font-medium text-slate-900">
                       Lors de votre dernier rendez-vous téléphonique, vous aviez utilisé le numéro de téléphone{" "}
                       <span className="font-semibold">{initialUser?.phone}</span>. Est-ce toujours correct ?
@@ -435,10 +435,10 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                           setPhoneConfirmation("yes");
                         }}
                         className={cn(
-                          "rounded-md border px-4 py-2 text-sm font-medium transition-all duration-150",
+                          "rounded-xl border px-4 py-2 text-sm font-medium transition-all",
                           phoneConfirmation === "yes"
-                            ? "border-blue-600 bg-blue-600 text-white"
-                            : "border-slate-200 bg-white text-slate-700 hover:border-slate-400",
+                            ? "border-accent bg-accent text-white"
+                            : "border-slate-200 bg-white text-slate-700 hover:border-accent hover:text-accent",
                         )}
                       >
                         Oui
@@ -450,10 +450,10 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                           setPhoneConfirmation("no");
                         }}
                         className={cn(
-                          "rounded-md border px-4 py-2 text-sm font-medium transition-all duration-150",
+                          "rounded-xl border px-4 py-2 text-sm font-medium transition-all",
                           phoneConfirmation === "no"
-                            ? "border-blue-600 bg-blue-600 text-white"
-                            : "border-slate-200 bg-white text-slate-700 hover:border-slate-400",
+                            ? "border-accent bg-accent text-white"
+                            : "border-slate-200 bg-white text-slate-700 hover:border-accent hover:text-accent",
                         )}
                       >
                         Non
@@ -467,7 +467,7 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                   </div>
                 ) : null}
 
-                <label className="space-y-2 text-sm font-medium text-slate-700">
+                <label className="space-y-2 text-[14px] font-medium text-slate-900">
                   <span>Téléphone</span>
                   <PhoneInput
                     value={phone}
@@ -476,51 +476,51 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                 </label>
 
                 {!isAuthenticated ? (
-                  <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm leading-7 text-slate-600">
+                  <div className="da-card bg-slate-50 px-5 py-4 text-[14px] leading-relaxed text-slate-500">
                     <p className="font-medium text-slate-900">Avez-vous un compte ?</p>
                     <p className="mt-2">
                       Ce n&apos;est pas obligatoire. Cela sert uniquement à retrouver l&apos;historique de vos rendez-vous et à
                       annuler un rendez-vous en ligne si besoin.
                     </p>
                     <div className="mt-3 flex flex-wrap gap-4">
-                      <a href="/connexion" className="font-medium text-slate-900 underline underline-offset-4">
+                      <a href="/connexion" className="font-semibold text-accent underline underline-offset-4 transition-colors hover:text-accent-hover">
                         Connectez-vous
                       </a>
-                      <a href="/inscription" className="font-medium text-slate-900 underline underline-offset-4">
+                      <a href="/inscription" className="font-semibold text-accent underline underline-offset-4 transition-colors hover:text-accent-hover">
                         Inscrivez-vous
                       </a>
                     </div>
                   </div>
                 ) : null}
 
-                <label className="space-y-2 text-sm font-medium text-slate-700">
+                <label className="space-y-2 text-[14px] font-medium text-slate-900">
                   <span>Message optionnel</span>
                   <textarea
                     rows={4}
                     value={message}
                     onChange={(event) => setMessage(event.target.value)}
-                    className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    className="da-field"
                   />
                 </label>
 
                 {category.customFields && category.customFields.length > 0 && (
                   <div className="space-y-4 pt-2 border-t border-slate-100">
-                    <p className="text-sm font-semibold text-slate-900">Informations complémentaires</p>
+                    <p className="da-eyebrow">Informations complémentaires</p>
                     {category.customFields.map((field) => (
-                      <label key={field.id} className="block space-y-2 text-sm font-medium text-slate-700">
+                      <label key={field.id} className="block space-y-2 text-[14px] font-medium text-slate-900">
                         <span>{field.label} {field.required && <span className="text-rose-600">*</span>}</span>
                         {field.type === "text" ? (
                           <input
                             value={customFieldResponses[field.id] || ""}
                             onChange={(e) => setCustomFieldResponses({ ...customFieldResponses, [field.id]: e.target.value })}
                             placeholder={field.placeholder || ""}
-                            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                            className="da-field"
                           />
                         ) : (
                           <select
                             value={customFieldResponses[field.id] || ""}
                             onChange={(e) => setCustomFieldResponses({ ...customFieldResponses, [field.id]: e.target.value })}
-                            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                            className="da-field"
                           >
                             <option value="" disabled>Sélectionnez une option...</option>
                             {field.options?.map((opt, i) => (
@@ -533,7 +533,9 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                   </div>
                 )}
 
-                {error ? <p className="text-sm font-medium text-rose-600">{error}</p> : null}
+                {error ? (
+                  <p className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-[14px] font-medium text-rose-600">{error}</p>
+                ) : null}
 
                 <div className="flex gap-3">
                   <button
@@ -542,14 +544,14 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                       setCurrentStep(1);
                       setError("");
                     }}
-                    className="inline-flex flex-1 items-center justify-center rounded-md border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 transition-all duration-150 hover:bg-slate-50"
+                    className="da-btn da-btn-quiet da-btn-sm flex-1"
                   >
                     Modifier le créneau
                   </button>
                   <button
                     type="button"
                     onClick={handleContinueToRecap}
-                    className="inline-flex flex-1 items-center justify-center rounded-md bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition-all duration-150 hover:bg-blue-700"
+                    className="da-btn da-btn-primary da-btn-sm flex-1"
                   >
                     Continuer
                   </button>
@@ -557,8 +559,8 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
               </div>
             ) : (
               <div className="mx-auto max-w-2xl space-y-5">
-                <div className="rounded-xl border border-slate-200 bg-slate-50 px-5 py-5">
-                  <p className="text-sm font-semibold text-slate-900">Récapitulatif</p>
+                <div className="da-card bg-slate-50 px-5 py-5">
+                  <p className="da-eyebrow">Récapitulatif</p>
                   <dl className="mt-4 space-y-3 text-sm text-slate-600">
                     <div>
                       <dt className="font-medium text-slate-900">Catégorie</dt>
@@ -600,9 +602,9 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                   </dl>
                 </div>
 
-                <div className="rounded-xl border border-slate-200 bg-slate-50 px-5 py-5 text-sm text-slate-800">
+                <div className="da-card bg-slate-50 px-5 py-5 text-[14px] text-slate-700">
                   <div className="flex items-center gap-2 font-medium">
-                    <CheckSquare className="size-4 text-slate-500" />
+                    <CheckSquare className="size-4 text-accent" />
                     <span>Confirmation</span>
                   </div>
                   <p className="mt-2 text-slate-600">
@@ -610,7 +612,9 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                   </p>
                 </div>
 
-                {error ? <p className="text-sm font-medium text-rose-600">{error}</p> : null}
+                {error ? (
+                  <p className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-[14px] font-medium text-rose-600">{error}</p>
+                ) : null}
 
                 <div className="flex gap-3">
                   <button
@@ -619,7 +623,7 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                       setCurrentStep(2);
                       setError("");
                     }}
-                    className="inline-flex flex-1 items-center justify-center rounded-md border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 transition-all duration-150 hover:bg-slate-50"
+                    className="da-btn da-btn-quiet da-btn-sm flex-1"
                   >
                     Modifier les informations
                   </button>
@@ -627,7 +631,7 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                     type="button"
                     onClick={handleSubmit}
                     disabled={isSubmitting}
-                    className="inline-flex flex-1 items-center justify-center gap-2 rounded-md bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition-all duration-150 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="da-btn da-btn-primary da-btn-sm flex-1"
                   >
                     {isSubmitting ? <LoaderCircle className="size-4 animate-spin" /> : null}
                     <span>{isSubmitting ? "Confirmation..." : "Confirmer la demande"}</span>
@@ -640,13 +644,13 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
           {activeStep === 1 ? (
             <section className="p-6 lg:p-8">
               <div className="mb-6 space-y-4">
-                <p className="text-sm font-semibold text-slate-900">Créneaux horaires</p>
-                <label className="flex cursor-pointer items-center justify-between rounded-lg border border-slate-200 bg-slate-50 p-3 transition-colors hover:bg-slate-100">
-                  <span className="text-xs font-medium text-slate-700">Masquer les indisponibles</span>
+                <p className="da-eyebrow">Créneaux horaires</p>
+                <label className="flex cursor-pointer items-center justify-between rounded-xl border border-slate-200 bg-white p-3 transition-colors hover:border-slate-300">
+                  <span className="text-[13px] font-medium text-slate-900">Masquer les indisponibles</span>
                   <div
                     className={cn(
                       "relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors",
-                      showOnlyAvailable ? "bg-blue-600" : "bg-slate-300"
+                      showOnlyAvailable ? "bg-accent" : "bg-slate-300"
                     )}
                     onClick={(e) => {
                       e.preventDefault();
@@ -677,11 +681,11 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                         disabled={slot.isBlocked}
                         onClick={() => handleSelectSlot(slot.start)}
                         className={cn(
-                          "flex w-full items-center justify-center rounded-lg border border-slate-200 px-4 py-3 text-sm font-medium transition-all duration-150",
+                          "flex w-full items-center justify-center rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium transition-all",
                           slot.isBlocked
                             ? "cursor-not-allowed bg-slate-50 text-slate-300"
-                            : "bg-white text-slate-700 hover:border-blue-600 hover:text-blue-600",
-                          active && "border-blue-600 bg-blue-600 text-white hover:bg-blue-700 hover:text-white hover:border-blue-700",
+                            : "bg-white text-slate-900 hover:-translate-y-0.5 hover:border-accent hover:text-accent hover:shadow-[0_8px_24px_rgba(48,128,238,0.15)]",
+                          active && "border-accent bg-accent text-white hover:border-accent-hover hover:bg-accent-hover hover:text-white",
                         )}
                       >
                         {slot.label}
@@ -689,7 +693,7 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                     );
                   })
                 ) : (
-                  <div className="rounded-xl border border-dashed border-slate-200 px-4 py-6 text-sm text-slate-500">
+                  <div className="rounded-xl border border-dashed border-slate-200 px-4 py-8 text-center text-[14px] text-slate-500">
                     {hasAnyAvailableSlot
                       ? "Sélectionnez une date dans le calendrier."
                       : "Aucun créneau n'est disponible pour le moment."}

@@ -28,10 +28,10 @@ export default async function AccountSecurityPage() {
       title="Sécurité"
       description="Votre compte a été créé avec un mot de passe temporaire. Choisissez maintenant un mot de passe personnel et sécurisé."
     >
-      <section className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+      <section className="da-card overflow-hidden">
         <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-6 py-4">
           <KeyRound className="size-5 text-slate-500" />
-          <h2 className="text-lg font-bold text-slate-900">Changer le mot de passe temporaire</h2>
+          <h2 className="da-title text-[18px]">Changer le mot de passe temporaire</h2>
         </div>
         
         <div className="p-6">

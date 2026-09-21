@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Cal_Sans, Inter } from "next/font/google";
+import { Inter, Playfair_Display } from "next/font/google";
 import { TrackingWrapper } from "@/components/tracking/tracking-wrapper";
 import "./globals.css";
 
@@ -10,10 +10,10 @@ const inter = Inter({
   display: "swap",
 });
 
-const calSans = Cal_Sans({
+const playfair = Playfair_Display({
   subsets: ["latin"],
-  weight: "400",
-  variable: "--font-cal-sans",
+  weight: ["400", "700", "900"],
+  variable: "--font-playfair",
   display: "swap",
 });
 
@@ -28,8 +28,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" className={`${inter.variable} ${calSans.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">
+    <html lang="fr" className={`${inter.variable} ${playfair.variable} h-full antialiased`}>
+      <body className="min-h-full flex flex-col bg-white font-sans text-slate-900">
+        <div className="da-scroll-progress" aria-hidden="true" />
         <TrackingWrapper />
         {children}
       </body>

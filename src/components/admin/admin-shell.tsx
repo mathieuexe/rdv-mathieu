@@ -77,12 +77,15 @@ export function AdminShell({ children, session }: AdminShellProps) {
       {/* Sidebar CRM Style */}
       <aside className="fixed inset-y-0 left-0 z-10 hidden w-64 flex-col border-r border-slate-200 bg-white lg:flex">
         <div className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 px-6">
-          <div className="font-semibold tracking-tight text-slate-900">
-            Administration
+          <div className="flex items-center gap-2.5">
+            <span className="flex size-7 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-accent-soft font-serif text-xs font-black text-accent">
+              M
+            </span>
+            <span className="text-[12px] font-medium uppercase tracking-[0.1em] text-slate-900">Administration</span>
           </div>
           <Link
             href="/"
-            className="rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+            className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-accent-soft hover:text-accent"
             title="Voir le site public"
           >
             <ArrowUpRight className="size-4" />
@@ -92,7 +95,7 @@ export function AdminShell({ children, session }: AdminShellProps) {
         <div className="flex-1 overflow-y-auto px-4 py-6">
           <Link
             href="/admin/rendez-vous/nouveau"
-            className="flex w-full items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-blue-700 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(48,128,238,0.25)]"
           >
             <CalendarPlus2 className="size-4" />
             <span>Nouveau RDV</span>
@@ -101,7 +104,7 @@ export function AdminShell({ children, session }: AdminShellProps) {
           <div className="mt-8 space-y-8">
             {navigationSections.map((section) => (
               <div key={section.title}>
-                <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500">{section.title}</p>
+                <p className="da-eyebrow mb-3 text-[11px]">{section.title}</p>
                 <nav className="space-y-1">
                   {section.items.map((item) => {
                     const isActive = currentPath === item.href || currentPath.startsWith(`${item.href}/`);
@@ -112,13 +115,13 @@ export function AdminShell({ children, session }: AdminShellProps) {
                         key={item.href}
                         href={item.href}
                         className={cn(
-                          "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                          "flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors",
                           isActive
-                            ? "bg-blue-50 text-blue-700"
+                            ? "bg-accent-soft text-accent"
                             : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
                         )}
                       >
-                        <Icon className={cn("size-4", isActive ? "text-blue-700" : "text-slate-400")} />
+                        <Icon className={cn("size-4", isActive ? "text-accent" : "text-slate-400")} />
                         {item.label}
                       </Link>
                     );
@@ -144,7 +147,7 @@ export function AdminShell({ children, session }: AdminShellProps) {
             {/* Mobile menu link if needed - hidden on desktop */}
             <Link
                href="/"
-               className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 lg:hidden"
+               className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:border-accent hover:text-accent lg:hidden"
              >
                Site
                <ArrowUpRight className="size-3" />
@@ -157,9 +160,9 @@ export function AdminShell({ children, session }: AdminShellProps) {
                   <p className="text-xs text-slate-500">Administrateur</p>
                 </div>
                 {session.avatarUrl ? (
-                  <img src={session.avatarUrl} alt={session.fullName || "Avatar"} className="size-8 rounded-full object-cover" />
+                  <img src={session.avatarUrl} alt={session.fullName || "Avatar"} className="size-8 rounded-full border border-slate-200 object-cover" />
                 ) : (
-                  <div className="flex size-8 items-center justify-center rounded-full bg-slate-100 text-sm font-medium text-slate-600">
+                  <div className="flex size-8 items-center justify-center rounded-full border border-slate-200 bg-accent-soft text-sm font-medium text-accent">
                     {session.firstName?.charAt(0)}{session.lastName?.charAt(0)}
                   </div>
                 )}

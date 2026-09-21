@@ -114,7 +114,7 @@ export function AdminUserEmailDialog({ userEmail, userFirstName, action }: Admin
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700 disabled:opacity-50"
+                  className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-blue-700 disabled:opacity-50 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(48,128,238,0.25)]"
                 >
                   {isPending ? "Envoi en cours..." : "Envoyer"}
                 </button>

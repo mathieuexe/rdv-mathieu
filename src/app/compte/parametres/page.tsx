@@ -31,10 +31,10 @@ export default async function AccountSettingsPage() {
       title="Paramètres"
       description="Modifiez ici vos informations personnelles utilisées pour vos rendez-vous et votre espace client."
     >
-      <section className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+      <section className="da-card overflow-hidden">
         <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-6 py-4">
           <UserCog className="size-5 text-slate-500" />
-          <h2 className="text-lg font-bold text-slate-900">Informations personnelles</h2>
+          <h2 className="da-title text-[18px]">Informations personnelles</h2>
         </div>
         
         <div className="p-6">
