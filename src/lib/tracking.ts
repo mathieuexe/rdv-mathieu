@@ -9,11 +9,22 @@ export interface TrackingStats {
   deviceStats: { device: string; count: number }[];
 }
 
+const emptyTrackingStats: TrackingStats = {
+  totalViews: 0,
+  uniqueVisitors: 0,
+  averageDuration: 0,
+  topPages: [],
+  topCountries: [],
+  deviceStats: [],
+};
+
 export async function getTrackingStats(days = 30): Promise<TrackingStats> {
   const supabase = getSupabaseAdminClient();
-  
+
+  // Base indisponible (build sans variables d'environnement, par exemple) :
+  // on renvoie des statistiques vides plutôt que de casser le rendu.
   if (!supabase) {
-    throw new Error("Database not connected");
+    return emptyTrackingStats;
   }
 
   const startDate = new Date();
@@ -28,14 +39,7 @@ export async function getTrackingStats(days = 30): Promise<TrackingStats> {
     .gte("created_at", startDateStr);
 
   if (error || !views) {
-    return {
-      totalViews: 0,
-      uniqueVisitors: 0,
-      averageDuration: 0,
-      topPages: [],
-      topCountries: [],
-      deviceStats: [],
-    };
+    return emptyTrackingStats;
   }
 
   const totalViews = views.length;
