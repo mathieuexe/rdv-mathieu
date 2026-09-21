@@ -71,12 +71,27 @@ function getTimeZoneOffsetMinutes(instant: Date, timeZone: string) {
   return (asUtc - instant.getTime()) / 60_000;
 }
 
-/** Convertit une date "journée entière" Google (YYYY-MM-DD) en instant UTC minuit heure de Paris. */
-export function parisDayStartToIso(dateOnly: string) {
-  const naive = new Date(`${dateOnly}T00:00:00Z`);
+/**
+ * Convertit une heure murale parisienne (`2026-09-21`, `14:30`) en instant ISO.
+ * Utilisé pour les évènements « journée entière » et pour les retouches saisies
+ * en administration.
+ */
+export function parisWallClockToIso(dateOnly: string, time = "00:00") {
+  const normalizedTime = /^\d{2}:\d{2}$/.test(time) ? time : "00:00";
+  const naive = new Date(`${dateOnly}T${normalizedTime}:00Z`);
+
+  if (Number.isNaN(naive.getTime())) {
+    throw new Error("Date ou heure invalide.");
+  }
+
   const offsetMinutes = getTimeZoneOffsetMinutes(naive, PARIS_TIME_ZONE);
 
   return new Date(naive.getTime() - offsetMinutes * 60_000).toISOString();
+}
+
+/** Convertit une date "journée entière" Google (YYYY-MM-DD) en minuit heure de Paris. */
+export function parisDayStartToIso(dateOnly: string) {
+  return parisWallClockToIso(dateOnly);
 }
 
 type JsonRecord = Record<string, unknown>;

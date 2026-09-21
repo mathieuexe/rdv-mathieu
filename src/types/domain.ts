@@ -173,12 +173,22 @@ export interface GoogleCalendarEventRecord {
   googleEventId: string;
   calendarId: string;
   calendarSummary?: string;
+  /** Titre effectif : la retouche locale si elle existe, sinon celui de Google. */
   summary: string;
+  /** Début effectif (retouche locale prioritaire). */
   startsAt: string;
+  /** Fin effective (retouche locale prioritaire). */
   endsAt: string;
   isAllDay: boolean;
   htmlLink?: string;
   syncedAt: string;
+  /** Vrai si l'indisponibilité a été modifiée à la main en administration. */
+  isOverridden: boolean;
+  /** Dernières valeurs reçues de Google, conservées pour pouvoir les rétablir. */
+  googleSummary?: string;
+  googleStartsAt?: string;
+  googleEndsAt?: string;
+  googleIsAllDay: boolean;
 }
 
 export interface BusyPeriod {

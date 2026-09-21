@@ -1430,6 +1430,11 @@ function mapGoogleCalendarEventRow(row: Record<string, unknown>): GoogleCalendar
     isAllDay: Boolean(row.is_all_day),
     htmlLink: typeof row.html_link === "string" ? row.html_link : undefined,
     syncedAt: String(row.synced_at ?? new Date().toISOString()),
+    isOverridden: Boolean(row.is_overridden),
+    googleSummary: typeof row.google_summary === "string" ? row.google_summary : undefined,
+    googleStartsAt: typeof row.google_starts_at === "string" ? row.google_starts_at : undefined,
+    googleEndsAt: typeof row.google_ends_at === "string" ? row.google_ends_at : undefined,
+    googleIsAllDay: Boolean(row.google_is_all_day),
   };
 }
 
@@ -1638,19 +1643,40 @@ export async function replaceGoogleCalendarEvents(input: {
   const syncedAt = new Date().toISOString();
 
   if (input.events.length > 0) {
+    // Les indisponibilités retouchées à la main conservent leurs valeurs
+    // effectives : seules les colonnes `google_*` sont rafraîchies.
+    const { data: overriddenRows } = await supabase
+      .from("google_calendar_events")
+      .select("calendar_id, google_event_id, summary, starts_at, ends_at, is_all_day")
+      .eq("account_id", input.accountId)
+      .eq("is_overridden", true);
+
+    const overrides = new Map(
+      (overriddenRows ?? []).map((row) => [`${row.calendar_id}::${row.google_event_id}`, row]),
+    );
+
     const { error } = await supabase.from("google_calendar_events").upsert(
-      input.events.map((event) => ({
-        account_id: input.accountId,
-        google_event_id: event.googleEventId,
-        calendar_id: event.calendarId,
-        calendar_summary: event.calendarSummary ?? null,
-        summary: event.summary,
-        starts_at: event.startsAt,
-        ends_at: event.endsAt,
-        is_all_day: event.isAllDay,
-        html_link: event.htmlLink ?? null,
-        synced_at: syncedAt,
-      })),
+      input.events.map((event) => {
+        const override = overrides.get(`${event.calendarId}::${event.googleEventId}`);
+
+        return {
+          account_id: input.accountId,
+          google_event_id: event.googleEventId,
+          calendar_id: event.calendarId,
+          calendar_summary: event.calendarSummary ?? null,
+          summary: override ? String(override.summary ?? event.summary) : event.summary,
+          starts_at: override ? String(override.starts_at) : event.startsAt,
+          ends_at: override ? String(override.ends_at) : event.endsAt,
+          is_all_day: override ? Boolean(override.is_all_day) : event.isAllDay,
+          google_summary: event.summary,
+          google_starts_at: event.startsAt,
+          google_ends_at: event.endsAt,
+          google_is_all_day: event.isAllDay,
+          is_overridden: Boolean(override),
+          html_link: event.htmlLink ?? null,
+          synced_at: syncedAt,
+        };
+      }),
       { onConflict: "calendar_id,google_event_id" },
     );
 
@@ -1685,6 +1711,81 @@ export async function replaceGoogleCalendarEvents(input: {
   }
 
   return input.events.length;
+}
+
+/** Retouche locale d'une indisponibilité importée (titre, début, fin). */
+export async function updateGoogleCalendarEventOverride(input: {
+  eventId: string;
+  summary: string;
+  startsAt: string;
+  endsAt: string;
+}) {
+  const supabase = getSupabaseAdminClient();
+
+  if (!supabase) {
+    throw new Error("La modification est indisponible tant que Supabase n'est pas configuré.");
+  }
+
+  const { data, error } = await supabase
+    .from("google_calendar_events")
+    .update({
+      summary: input.summary,
+      starts_at: input.startsAt,
+      ends_at: input.endsAt,
+      // Des horaires explicites ont été saisis : ce n'est plus une journée entière.
+      is_all_day: false,
+      is_overridden: true,
+      overridden_at: new Date().toISOString(),
+    })
+    .eq("id", input.eventId)
+    .select("*")
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!data) {
+    throw new Error("Indisponibilité introuvable.");
+  }
+
+  return mapGoogleCalendarEventRow(data as Record<string, unknown>);
+}
+
+/** Rétablit les valeurs reçues de Google pour une indisponibilité retouchée. */
+export async function resetGoogleCalendarEventOverride(eventId: string) {
+  const supabase = getSupabaseAdminClient();
+
+  if (!supabase) {
+    throw new Error("La modification est indisponible tant que Supabase n'est pas configuré.");
+  }
+
+  const { data: existing } = await supabase
+    .from("google_calendar_events")
+    .select("*")
+    .eq("id", eventId)
+    .maybeSingle();
+
+  if (!existing) {
+    throw new Error("Indisponibilité introuvable.");
+  }
+
+  const row = existing as Record<string, unknown>;
+  const { error } = await supabase
+    .from("google_calendar_events")
+    .update({
+      summary: typeof row.google_summary === "string" ? row.google_summary : row.summary,
+      starts_at: typeof row.google_starts_at === "string" ? row.google_starts_at : row.starts_at,
+      ends_at: typeof row.google_ends_at === "string" ? row.google_ends_at : row.ends_at,
+      is_all_day: Boolean(row.google_is_all_day),
+      is_overridden: false,
+      overridden_at: null,
+    })
+    .eq("id", eventId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
 }
 
 export async function deleteAllGoogleCalendarEvents(accountId: string) {

@@ -71,3 +71,29 @@ export function formatDateTimeFr(
     ...options,
   }).format(typeof value === "string" ? new Date(value) : value);
 }
+
+/** Découpe un instant ISO en valeurs de formulaire (date + heure) à l'heure de Paris. */
+export function toParisInputValues(iso: string) {
+  const parts = new Intl.DateTimeFormat("fr-FR", {
+    timeZone: PARIS_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  })
+    .formatToParts(new Date(iso))
+    .reduce<Record<string, string>>((accumulator, part) => {
+      if (part.type !== "literal") {
+        accumulator[part.type] = part.value;
+      }
+
+      return accumulator;
+    }, {});
+
+  return {
+    date: `${parts.year}-${parts.month}-${parts.day}`,
+    time: `${parts.hour}:${parts.minute}`,
+  };
+}

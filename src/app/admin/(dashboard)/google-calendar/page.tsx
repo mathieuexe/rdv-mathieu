@@ -2,6 +2,10 @@ import Link from "next/link";
 import { AlertTriangle, CalendarSync, CheckCircle2, Link2, RefreshCw, Save, TriangleAlert } from "lucide-react";
 
 import { DisconnectGoogleCalendarForm, PendingSubmitButton } from "@/components/admin/google-calendar-controls";
+import {
+  GoogleCalendarEventList,
+  type EditableGoogleEvent,
+} from "@/components/admin/google-calendar-event-list";
 import { GoogleCalendarBadge } from "@/components/shared/google-calendar-badge";
 import { GoogleCalendarIcon } from "@/components/shared/google-calendar-icon";
 import {
@@ -11,20 +15,40 @@ import {
 } from "@/lib/data-access";
 import { getGoogleOAuthEnv, isGoogleCalendarConfigured } from "@/lib/env";
 import { listAvailableGoogleCalendars, syncGoogleCalendarIfStale } from "@/lib/google-calendar-sync";
-import { formatDateTimeFr } from "@/lib/utils";
+import { formatDateTimeFr, toParisInputValues } from "@/lib/utils";
 
 import {
   disconnectGoogleCalendarAction,
+  resetGoogleCalendarEventAction,
+  saveGoogleCalendarEventAction,
   saveGoogleCalendarPreferencesAction,
   syncGoogleCalendarAction,
 } from "./actions";
 
+function formatEventRange(startsAt: string, endsAt: string, isAllDay: boolean) {
+  if (isAllDay) {
+    return `${formatDateTimeFr(startsAt, { dateStyle: "full" })} · journée entière`;
+  }
+
+  return `${formatDateTimeFr(startsAt, { dateStyle: "full", timeStyle: "short" })} → ${formatDateTimeFr(endsAt, {
+    timeStyle: "short",
+  })}`;
+}
+
 export default async function GoogleCalendarPage({
   searchParams,
 }: {
-  searchParams: Promise<{ connected?: string; disconnected?: string; saved?: string; synced?: string; error?: string }>;
+  searchParams: Promise<{
+    connected?: string;
+    disconnected?: string;
+    saved?: string;
+    synced?: string;
+    updated?: string;
+    restored?: string;
+    error?: string;
+  }>;
 }) {
-  const { connected, disconnected, saved, synced, error } = await searchParams;
+  const { connected, disconnected, saved, synced, updated, restored, error } = await searchParams;
   const isConfigured = isGoogleCalendarConfigured();
 
   if (isConfigured) {
@@ -40,6 +64,28 @@ export default async function GoogleCalendarPage({
   const calendars = account ? await listAvailableGoogleCalendars() : [];
   const { redirectUri } = getGoogleOAuthEnv();
   const upcomingEvents = events.filter((event) => new Date(event.endsAt) >= new Date());
+  const editableEvents: EditableGoogleEvent[] = upcomingEvents.map((event) => {
+    const start = toParisInputValues(event.startsAt);
+    const end = toParisInputValues(event.endsAt);
+
+    return {
+      id: event.id,
+      summary: event.summary,
+      startDate: start.date,
+      startTime: start.time,
+      endDate: end.date,
+      endTime: end.time,
+      rangeLabel: formatEventRange(event.startsAt, event.endsAt, event.isAllDay),
+      calendarLabel: event.calendarSummary ?? event.calendarId,
+      isOverridden: event.isOverridden,
+      googleSummary: event.googleSummary,
+      googleRangeLabel:
+        event.googleStartsAt && event.googleEndsAt
+          ? formatEventRange(event.googleStartsAt, event.googleEndsAt, event.googleIsAllDay)
+          : undefined,
+      htmlLink: event.htmlLink,
+    };
+  });
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 pb-12">
@@ -70,6 +116,16 @@ export default async function GoogleCalendarPage({
       {saved ? (
         <div className="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
           Préférences de synchronisation enregistrées.
+        </div>
+      ) : null}
+      {updated ? (
+        <div className="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+          Indisponibilité modifiée. La retouche sera conservée lors des prochaines synchronisations.
+        </div>
+      ) : null}
+      {restored ? (
+        <div className="rounded-md border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700">
+          Valeurs d&apos;origine Google rétablies.
         </div>
       ) : null}
       {synced ? (
@@ -302,33 +358,11 @@ export default async function GoogleCalendarPage({
           <GoogleCalendarBadge />
         </div>
 
-        {upcomingEvents.length === 0 ? (
-          <p className="p-6 text-center text-sm text-slate-500">
-            Aucun rendez-vous personnel importé pour le moment.
-          </p>
-        ) : (
-          <ul className="divide-y divide-slate-100">
-            {upcomingEvents.map((event) => (
-              <li key={event.id} className="flex flex-col gap-1 p-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="text-sm">
-                  <p className="flex items-center gap-2 font-medium text-slate-900">
-                    <GoogleCalendarBadge compact />
-                    {event.summary}
-                  </p>
-                  <p className="mt-1 text-slate-500">
-                    {event.isAllDay
-                      ? `${formatDateTimeFr(event.startsAt, { dateStyle: "full" })} · journée entière`
-                      : `${formatDateTimeFr(event.startsAt, { dateStyle: "full", timeStyle: "short" })} → ${formatDateTimeFr(
-                          event.endsAt,
-                          { timeStyle: "short" },
-                        )}`}
-                  </p>
-                </div>
-                <span className="text-xs text-slate-400">{event.calendarSummary ?? event.calendarId}</span>
-              </li>
-            ))}
-          </ul>
-        )}
+        <GoogleCalendarEventList
+          events={editableEvents}
+          saveAction={saveGoogleCalendarEventAction}
+          resetAction={resetGoogleCalendarEventAction}
+        />
       </section>
     </div>
   );
