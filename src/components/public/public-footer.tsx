@@ -1,10 +1,12 @@
 import Script from "next/script";
 import Link from "next/link";
 
-import { getSiteSettings } from "@/lib/data-access";
+import { getPublicCategories, getSiteSettings } from "@/lib/data-access";
+import { formatAppointmentMode } from "@/lib/utils";
+import { BookingWidget } from "./booking-widget";
 
 export async function PublicFooter() {
-  const settings = await getSiteSettings();
+  const [settings, categories] = await Promise.all([getSiteSettings(), getPublicCategories()]);
 
   return (
     <>
@@ -34,6 +36,17 @@ export async function PublicFooter() {
           </p>
         </div>
       </footer>
+
+      {settings.bookingBlocked ? null : (
+        <BookingWidget
+          categories={categories.map((category) => ({
+            slug: category.slug,
+            title: category.title,
+            durationMinutes: category.durationMinutes,
+            modeLabel: formatAppointmentMode(category.appointmentMode),
+          }))}
+        />
+      )}
 
       {settings.enableWhatsappWidget ? (
         <>
