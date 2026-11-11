@@ -1,8 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Clock, MapPin, CalendarDays, CheckCircle2 } from "lucide-react";
+import { ArrowRight, Clock, MapPin, CalendarDays } from "lucide-react";
 
-import { DiscordIcon } from "@/components/shared/discord-icon";
 import { PublicFooter } from "@/components/public/public-footer";
 import { PublicHeader } from "@/components/public/public-header";
 import { PublicBlackoutMarquee } from "@/components/public/public-blackout-marquee";
@@ -46,56 +45,16 @@ export default async function Home() {
           </section>
         ) : (
           <>
-            {/* ---------------------------------------------------------- Hero */}
-            <section className="px-6 pb-16 pt-12 sm:pt-16">
-              <div className="mx-auto flex max-w-[620px] flex-col items-center">
-                <Image
-                  src="/images/mathieu-upscale.png"
-                  alt="Mathieu Cerenzia"
-                  width={76}
-                  height={76}
-                  priority
-                  className="size-[76px] rounded-full border border-slate-200 object-cover object-[45%_47%]"
-                />
-
-                <div className="da-pill da-pulse mt-4">Prise de rendez-vous en ligne</div>
-
-                <h1 className="da-display mt-6 text-center text-[32px] leading-[1.15] sm:text-[42px]">
-                  Prenez rendez-vous
-                  <br />
-                  <span className="text-accent">en ligne</span>
-                </h1>
-
-                <p className="mt-4 max-w-md text-center text-[16px] leading-relaxed text-slate-900">
-                  Choisissez le motif de votre rendez-vous ci-dessous et réservez directement le créneau qui vous
-                  convient le mieux.
-                </p>
-
-                <div className="mt-10 flex w-full max-w-[560px] flex-col gap-3 sm:flex-row sm:gap-4">
-                  <Link href="#motifs" className="da-btn da-btn-primary w-full">
-                    Voir les motifs
-                    <ArrowRight className="size-5" />
-                  </Link>
-                  <Link href="/qui-suis-je" className="da-btn da-btn-secondary w-full">
-                    Qui suis-je ?
-                  </Link>
-                </div>
-
-                <p className="mt-4 text-center text-[14px] text-slate-500">
-                  Réservation en ligne &nbsp;•&nbsp; Confirmation par email &nbsp;•&nbsp; Annulation depuis votre espace
-                </p>
-              </div>
-            </section>
-
-            {/* ------------------------------------------------------ Motifs */}
-            <section id="motifs" className="scroll-mt-24 px-6 py-16 sm:py-20">
+            <section className="px-6 py-12 sm:py-16">
               <div className="mx-auto max-w-[960px]">
-                <div className="da-reveal mx-auto max-w-[620px] text-center">
-                  <p className="da-eyebrow">Les motifs disponibles</p>
-                  <h2 className="da-title mt-2 text-[26px] sm:text-[32px]">Choisissez votre rendez-vous</h2>
+                <div className="mx-auto max-w-[620px] text-center">
+                  <p className="da-eyebrow">Prise de rendez-vous en ligne</p>
+                  <h1 className="da-display mt-2 text-[32px] leading-[1.15] sm:text-[42px]">
+                    Choisissez votre <span className="text-accent">rendez-vous</span>
+                  </h1>
                   <p className="mt-4 text-[16px] leading-relaxed text-slate-500">
-                    Chaque motif a sa propre durée et son propre mode de déroulement. Sélectionnez celui qui correspond à
-                    votre besoin.
+                    Sélectionnez le motif qui correspond à votre besoin, puis réservez directement le créneau qui vous
+                    convient.
                   </p>
                 </div>
 
@@ -199,77 +158,6 @@ export default async function Home() {
                     ))}
                   </div>
                 )}
-              </div>
-            </section>
-
-            {/* ------------------------------------------------ Déroulement */}
-            <section className="border-y border-slate-200 px-6 py-16 sm:py-20">
-              <div className="mx-auto max-w-[960px]">
-                <div className="da-reveal mx-auto max-w-[620px] text-center">
-                  <p className="da-eyebrow">Comment ça se passe</p>
-                  <h2 className="da-title mt-2 text-[26px] sm:text-[32px]">Trois étapes, rien de plus</h2>
-                </div>
-
-                <div className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-3">
-                  {[
-                    {
-                      step: "01",
-                      title: "Choisissez un motif",
-                      text: "Chaque motif précise la durée du rendez-vous et son mode de déroulement.",
-                      points: ["Durée annoncée", "Mode de rendez-vous"],
-                    },
-                    {
-                      step: "02",
-                      title: "Réservez un créneau",
-                      text: "Le calendrier n'affiche que les créneaux réellement disponibles, à l'heure de Paris.",
-                      points: ["Disponibilités en direct", "Fuseau Europe/Paris"],
-                    },
-                    {
-                      step: "03",
-                      title: "Recevez la confirmation",
-                      text: "Un email provisoire part immédiatement, puis la validation finale vous est envoyée.",
-                      points: ["Email de récapitulatif", "Suivi dans votre espace"],
-                    },
-                  ].map((phase) => (
-                    <article key={phase.step} className="da-card da-card-hover da-reveal flex flex-col p-6">
-                      <span className="da-step-number">{phase.step}</span>
-                      <h3 className="da-title mt-2 text-[18px]">{phase.title}</h3>
-                      <p className="mt-2 text-[14px] leading-relaxed text-slate-500">{phase.text}</p>
-                      <ul className="mt-5 space-y-2.5 border-t border-slate-200/70 pt-4">
-                        {phase.points.map((point) => (
-                          <li key={point} className="flex items-start gap-2.5 text-[14px] leading-snug text-slate-900">
-                            <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-accent" />
-                            <span>{point}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </article>
-                  ))}
-                </div>
-              </div>
-            </section>
-
-            {/* --------------------------------------------------- Discord */}
-            <section className="px-6 py-16 sm:py-20">
-              <div className="da-reveal mx-auto flex max-w-[960px] flex-col items-center text-center">
-                <span className="flex size-12 items-center justify-center rounded-full border border-slate-200 bg-accent-soft text-accent">
-                  <DiscordIcon className="size-6" />
-                </span>
-                <p className="da-eyebrow mt-5">La communauté</p>
-                <h2 className="da-title mt-2 text-[26px] sm:text-[32px]">Rejoignez le serveur Discord</h2>
-                <p className="mt-4 max-w-[560px] text-[16px] leading-relaxed text-slate-500">
-                  Venez échanger avec la communauté, partager vos idées et soumettre votre projet directement sur le
-                  serveur.
-                </p>
-                <a
-                  href="https://discord.mathieucerenzia.fr"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="da-btn da-btn-primary mt-8"
-                >
-                  Rejoindre le serveur
-                  <ArrowRight className="size-5" />
-                </a>
               </div>
             </section>
           </>

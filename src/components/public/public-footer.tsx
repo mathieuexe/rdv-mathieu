@@ -17,12 +17,9 @@ export async function PublicFooter() {
           </span>
 
           <p className="text-[13px] font-medium uppercase tracking-[0.1em] text-slate-900">Mathieu Cerenzia</p>
-          <p className="text-sm text-slate-500">Prise de rendez-vous en ligne, développement web et automatisation.</p>
+          <p className="text-sm text-slate-500">Prise de rendez-vous en ligne.</p>
 
           <div className="mt-2 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-slate-500">
-            <Link href="/qui-suis-je" className="transition-colors hover:text-accent">
-              Qui suis-je ?
-            </Link>
             <Link href="/mentions-legales" className="transition-colors hover:text-accent">
               Mentions légales
             </Link>

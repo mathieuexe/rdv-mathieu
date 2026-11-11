@@ -46,10 +46,7 @@ export async function PublicHeader({ currentPath }: PublicHeaderProps) {
 
         <nav className="hidden items-center gap-7 md:flex">
           <Link href="/" className={getLinkClass("/", currentPath)}>
-            Accueil
-          </Link>
-          <Link href="/qui-suis-je" className={getLinkClass("/qui-suis-je", currentPath)}>
-            Qui suis-je ?
+            Prendre rendez-vous
           </Link>
           {session.isAuthenticated ? (
             <>

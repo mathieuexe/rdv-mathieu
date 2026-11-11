@@ -1,5 +1,4 @@
 import { getAppUrl } from "@/lib/env";
-import { DiscordIcon } from "@/components/shared/discord-icon";
 
 type MailDetail = {
   label: string;
@@ -129,32 +128,7 @@ function MailLayout({
           </div>
         ) : null}
 
-        <div style={{ margin: "40px 0 0", padding: "24px", backgroundColor: "#eef2ff", borderRadius: "8px", border: "1px solid #c7d2fe", textAlign: "center" }}>
-          <h3 style={{ margin: "0 0 8px", fontSize: "16px", color: "#3730a3", fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
-            <DiscordIcon className="size-5" style={{ width: "20px", height: "20px" }} />
-            Rejoignez la communauté Discord
-          </h3>
-          <p style={{ margin: "0 0 16px", fontSize: "14px", color: "#3730a3" }}>
-            Venez échanger avec la communauté, partager vos idées et soumettre votre projet directement sur notre serveur Discord.
-          </p>
-          <a 
-            href="https://discord.mathieucerenzia.fr" 
-            style={{ 
-              display: "inline-block", 
-              backgroundColor: "#4f46e5", // indigo-600
-              color: "#ffffff", 
-              textDecoration: "none", 
-              padding: "10px 20px", 
-              borderRadius: "6px", 
-              fontWeight: 600,
-              fontSize: "14px"
-            }}
-          >
-            Rejoindre le serveur
-          </a>
-        </div>
-
-        <div style={{ marginTop: "24px", paddingTop: "24px", borderTop: "1px solid #e2e8f0" }}>
+        <div style={{ marginTop: "40px", paddingTop: "24px", borderTop: "1px solid #e2e8f0" }}>
           <p style={{ margin: "0", color: "#64748b", fontSize: "13px" }}>
             Cet e-mail a été envoyé automatiquement. Merci de ne pas y répondre.
           </p>

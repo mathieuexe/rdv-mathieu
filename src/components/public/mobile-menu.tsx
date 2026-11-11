@@ -29,10 +29,7 @@ export function MobileMenu({ isAuthenticated, isAdmin }: MobileMenuProps) {
       {isOpen && (
         <div className="absolute left-0 right-0 top-full flex flex-col gap-4 border-b border-slate-200 bg-white px-6 py-6 shadow-lg">
           <Link href="/" className={linkClass} onClick={() => setIsOpen(false)}>
-            Accueil
-          </Link>
-          <Link href="/qui-suis-je" className={linkClass} onClick={() => setIsOpen(false)}>
-            Qui suis-je ?
+            Prendre rendez-vous
           </Link>
 
           {isAuthenticated ? (
