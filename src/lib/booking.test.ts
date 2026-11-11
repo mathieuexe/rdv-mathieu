@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildBookingSlots, groupSlotsByDay, PERSONAL_BUSY_REASON } from "./booking";
+import { buildBookingSlots, getBookingState, groupSlotsByDay, PERSONAL_BUSY_REASON } from "./booking";
 import type { AppointmentCategory, AppointmentRecord, SiteSettings } from "@/types/domain";
 
 function getNextWeekdayAtTime(weekday: number, hour: number, minute: number) {
@@ -182,5 +182,22 @@ describe("buildBookingSlots avec agenda personnel synchronisé", () => {
     });
 
     expect(slots.every((slot) => !slot.reason?.includes("Google"))).toBe(true);
+  });
+});
+
+describe("catégorie privée", () => {
+  it("reste réservable par lien même hors ligne", () => {
+    const privateCategory = { ...testCategories[0], isOnline: false, isHidden: true };
+
+    expect(getBookingState(privateCategory, testSiteSettings).available).toBe(true);
+    expect(
+      buildBookingSlots({ category: privateCategory, siteSettings: testSiteSettings, appointments: [], daysToShow: 10 }).length,
+    ).toBeGreaterThan(0);
+  });
+
+  it("reste indisponible si elle est hors ligne et non privée", () => {
+    const offlineCategory = { ...testCategories[0], isOnline: false, isHidden: false };
+
+    expect(getBookingState(offlineCategory, testSiteSettings).available).toBe(false);
   });
 });

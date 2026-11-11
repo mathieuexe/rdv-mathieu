@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Clock, MapPin, CalendarDays } from "lucide-react";
+import { CalendarDays, ChevronRight } from "lucide-react";
 
 import { PublicFooter } from "@/components/public/public-footer";
 import { PublicHeader } from "@/components/public/public-header";
@@ -44,127 +44,80 @@ export default async function Home() {
             </div>
           </section>
         ) : (
-          <>
-            <section className="px-6 py-12 sm:py-16">
-              <div className="mx-auto max-w-[960px]">
-                <div className="mx-auto max-w-[620px] text-center">
-                  <p className="da-eyebrow">Prise de rendez-vous en ligne</p>
-                  <h1 className="da-display mt-2 text-[32px] leading-[1.15] sm:text-[42px]">
-                    Choisissez votre <span className="text-accent">rendez-vous</span>
-                  </h1>
-                  <p className="mt-4 text-[16px] leading-relaxed text-slate-500">
-                    Sélectionnez le motif qui correspond à votre besoin, puis réservez directement le créneau qui vous
-                    convient.
-                  </p>
-                </div>
+          <section className="px-6 py-12 sm:py-20">
+            <div className="mx-auto max-w-[560px]">
+              <h1 className="da-display text-center text-[30px] leading-[1.15] sm:text-[38px]">
+                Prendre <span className="text-accent">rendez-vous</span>
+              </h1>
+              <p className="mt-3 text-center text-[16px] text-slate-500">Choisissez un motif pour voir les créneaux disponibles.</p>
 
-                {settings.bookingBlocked ? (
-                  <div className="da-card mt-10 border-amber-200 bg-amber-50 px-6 py-14 text-center">
-                    <CalendarDays className="mx-auto mb-4 size-10 text-amber-600" />
-                    <p className="da-title text-[20px] text-amber-900">
-                      La prise de rendez-vous est actuellement suspendue.
-                    </p>
-                    {settings.bookingBlockedMessage && (
-                      <p className="mx-auto mt-3 max-w-2xl text-[15px] leading-relaxed text-amber-800">
-                        {settings.bookingBlockedMessage}
-                      </p>
-                    )}
-                    <div className="mt-8 flex justify-center">
-                      <ContactButton />
-                    </div>
+              {settings.bookingBlocked ? (
+                <div className="mt-10 rounded-2xl border border-amber-200 bg-amber-50 px-6 py-10 text-center">
+                  <p className="da-title text-[18px] text-amber-900">
+                    La prise de rendez-vous est actuellement suspendue.
+                  </p>
+                  {settings.bookingBlockedMessage && (
+                    <p className="mt-3 text-[15px] leading-relaxed text-amber-800">{settings.bookingBlockedMessage}</p>
+                  )}
+                  <div className="mt-6 flex justify-center">
+                    <ContactButton />
                   </div>
-                ) : categories.length === 0 ? (
-                  <div className="da-card mt-10 border-dashed px-6 py-14 text-center">
-                    <CalendarDays className="mx-auto mb-4 size-10 text-slate-300" />
-                    <p className="da-title text-[20px]">Aucun calendrier n&apos;est disponible pour le moment.</p>
-                    <p className="mt-2 text-[15px] text-slate-500">
-                      Revenez un peu plus tard pour consulter les prochaines disponibilités.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    {categories.map((category, index) => (
+                </div>
+              ) : categories.length === 0 ? (
+                <div className="mt-10 rounded-2xl border border-dashed border-slate-200 px-6 py-10 text-center">
+                  <CalendarDays className="mx-auto mb-3 size-8 text-slate-300" />
+                  <p className="da-title text-[18px]">Aucun rendez-vous n&apos;est proposé pour le moment.</p>
+                  <p className="mt-2 text-[15px] text-slate-500">Revenez un peu plus tard.</p>
+                </div>
+              ) : (
+                <ul className="mt-10 space-y-3">
+                  {categories.map((category, index) => (
+                    <li key={category.id}>
                       <Link
                         href={`/rdv/${category.slug}`}
-                        key={category.id}
-                        className="da-card da-card-hover da-reveal group flex flex-col overflow-hidden"
+                        className="group flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 transition-colors hover:border-accent hover:bg-accent-soft focus-visible:border-accent focus-visible:outline-none sm:p-5"
                       >
-                        <div className="relative aspect-[21/9] w-full overflow-hidden border-b border-slate-200 bg-slate-50">
-                          {category.bannerImageUrl ? (
+                        <span className="relative flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-accent-soft text-sm font-semibold text-accent">
+                          {category.thumbnailImageUrl ? (
                             <Image
-                              src={category.bannerImageUrl}
+                              src={category.thumbnailImageUrl}
                               alt=""
                               fill
                               priority={index === 0}
-                              sizes="(max-width: 640px) 100vw, 50vw"
-                              className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                              sizes="48px"
+                              className="object-cover"
                             />
                           ) : (
-                            <div className="flex h-full w-full items-center justify-center">
-                              <CalendarDays className="size-8 text-slate-300" />
-                            </div>
+                            category.title
+                              .split(" ")
+                              .filter(Boolean)
+                              .slice(0, 2)
+                              .map((part) => part[0]?.toUpperCase() ?? "")
+                              .join("") || "RDV"
                           )}
-                        </div>
+                        </span>
 
-                        <div className="flex flex-1 flex-col p-6">
-                          <div className="flex items-start gap-4">
-                            <div className="relative flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-accent-soft text-sm font-semibold text-accent">
-                              {category.thumbnailImageUrl ? (
-                                <Image
-                                  src={category.thumbnailImageUrl}
-                                  alt=""
-                                  fill
-                                  priority={index === 0}
-                                  sizes="48px"
-                                  className="object-cover"
-                                />
-                              ) : (
-                                category.title
-                                  .split(" ")
-                                  .filter(Boolean)
-                                  .slice(0, 2)
-                                  .map((part) => part[0]?.toUpperCase() ?? "")
-                                  .join("") || "RDV"
-                              )}
-                            </div>
+                        <span className="min-w-0 flex-1">
+                          <span className="block text-[17px] font-semibold leading-snug text-slate-900">
+                            {category.title}
+                          </span>
+                          <span className="mt-0.5 block text-[14px] text-slate-500">
+                            {category.durationMinutes} min · {formatAppointmentMode(category.appointmentMode)}
+                          </span>
+                        </span>
 
-                            <div className="min-w-0 flex-1">
-                              <h3 className="da-title text-[18px] transition-colors group-hover:text-accent">
-                                {category.title}
-                              </h3>
-                              <p className="mt-1 line-clamp-2 text-[14px] leading-relaxed text-slate-500">
-                                {category.description}
-                              </p>
-                            </div>
-                          </div>
-
-                          <ul className="mt-5 space-y-2.5 border-t border-slate-200/70 pt-4">
-                            <li className="flex items-start gap-2.5 text-[14px] leading-snug text-slate-900">
-                              <Clock className="mt-0.5 size-4 shrink-0 text-accent" />
-                              <span>{category.durationMinutes} min</span>
-                            </li>
-                            <li className="flex items-start gap-2.5 text-[14px] leading-snug text-slate-900">
-                              <MapPin className="mt-0.5 size-4 shrink-0 text-accent" />
-                              <span className="truncate">{formatAppointmentMode(category.appointmentMode)}</span>
-                            </li>
-                          </ul>
-
-                          <div className="mt-6 flex items-center gap-2 text-[15px] font-semibold text-accent">
-                            <span>Prendre rendez-vous</span>
-                            <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-                          </div>
-                        </div>
+                        <ChevronRight className="size-5 shrink-0 text-slate-300 transition-all group-hover:translate-x-0.5 group-hover:text-accent" />
                       </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </section>
-          </>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </section>
         )}
       </main>
 
-      <PublicFooter />
+      <PublicFooter showBookingWidget={false} />
     </div>
   );
 }

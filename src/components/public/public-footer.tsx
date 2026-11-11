@@ -5,7 +5,12 @@ import { getPublicCategories, getSiteSettings } from "@/lib/data-access";
 import { formatAppointmentMode } from "@/lib/utils";
 import { BookingWidget } from "./booking-widget";
 
-export async function PublicFooter() {
+interface PublicFooterProps {
+  /** L'accueil liste déjà les motifs : le bouton flottant y ferait doublon. */
+  showBookingWidget?: boolean;
+}
+
+export async function PublicFooter({ showBookingWidget = true }: PublicFooterProps = {}) {
   const [settings, categories] = await Promise.all([getSiteSettings(), getPublicCategories()]);
 
   return (
@@ -34,7 +39,7 @@ export async function PublicFooter() {
         </div>
       </footer>
 
-      {settings.bookingBlocked ? null : (
+      {settings.bookingBlocked || !showBookingWidget ? null : (
         <BookingWidget
           avatarUrl="/images/mathieu-upscale.png"
           categories={categories.map((category) => ({

@@ -347,7 +347,8 @@ export const getPublicCategoryBySlug = unstable_cache(async (slug: string) => {
 
   if (supabase) {
     const [{ data: categoryRow }, { data: ruleRows }, { data: blackoutRows }] = await Promise.all([
-      supabase.from("categories").select("*").eq("slug", slug).eq("is_online", true).maybeSingle(),
+      // Une catégorie privée reste joignable par son lien, même décochée de « visible au public ».
+      supabase.from("categories").select("*").eq("slug", slug).or("is_online.eq.true,is_hidden.eq.true").maybeSingle(),
       supabase.from("category_availability_rules").select("*").order("weekday"),
       supabase.from("category_blackout_periods").select("*").order("start_date"),
     ]);

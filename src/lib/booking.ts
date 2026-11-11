@@ -69,7 +69,7 @@ export function buildBookingSlots({
   busyPeriods?: BusyPeriod[];
   daysToShow?: number;
 }): BookingSlot[] {
-  if (!category.isOnline || siteSettings.maintenanceMode || siteSettings.bookingBlocked || category.isBookingBlocked) {
+  if (!isCategoryReachable(category) || siteSettings.maintenanceMode || siteSettings.bookingBlocked || category.isBookingBlocked) {
     return [];
   }
 
@@ -158,6 +158,14 @@ export function groupSlotsByDay(slots: BookingSlot[]) {
   return groups;
 }
 
+/**
+ * Une catégorie est réservable si elle est en ligne, ou si elle est privée :
+ * privée signifie « absente de l'accueil mais accessible à qui possède le lien ».
+ */
+export function isCategoryReachable(category: Pick<AppointmentCategory, "isOnline" | "isHidden">) {
+  return category.isOnline || Boolean(category.isHidden);
+}
+
 export function getBookingState(category: AppointmentCategory, siteSettings: SiteSettings) {
   if (siteSettings.maintenanceMode) {
     return {
@@ -175,7 +183,7 @@ export function getBookingState(category: AppointmentCategory, siteSettings: Sit
     };
   }
 
-  if (!category.isOnline) {
+  if (!isCategoryReachable(category)) {
     return {
       available: false,
       title: "Catégorie indisponible",
