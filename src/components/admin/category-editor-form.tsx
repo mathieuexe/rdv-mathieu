@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState, useTransition, type FormEvent } from "react";
 import { Info, Calendar, Image as ImageIcon, Globe, MessageSquare, Save, Lock, Plus, Trash2, GripVertical, Settings } from "lucide-react";
 
 import { ImagePicker } from "@/components/admin/image-picker";
@@ -29,7 +29,7 @@ const bannerConfig = {
 };
 
 interface CategoryEditorFormProps {
-  action: (formData: FormData) => Promise<void>;
+  action: (formData: FormData) => Promise<{ error: string } | void>;
   category?: AppointmentCategory | null;
   title: string;
   returnPath: string;
@@ -69,8 +69,32 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
   const [imageError, setImageError] = useState("");
   const [customFields, setCustomFields] = useState<CustomField[]>(category?.customFields ?? []);
 
-  async function handleFormAction(formData: FormData) {
-    await action(formData);
+  const [submitError, setSubmitError] = useState(error ?? "");
+  const [isSaving, startSaving] = useTransition();
+  const errorRef = useRef<HTMLDivElement>(null);
+
+  // Envoi manuel plutôt que `<form action>` : React vide les champs d'un
+  // formulaire après une action, ce qui effaçait toute la saisie à la moindre
+  // erreur. Ici le formulaire reste tel quel et seule l'erreur s'affiche.
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+
+    setSubmitError("");
+    startSaving(async () => {
+      let message = "";
+
+      try {
+        message = (await action(formData))?.error ?? "";
+      } catch {
+        message = "L'enregistrement a échoué. Vérifiez votre connexion puis réessayez.";
+      }
+
+      if (message) {
+        setSubmitError(message);
+        requestAnimationFrame(() => errorRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }));
+      }
+    });
   }
 
   return (
@@ -90,9 +114,13 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
         </div>
       )}
 
-      {error && (
-        <div className="rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
-          {error}
+      {submitError && (
+        <div
+          ref={errorRef}
+          role="alert"
+          className="scroll-mt-24 rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800"
+        >
+          {submitError} Votre saisie a été conservée.
         </div>
       )}
 
@@ -102,7 +130,7 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
         </div>
       )}
 
-      <form action={handleFormAction} className="grid items-start gap-6 lg:grid-cols-3">
+      <form onSubmit={handleSubmit} className="grid items-start gap-6 lg:grid-cols-3">
         <input type="hidden" name="categoryId" value={category?.id ?? ""} />
         <input type="hidden" name="returnPath" value={returnPath} />
         <input type="hidden" name="thumbnailImageDataUrl" value={thumbnailPreview} />
@@ -494,7 +522,7 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
               </label>
               <label className="flex items-center gap-3 text-sm text-slate-700">
                 <input type="checkbox" name="isHidden" defaultChecked={category?.isHidden ?? false} className="size-4 rounded border-slate-300 text-blue-600" />
-                <span className="font-medium">Catégorie privée (masquée de l'accueil, accessible par lien)</span>
+                <span className="font-medium">Catégorie privée (masquée de l&apos;accueil, accessible par lien)</span>
               </label>
             </div>
           </section>
@@ -542,10 +570,11 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
           <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
             <button
               type="submit"
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-all hover:bg-blue-700 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(48,128,238,0.25)]"
+              disabled={isSaving}
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-all hover:bg-blue-700 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(48,128,238,0.25)] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
             >
               <Save className="size-4" />
-              Enregistrer la catégorie
+              {isSaving ? "Enregistrement…" : "Enregistrer la catégorie"}
             </button>
           </div>
         </div>

@@ -77,7 +77,11 @@ function parseCategoryAvailabilityRules(formData: FormData) {
   }));
 }
 
-export async function saveCategoryAction(formData: FormData) {
+/**
+ * En cas d'erreur, l'action renvoie le message au lieu de rediriger : la page
+ * n'est pas rechargée et l'administrateur conserve toute sa saisie.
+ */
+export async function saveCategoryAction(formData: FormData): Promise<{ error: string } | void> {
   const session = await getAdminSession();
 
   if (!session.isAuthenticated) {
@@ -104,8 +108,7 @@ export async function saveCategoryAction(formData: FormData) {
   });
 
   if (!parsed.success) {
-    const message = encodeURIComponent(parsed.error.issues[0]?.message ?? "Le formulaire contient au moins une erreur.");
-    redirect(`${returnPath}?error=${message}`);
+    return { error: parsed.error.issues[0]?.message ?? "Le formulaire contient au moins une erreur." };
   }
 
   let successPath = returnPath;
@@ -140,8 +143,7 @@ export async function saveCategoryAction(formData: FormData) {
 
     successPath = `/admin/categories/${category.slug}`;
   } catch (error) {
-    const message = encodeURIComponent(error instanceof Error ? error.message : "Impossible d'enregistrer la categorie.");
-    redirect(`${returnPath}?error=${message}`);
+    return { error: error instanceof Error ? error.message : "Impossible d'enregistrer la catégorie." };
   }
 
   redirect(`${successPath}?saved=1`);
