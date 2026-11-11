@@ -15,6 +15,7 @@ import {
   deleteManagedUserAccount,
   getAdminUserDetail,
   getCategoryById,
+  rescheduleAppointment,
   saveCategory,
   getSiteSettings,
   saveSiteSettings,
@@ -23,13 +24,14 @@ import {
 } from "@/lib/data-access";
 import {
   sendAdminCreatedSignupEmail,
+  sendAppointmentRescheduledEmail,
   sendBlackoutAppointmentCancellationEmail,
   sendValidatedAppointmentEmail,
   sendAdminCustomEmailToUser
 } from "@/lib/email";
 import { sendDiscordNotification } from "@/lib/discord";
 import { adminAppointmentSchema, categoryAdminSchema, settingsSchema } from "@/lib/validators";
-import { formatDateTimeFr } from "@/lib/utils";
+import { formatDateTimeFr, fromParisInputValues } from "@/lib/utils";
 
 const AUTOMATIC_BLACKOUT_CANCELLATION_REASON =
   "Annulation automatique en raison d'une période d'indisponibilité.";
@@ -793,4 +795,49 @@ export async function sendCustomEmailAction(formData: FormData) {
   } catch (error) {
     return { error: "Impossible d'envoyer l'email." };
   }
+}
+
+/** Déplace un rendez-vous sur un nouveau créneau et prévient le client par email. */
+export async function rescheduleAppointmentAction(formData: FormData) {
+  const session = await getAdminSession();
+
+  if (!session.isAuthenticated) {
+    redirect("/admin/login");
+  }
+
+  const appointmentId = String(formData.get("appointmentId") ?? "");
+  const detailPath = `/admin/rendez-vous/${appointmentId}`;
+  const startsAtIso = fromParisInputValues(String(formData.get("date") ?? ""), String(formData.get("time") ?? ""));
+  const reason = String(formData.get("reason") ?? "").trim();
+
+  if (!appointmentId || !startsAtIso) {
+    redirect(`${detailPath}?error=${encodeURIComponent("Indiquez une date et une heure valides.")}`);
+  }
+
+  let failure = "";
+
+  try {
+    const { appointment, previousStartsAt } = await rescheduleAppointment(appointmentId, startsAtIso);
+    const category = await getCategoryById(appointment.categoryId);
+
+    await sendAppointmentRescheduledEmail({
+      to: appointment.email,
+      firstName: appointment.firstName,
+      categoryTitle: category?.title ?? "Votre rendez-vous",
+      previousStartsAtLabel: formatDateTimeFr(previousStartsAt, { dateStyle: "full", timeStyle: "short" }),
+      startsAtLabel: formatDateTimeFr(appointment.startsAt, { dateStyle: "full", timeStyle: "short" }),
+      appointmentMode: category?.appointmentMode ?? "visioconference",
+      reason: reason || undefined,
+      appointmentId: appointment.id,
+    });
+
+    revalidatePath("/admin");
+    revalidatePath("/admin/rendez-vous");
+    revalidatePath("/admin/rendez-vous/agenda");
+    revalidatePath(detailPath);
+  } catch (error) {
+    failure = error instanceof Error ? error.message : "Impossible de déplacer le rendez-vous.";
+  }
+
+  redirect(failure ? `${detailPath}?error=${encodeURIComponent(failure)}` : `${detailPath}?moved=1`);
 }

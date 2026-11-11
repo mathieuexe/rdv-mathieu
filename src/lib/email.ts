@@ -8,6 +8,8 @@ import {
   AdminBlackoutCancellationEmail,
   AdminCreatedSignupEmail,
   AppointmentCancellationEmail,
+  AppointmentReminderEmail,
+  AppointmentRescheduledEmail,
   ProvisionalAppointmentEmail,
   RefusedAppointmentEmail,
   SignupConfirmationEmail,
@@ -26,6 +28,8 @@ type AppMailTemplateKey =
   | "confirmation_inscription_admin"
   | "prise_rdv_provisoire"
   | "rendez_vous_valide"
+  | "rappel_rendez_vous"
+  | "rendez_vous_deplace"
   | "rendez_vous_annule"
   | "rendez_vous_annule_indisponibilite"
   | "rendez_vous_refuse"
@@ -52,8 +56,13 @@ interface TransactionalEmailResult {
   reason?: "email_not_configured" | "email_request_failed";
 }
 
-const DEFAULT_RESEND_FROM_NAME = "NOREPLY";
-const DEFAULT_RESEND_FROM_EMAIL = "info@mathieucerenzia.fr";
+/**
+ * Expéditeur unique de la plateforme. Le domaine est authentifié chez Resend
+ * (SPF + DKIM) : garder toujours la même adresse et un nom lisible construit
+ * la réputation d'envoi, là où « NOREPLY » en majuscules ressemble à du spam.
+ */
+const RESEND_FROM_NAME = "Mathieu Cerenzia";
+const RESEND_FROM_EMAIL = "noreply@mathieucerenzia.fr";
 const ADMIN_APPOINTMENT_REQUEST_NOTIFICATION_EMAIL = "mathieucerenzia@gmail.com";
 
 function createMailReference() {
@@ -61,18 +70,7 @@ function createMailReference() {
 }
 
 function getResendFromValue() {
-  const fromEmail = process.env.RESEND_FROM_EMAIL?.trim() || DEFAULT_RESEND_FROM_EMAIL;
-  const fromName = process.env.RESEND_FROM_NAME?.trim() || DEFAULT_RESEND_FROM_NAME;
-
-  if (!fromEmail) {
-    return "";
-  }
-
-  if (fromEmail.includes("<") && fromEmail.includes(">")) {
-    return fromEmail;
-  }
-
-  return `${fromName} <${fromEmail}>`;
+  return `${RESEND_FROM_NAME} <${RESEND_FROM_EMAIL}>`;
 }
 
 function serializeUnknownError(error: unknown) {
@@ -203,14 +201,21 @@ export async function sendTransactionalEmail({
 
   const resend = new Resend(apiKey);
   try {
-    const html = await render(buildTemplate(reference));
+    const template = buildTemplate(reference);
+    // Version texte en plus du HTML : un email sans alternative texte est un
+    // signal négatif pour les filtres anti-spam, et certains lecteurs l'exigent.
+    const [html, text] = await Promise.all([render(template), render(template, { plainText: true })]);
 
     const { data, error } = await resend.emails.send({
       from,
       to,
       subject,
       html,
+      text,
       attachments,
+      // Étiquette d'usage (statistiques Resend). Aucun en-tête de désinscription :
+      // ce sont des emails de service, déclenchés par une action du destinataire.
+      tags: [{ name: "category", value: templateKey }],
     });
 
     if (error) {
@@ -298,7 +303,7 @@ export async function sendSignupConfirmationEmail(input: {
 }) {
   return sendTransactionalEmail({
     to: input.to,
-    subject: "Confirmation d'inscription",
+    subject: "Votre compte est créé",
     templateKey: "confirmation_inscription",
     sourceType: "inscription",
     sourceLabel: "Confirmation d'inscription",
@@ -326,7 +331,7 @@ export async function sendContactAcknowledgementEmail(input: {
 }) {
   return sendTransactionalEmail({
     to: input.email,
-    subject: "Accusé de réception de votre demande",
+    subject: "Votre message est bien reçu",
     templateKey: "contact_accuse_reception",
     sourceType: "formulaire_contact",
     sourceLabel: "Accusé de réception formulaire de contact",
@@ -391,7 +396,7 @@ export async function sendAdminCreatedSignupEmail(input: {
 }) {
   return sendTransactionalEmail({
     to: input.to,
-    subject: "Confirmation d'inscription",
+    subject: "Votre compte est créé",
     templateKey: "confirmation_inscription_admin",
     sourceType: "inscription_admin",
     sourceLabel: "Confirmation d'inscription créée par l'administration",
@@ -420,7 +425,7 @@ export async function sendProvisionalAppointmentEmail(input: {
 }) {
   return sendTransactionalEmail({
     to: input.to,
-    subject: "Confirmation de prise de rendez-vous (provisoire)",
+    subject: `Demande de rendez-vous reçue pour le ${input.startsAtLabel}`,
     templateKey: "prise_rdv_provisoire",
     sourceType: "rendez_vous_provisoire",
     sourceLabel: "Confirmation de prise de rendez-vous (provisoire)",
@@ -500,7 +505,7 @@ export async function sendValidatedAppointmentEmail(input: {
 }) {
   return sendTransactionalEmail({
     to: input.to,
-    subject: "Confirmation de rendez-vous (valide)",
+    subject: `Rendez-vous confirmé : ${input.startsAtLabel}`,
     templateKey: "rendez_vous_valide",
     sourceType: "rendez_vous_valide",
     sourceLabel: "Confirmation de rendez-vous (valide)",
@@ -534,7 +539,7 @@ export async function sendAppointmentCancellationEmail(input: {
 }) {
   return sendTransactionalEmail({
     to: input.to,
-    subject: "Confirmation annulation rendez-vous",
+    subject: `Rendez-vous annulé : ${input.startsAtLabel}`,
     templateKey: "rendez_vous_annule",
     sourceType: "rendez_vous_annule",
     sourceLabel: "Confirmation annulation rendez-vous",
@@ -567,7 +572,7 @@ export async function sendBlackoutAppointmentCancellationEmail(input: {
 }) {
   return sendTransactionalEmail({
     to: input.to,
-    subject: "Annulation de votre rendez-vous",
+    subject: `Votre rendez-vous du ${input.appointmentDateLabel} ne peut pas avoir lieu`,
     templateKey: "rendez_vous_annule_indisponibilite",
     sourceType: "rendez_vous_annule_indisponibilite",
     sourceLabel: "Annulation automatique pour indisponibilité",
@@ -627,7 +632,7 @@ export async function sendRefusedAppointmentEmail(input: {
 }) {
   return sendTransactionalEmail({
     to: input.to,
-    subject: "Votre demande de rendez-vous a ete refusee",
+    subject: "Votre demande de rendez-vous n'a pas pu être acceptée",
     templateKey: "rendez_vous_refuse",
     sourceType: "rendez_vous_refuse",
     sourceLabel: "Demande de rendez-vous refusee",
@@ -643,6 +648,78 @@ export async function sendRefusedAppointmentEmail(input: {
         email: input.to,
         categoryTitle: input.categoryTitle,
         startsAtLabel: input.startsAtLabel,
+        reason: input.reason,
+        reference,
+      }),
+  });
+}
+
+export async function sendAppointmentReminderEmail(input: {
+  to: string;
+  firstName: string;
+  categoryTitle: string;
+  startsAtLabel: string;
+  appointmentMode: AppointmentMode;
+  phone?: string;
+  appointmentId: string;
+  /** Instant du rendez-vous : sert à ne jamais envoyer deux rappels pour le même créneau. */
+  startsAt: string;
+}) {
+  return sendTransactionalEmail({
+    to: input.to,
+    subject: `Rappel : votre rendez-vous du ${input.startsAtLabel}`,
+    templateKey: "rappel_rendez_vous",
+    sourceType: "rappel_rendez_vous",
+    sourceLabel: "Rappel de rendez-vous",
+    appointmentId: input.appointmentId,
+    metadata: {
+      startsAt: input.startsAt,
+      categoryTitle: input.categoryTitle,
+      startsAtLabel: input.startsAtLabel,
+      appointmentMode: input.appointmentMode,
+    },
+    buildTemplate: (reference) =>
+      AppointmentReminderEmail({
+        firstName: input.firstName,
+        categoryTitle: input.categoryTitle,
+        startsAtLabel: input.startsAtLabel,
+        appointmentModeLabel: formatAppointmentMode(input.appointmentMode),
+        phone: input.phone,
+        reference,
+      }),
+  });
+}
+
+export async function sendAppointmentRescheduledEmail(input: {
+  to: string;
+  firstName: string;
+  categoryTitle: string;
+  previousStartsAtLabel: string;
+  startsAtLabel: string;
+  appointmentMode: AppointmentMode;
+  reason?: string;
+  appointmentId: string;
+}) {
+  return sendTransactionalEmail({
+    to: input.to,
+    subject: `Rendez-vous déplacé au ${input.startsAtLabel}`,
+    templateKey: "rendez_vous_deplace",
+    sourceType: "rendez_vous_deplace",
+    sourceLabel: "Déplacement de rendez-vous",
+    appointmentId: input.appointmentId,
+    metadata: {
+      categoryTitle: input.categoryTitle,
+      previousStartsAtLabel: input.previousStartsAtLabel,
+      startsAtLabel: input.startsAtLabel,
+      reason: input.reason,
+    },
+    buildTemplate: (reference) =>
+      AppointmentRescheduledEmail({
+        firstName: input.firstName,
+        categoryTitle: input.categoryTitle,
+        previousStartsAtLabel: input.previousStartsAtLabel,
+        startsAtLabel: input.startsAtLabel,
+        appointmentModeLabel: formatAppointmentMode(input.appointmentMode),
         reason: input.reason,
         reference,
       }),

@@ -1,143 +1,247 @@
+import type { CSSProperties, ReactNode } from "react";
+
 import { getAppUrl } from "@/lib/env";
+
+/**
+ * Gabarits des emails envoyés par la plateforme.
+ *
+ * Mise en page volontairement sobre et écrite « à l'ancienne » (tableaux,
+ * styles en ligne, police système, aucune image distante) : c'est ce qui
+ * s'affiche correctement dans Gmail, Outlook, Yahoo et Apple Mail, et ce qui
+ * ressemble le moins à un email publicitaire aux yeux des filtres anti-spam.
+ */
+
+const FONT_FAMILY = "Arial, Helvetica, sans-serif";
+const COLOR_TEXT = "#1a1a1a";
+const COLOR_MUTED = "#6b7280";
+const COLOR_ACCENT = "#2563eb";
+const COLOR_BORDER = "#e5e7eb";
 
 type MailDetail = {
   label: string;
   value: string;
-  underline?: boolean;
+};
+
+type MailNotice = {
+  tone: "info" | "warning";
+  text: string;
 };
 
 interface MailLayoutProps {
+  /** Titre affiché en tête de l'email. */
   title: string;
+  /** Résumé d'une ligne affiché par la messagerie à côté de l'objet. */
+  preheader: string;
   greeting: string;
+  /** Phrase d'ouverture : elle doit dire l'essentiel à elle seule. */
   lead: string;
-  userEmail?: string;
   details?: MailDetail[];
   paragraphs?: string[];
-  highlightedParagraphs?: string[];
+  notice?: MailNotice;
   linkLabel?: string;
   linkHref?: string;
   reference: string;
-  children?: React.ReactNode;
+  /** Les alertes internes n'ont pas besoin de formule de politesse. */
+  hideSignature?: boolean;
+  children?: ReactNode;
 }
+
+const paragraphStyle: CSSProperties = {
+  margin: "0 0 16px",
+  fontFamily: FONT_FAMILY,
+  fontSize: "16px",
+  lineHeight: "24px",
+  color: COLOR_TEXT,
+};
 
 function MailLayout({
   title,
+  preheader,
   greeting,
   lead,
-  userEmail,
   details = [],
   paragraphs = [],
-  highlightedParagraphs = [],
+  notice,
   linkLabel,
   linkHref,
   reference,
+  hideSignature,
   children,
 }: MailLayoutProps) {
+  const siteUrl = getAppUrl();
+  const siteLabel = siteUrl.replace(/^https?:\/\//, "").replace(/\/+$/, "");
+
   return (
-    <div
-      style={{
-        margin: 0,
-        padding: "40px 0",
-        backgroundColor: "#f8fafc", // slate-50
-        color: "#0f172a", // slate-900
-        textAlign: "left",
-        fontFamily:
-          'Inter, "Gilroy", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-        lineHeight: 1.6,
-        fontSize: "15px",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "600px",
-          margin: "0 auto",
-          padding: "32px",
-          backgroundColor: "#ffffff",
-          borderRadius: "12px",
-          boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)",
-          border: "1px solid #e2e8f0", // slate-200
-        }}
-      >
-        <p style={{ margin: "0 0 24px", fontSize: "12px", color: "#64748b", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 600 }}>
-          Prise de rendez-vous - Mathieu CERENZIA
-        </p>
-        
-        <h1 style={{ margin: "0 0 24px", fontSize: "24px", lineHeight: "1.3", color: "#0f172a", fontWeight: 700 }}>
-          {title}
-        </h1>
-
-        {userEmail ? (
-          <div style={{ margin: "0 0 24px", padding: "16px", backgroundColor: "#f1f5f9", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
-            <p style={{ margin: "0 0 12px", color: "#0f172a", fontWeight: 600, fontSize: "14px" }}>Vos identifiants de connexion :</p>
-            <p style={{ margin: "0 0 6px", color: "#334155", fontSize: "14px" }}>
-              <strong style={{ color: "#0f172a" }}>E-mail :</strong> {userEmail}
-            </p>
-            <p style={{ margin: "0", color: "#334155", fontSize: "14px" }}>
-              <strong style={{ color: "#0f172a" }}>Mot de passe :</strong> ****** <span style={{ fontSize: "12px", color: "#64748b" }}>(vous êtes le seul à le connaître, ne le communiquez à personne.)</span>
-            </p>
-          </div>
-        ) : null}
-        
-        <p style={{ margin: "0 0 16px", color: "#334155", fontWeight: 500 }}>{greeting}</p>
-        <p style={{ margin: "0 0 24px", color: "#475569" }}>{lead}</p>
-
-        {details.length > 0 ? (
-          <div style={{ margin: "0 0 24px", padding: "20px", backgroundColor: "#f8fafc", borderRadius: "8px", border: "1px solid #f1f5f9" }}>
-            {details.map((detail, index) => (
-              <p key={detail.label} style={{ margin: index === 0 ? "0" : "12px 0 0", color: "#334155", fontSize: "14px" }}>
-                <strong style={{ color: "#0f172a" }}>{detail.label} :</strong>{" "}
-                <span style={detail.underline ? { textDecoration: "underline", textUnderlineOffset: "4px" } : undefined}>{detail.value}</span>
-              </p>
-            ))}
-          </div>
-        ) : null}
-
-        {paragraphs.map((paragraph) => (
-          <p key={paragraph} style={{ margin: "0 0 16px", color: "#475569" }}>
-            {paragraph}
-          </p>
-        ))}
-
-        {highlightedParagraphs.map((paragraph) => (
-          <div key={paragraph} style={{ margin: "24px 0", padding: "16px", backgroundColor: "#fef2f2", borderLeft: "4px solid #ef4444", borderRadius: "0 8px 8px 0" }}>
-            <p style={{ margin: 0, color: "#991b1b", fontWeight: 600 }}>
-              {paragraph}
-            </p>
-          </div>
-        ))}
-
-        {children}
-
-        {linkLabel && linkHref ? (
-          <div style={{ margin: "32px 0 0" }}>
-            <a 
-              href={linkHref} 
-              style={{ 
-                display: "inline-block", 
-                backgroundColor: "#2563eb", // blue-600
-                color: "#ffffff", 
-                textDecoration: "none", 
-                padding: "12px 24px", 
-                borderRadius: "6px", 
-                fontWeight: 600,
-                fontSize: "14px"
-              }}
-            >
-              {linkLabel}
-            </a>
-          </div>
-        ) : null}
-
-        <div style={{ marginTop: "40px", paddingTop: "24px", borderTop: "1px solid #e2e8f0" }}>
-          <p style={{ margin: "0", color: "#64748b", fontSize: "13px" }}>
-            Cet e-mail a été envoyé automatiquement. Merci de ne pas y répondre.
-          </p>
-          <p style={{ margin: "4px 0 0", color: "#94a3b8", fontSize: "12px" }}>Réf : {reference}</p>
+    <html lang="fr">
+      <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="color-scheme" content="light" />
+        <meta name="supported-color-schemes" content="light" />
+        <title>{title}</title>
+      </head>
+      <body style={{ margin: 0, padding: 0, backgroundColor: "#f4f5f7" }}>
+        <div style={{ display: "none", maxHeight: 0, overflow: "hidden", opacity: 0, color: "#f4f5f7", fontSize: "1px", lineHeight: "1px" }}>
+          {preheader}
         </div>
-      </div>
-    </div>
+
+        <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} border={0} style={{ backgroundColor: "#f4f5f7" }}>
+          <tbody>
+            <tr>
+              <td align="center" style={{ padding: "24px 12px" }}>
+                <table
+                  role="presentation"
+                  width={560}
+                  cellPadding={0}
+                  cellSpacing={0}
+                  border={0}
+                  style={{
+                    width: "100%",
+                    maxWidth: "560px",
+                    backgroundColor: "#ffffff",
+                    border: `1px solid ${COLOR_BORDER}`,
+                    borderRadius: "8px",
+                  }}
+                >
+                  <tbody>
+                    <tr>
+                      <td style={{ padding: "24px 32px 20px", borderBottom: `1px solid ${COLOR_BORDER}` }}>
+                        <p style={{ margin: 0, fontFamily: FONT_FAMILY, fontSize: "15px", lineHeight: "22px", fontWeight: 700, color: COLOR_TEXT }}>
+                          Mathieu Cerenzia
+                        </p>
+                        <p style={{ margin: 0, fontFamily: FONT_FAMILY, fontSize: "13px", lineHeight: "20px", color: COLOR_MUTED }}>
+                          Prise de rendez-vous en ligne
+                        </p>
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td style={{ padding: "28px 32px 8px" }}>
+                        <h1 style={{ margin: "0 0 20px", fontFamily: FONT_FAMILY, fontSize: "22px", lineHeight: "30px", fontWeight: 700, color: COLOR_TEXT }}>
+                          {title}
+                        </h1>
+
+                        <p style={paragraphStyle}>{greeting}</p>
+                        {lead ? <p style={paragraphStyle}>{lead}</p> : null}
+
+                        {details.length > 0 ? (
+                          <div style={{ margin: "8px 0 24px", borderTop: `1px solid ${COLOR_BORDER}` }}>
+                            {/* Une ligne « Libellé : valeur » par information : lisible partout,
+                                y compris dans la version texte de l'email. */}
+                            {details.map((detail) => (
+                              <p
+                                key={detail.label}
+                                style={{
+                                  margin: 0,
+                                  padding: "11px 0",
+                                  borderBottom: `1px solid ${COLOR_BORDER}`,
+                                  fontFamily: FONT_FAMILY,
+                                  fontSize: "15px",
+                                  lineHeight: "22px",
+                                  color: COLOR_TEXT,
+                                }}
+                              >
+                                <span style={{ color: COLOR_MUTED }}>{detail.label} : </span>
+                                <strong>{detail.value}</strong>
+                              </p>
+                            ))}
+                          </div>
+                        ) : null}
+
+                        {notice ? (
+                          <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} border={0} style={{ margin: "0 0 20px" }}>
+                            <tbody>
+                              <tr>
+                                <td
+                                  style={{
+                                    padding: "12px 16px",
+                                    backgroundColor: notice.tone === "warning" ? "#fff7ed" : "#eff6ff",
+                                    borderLeft: `3px solid ${notice.tone === "warning" ? "#ea580c" : COLOR_ACCENT}`,
+                                    fontFamily: FONT_FAMILY,
+                                    fontSize: "15px",
+                                    lineHeight: "22px",
+                                    color: COLOR_TEXT,
+                                  }}
+                                >
+                                  {notice.text}
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        ) : null}
+
+                        {paragraphs.map((paragraph) => (
+                          <p key={paragraph} style={paragraphStyle}>
+                            {paragraph}
+                          </p>
+                        ))}
+
+                        {children}
+
+                        {linkLabel && linkHref ? (
+                          <table role="presentation" cellPadding={0} cellSpacing={0} border={0} style={{ margin: "8px 0 24px" }}>
+                            <tbody>
+                              <tr>
+                                <td align="center" style={{ backgroundColor: COLOR_ACCENT, borderRadius: "6px" }}>
+                                  <a
+                                    href={linkHref}
+                                    style={{
+                                      display: "inline-block",
+                                      padding: "12px 24px",
+                                      fontFamily: FONT_FAMILY,
+                                      fontSize: "16px",
+                                      lineHeight: "24px",
+                                      fontWeight: 700,
+                                      color: "#ffffff",
+                                      textDecoration: "none",
+                                    }}
+                                  >
+                                    {linkLabel}
+                                  </a>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        ) : null}
+
+                        {hideSignature ? null : (
+                          <p style={{ ...paragraphStyle, margin: "0 0 24px" }}>
+                            À bientôt,
+                            <br />
+                            Mathieu Cerenzia
+                          </p>
+                        )}
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td style={{ padding: "20px 32px 24px", borderTop: `1px solid ${COLOR_BORDER}` }}>
+                        <p style={{ margin: "0 0 6px", fontFamily: FONT_FAMILY, fontSize: "13px", lineHeight: "20px", color: COLOR_MUTED }}>
+                          Cet email vous est envoyé automatiquement à la suite d&apos;une action sur{" "}
+                          <a href={siteUrl} style={{ color: COLOR_MUTED, textDecoration: "underline" }}>
+                            {siteLabel}
+                          </a>
+                          . Merci de ne pas y répondre : cette adresse n&apos;est pas consultée.
+                        </p>
+                        <p style={{ margin: 0, fontFamily: FONT_FAMILY, fontSize: "12px", lineHeight: "18px", color: "#9ca3af" }}>
+                          Référence : {reference}
+                        </p>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </body>
+    </html>
   );
 }
+
+/* =========================================================================
+   COMPTE
+   ========================================================================= */
 
 interface SignupConfirmationEmailProps {
   firstName: string;
@@ -145,21 +249,19 @@ interface SignupConfirmationEmailProps {
   reference: string;
 }
 
+/** Inscription réussie sur la plateforme. */
 export function SignupConfirmationEmail({ firstName, email, reference }: SignupConfirmationEmailProps) {
   return (
     <MailLayout
-      title="Confirmation d'inscription"
+      title="Votre compte est créé"
+      preheader="Votre compte est prêt : vous pouvez prendre et suivre vos rendez-vous en ligne."
       greeting={`Bonjour ${firstName},`}
-      lead="Votre compte a bien été créé."
-      userEmail={email}
-      details={[
-        { label: "Email", value: email, underline: true },
-      ]}
+      lead="Votre inscription est bien enregistrée. Votre compte vous permet de prendre rendez-vous plus vite, de retrouver vos rendez-vous et de les annuler en ligne."
+      details={[{ label: "Identifiant", value: email }]}
       paragraphs={[
-        "Si une vérification du compte est requise, pensez également à consulter l'email envoyé par le service d'authentification.",
-        "Vous pouvez ensuite vous connecter et retrouver vos rendez-vous depuis votre espace compte.",
+        "Si un second email vous demande de confirmer votre adresse, cliquez sur le lien qu'il contient avant de vous connecter.",
       ]}
-      linkLabel="Connexion"
+      linkLabel="Me connecter"
       linkHref={`${getAppUrl()}/connexion`}
       reference={reference}
     />
@@ -173,34 +275,31 @@ interface AdminCreatedSignupEmailProps {
   reference: string;
 }
 
-export function AdminCreatedSignupEmail({
-  firstName,
-  email,
-  temporaryPassword,
-  reference,
-}: AdminCreatedSignupEmailProps) {
+export function AdminCreatedSignupEmail({ firstName, email, temporaryPassword, reference }: AdminCreatedSignupEmailProps) {
   return (
     <MailLayout
-      title="Confirmation d'inscription"
+      title="Votre compte est créé"
+      preheader="Un compte vient d'être créé pour vous. Voici comment vous connecter."
       greeting={`Bonjour ${firstName},`}
-      lead="Votre compte a été créé par l'administration."
+      lead="Un compte vient d'être créé pour vous. Il vous permet de retrouver vos rendez-vous et de les gérer en ligne."
       details={[
-        { label: "Email", value: email, underline: true },
-        { label: "Mot de passe temporaire", value: temporaryPassword, underline: true },
+        { label: "Identifiant", value: email },
+        { label: "Mot de passe provisoire", value: temporaryPassword },
       ]}
-      highlightedParagraphs={[
-        "Lors de votre première connexion, il vous sera demandé de modifier ce mot de passe pour plus de sécurité.",
-      ]}
-      paragraphs={[
-        "Vous pouvez vous connecter dès maintenant avec les identifiants ci-dessus.",
-        "Conservez cet email jusqu'à votre première connexion.",
-      ]}
-      linkLabel="Connexion"
+      notice={{
+        tone: "info",
+        text: "À votre première connexion, vous choisirez votre propre mot de passe.",
+      }}
+      linkLabel="Me connecter"
       linkHref={`${getAppUrl()}/connexion`}
       reference={reference}
     />
   );
 }
+
+/* =========================================================================
+   RENDEZ-VOUS
+   ========================================================================= */
 
 interface ProvisionalAppointmentEmailProps {
   firstName: string;
@@ -212,30 +311,30 @@ interface ProvisionalAppointmentEmailProps {
   reference: string;
 }
 
+/** Demande reçue, en attente de validation. */
 export function ProvisionalAppointmentEmail({
   firstName,
-  email,
   categoryTitle,
   startsAtLabel,
   appointmentModeLabel,
-  phone,
   reference,
 }: ProvisionalAppointmentEmailProps) {
   return (
     <MailLayout
-      title="Confirmation de prise de rendez-vous (provisoire)"
+      title="Votre demande est bien reçue"
+      preheader={`Demande de rendez-vous du ${startsAtLabel} : en attente de validation.`}
       greeting={`Bonjour ${firstName},`}
-      lead={`Votre demande de rendez-vous pour « ${categoryTitle} » a bien été enregistrée à titre provisoire.`}
-      userEmail={email}
+      lead="J'ai bien reçu votre demande de rendez-vous. Elle doit encore être validée : vous recevrez un second email dès que ce sera fait."
       details={[
-        { label: "Catégorie", value: categoryTitle, underline: true },
-        { label: "Date et heure", value: startsAtLabel, underline: true },
-        { label: "Type de rendez-vous", value: appointmentModeLabel, underline: true },
-        { label: "Statut", value: "En attente de validation", underline: true },
+        { label: "Rendez-vous", value: categoryTitle },
+        { label: "Date et heure", value: startsAtLabel },
+        { label: "Déroulement", value: appointmentModeLabel },
+        { label: "Statut", value: "En attente de validation" },
       ]}
-      highlightedParagraphs={["Votre demande reste provisoire tant qu'un administrateur ne l'a pas validée."]}
-      linkLabel="Site"
-      linkHref={getAppUrl()}
+      notice={{
+        tone: "warning",
+        text: "Le rendez-vous n'est pas encore confirmé. Merci d'attendre l'email de confirmation.",
+      }}
       reference={reference}
     />
   );
@@ -251,9 +350,9 @@ interface ValidatedAppointmentEmailProps {
   reference: string;
 }
 
+/** Confirmation de rendez-vous. */
 export function ValidatedAppointmentEmail({
   firstName,
-  email,
   categoryTitle,
   startsAtLabel,
   appointmentModeLabel,
@@ -262,23 +361,101 @@ export function ValidatedAppointmentEmail({
 }: ValidatedAppointmentEmailProps) {
   return (
     <MailLayout
-      title="Confirmation de rendez-vous validé"
+      title="Votre rendez-vous est confirmé"
+      preheader={`Rendez-vous confirmé : ${startsAtLabel}.`}
       greeting={`Bonjour ${firstName},`}
-      lead={`Votre rendez-vous pour « ${categoryTitle} » a bien été validé.`}
-      userEmail={email}
+      lead="Bonne nouvelle : votre rendez-vous est confirmé. Voici le récapitulatif à conserver."
       details={[
-        { label: "Catégorie", value: categoryTitle, underline: true },
-        { label: "Date et heure", value: startsAtLabel, underline: true },
-        { label: "Type de rendez-vous", value: appointmentModeLabel, underline: true },
-        { label: "Statut", value: "Validé", underline: true },
+        { label: "Rendez-vous", value: categoryTitle },
+        { label: "Date et heure", value: startsAtLabel },
+        { label: "Déroulement", value: appointmentModeLabel },
+        ...(appointmentModeLabel === "Téléphonique" && phone ? [{ label: "Je vous appelle au", value: phone }] : []),
       ]}
       paragraphs={[
-        "Conservez cet email. Vous pouvez retrouver l'historique de vos rendez-vous depuis votre espace compte.",
-        ...(appointmentModeLabel === "Téléphonique" && phone
-          ? [`Je vous appellerai sur le numéro de téléphone inscrit sur votre fiche client à savoir le : ${phone}.`]
-          : []),
+        "Un empêchement ? Vous pouvez annuler ce rendez-vous depuis votre espace, le plus tôt possible, afin de libérer le créneau.",
       ]}
-      linkLabel="Mon compte"
+      linkLabel="Voir mes rendez-vous"
+      linkHref={`${getAppUrl()}/compte`}
+      reference={reference}
+    />
+  );
+}
+
+interface AppointmentReminderEmailProps {
+  firstName: string;
+  categoryTitle: string;
+  startsAtLabel: string;
+  appointmentModeLabel: string;
+  phone?: string;
+  reference: string;
+}
+
+/** Rappel envoyé avant le rendez-vous. */
+export function AppointmentReminderEmail({
+  firstName,
+  categoryTitle,
+  startsAtLabel,
+  appointmentModeLabel,
+  phone,
+  reference,
+}: AppointmentReminderEmailProps) {
+  return (
+    <MailLayout
+      title="Rappel de votre rendez-vous"
+      preheader={`Rappel : votre rendez-vous a lieu ${startsAtLabel}.`}
+      greeting={`Bonjour ${firstName},`}
+      lead="Un petit rappel : votre rendez-vous approche."
+      details={[
+        { label: "Rendez-vous", value: categoryTitle },
+        { label: "Date et heure", value: startsAtLabel },
+        { label: "Déroulement", value: appointmentModeLabel },
+        ...(appointmentModeLabel === "Téléphonique" && phone ? [{ label: "Je vous appelle au", value: phone }] : []),
+      ]}
+      paragraphs={["Si vous ne pouvez plus venir, merci d'annuler depuis votre espace pour libérer le créneau."]}
+      linkLabel="Voir mes rendez-vous"
+      linkHref={`${getAppUrl()}/compte`}
+      reference={reference}
+    />
+  );
+}
+
+interface AppointmentRescheduledEmailProps {
+  firstName: string;
+  categoryTitle: string;
+  previousStartsAtLabel: string;
+  startsAtLabel: string;
+  appointmentModeLabel: string;
+  reason?: string;
+  reference: string;
+}
+
+/** Déplacement d'un rendez-vous sur un nouveau créneau. */
+export function AppointmentRescheduledEmail({
+  firstName,
+  categoryTitle,
+  previousStartsAtLabel,
+  startsAtLabel,
+  appointmentModeLabel,
+  reason,
+  reference,
+}: AppointmentRescheduledEmailProps) {
+  return (
+    <MailLayout
+      title="Votre rendez-vous est déplacé"
+      preheader={`Nouveau créneau : ${startsAtLabel}.`}
+      greeting={`Bonjour ${firstName},`}
+      lead="Votre rendez-vous a été déplacé. Voici le nouveau créneau, qui remplace le précédent."
+      details={[
+        { label: "Rendez-vous", value: categoryTitle },
+        { label: "Nouveau créneau", value: startsAtLabel },
+        { label: "Ancien créneau", value: previousStartsAtLabel },
+        { label: "Déroulement", value: appointmentModeLabel },
+        ...(reason ? [{ label: "Motif", value: reason }] : []),
+      ]}
+      paragraphs={[
+        "Si ce nouveau créneau ne vous convient pas, vous pouvez annuler le rendez-vous depuis votre espace et en choisir un autre.",
+      ]}
+      linkLabel="Voir mes rendez-vous"
       linkHref={`${getAppUrl()}/compte`}
       reference={reference}
     />
@@ -294,9 +471,9 @@ interface AppointmentCancellationEmailProps {
   reference: string;
 }
 
+/** Confirmation d'annulation demandée par le client. */
 export function AppointmentCancellationEmail({
   firstName,
-  email,
   categoryTitle,
   startsAtLabel,
   reason,
@@ -304,22 +481,96 @@ export function AppointmentCancellationEmail({
 }: AppointmentCancellationEmailProps) {
   return (
     <MailLayout
-      title="Confirmation d'annulation de rendez-vous"
+      title="Votre rendez-vous est annulé"
+      preheader={`Annulation confirmée pour le rendez-vous du ${startsAtLabel}.`}
       greeting={`Bonjour ${firstName},`}
-      lead={`L'annulation de votre rendez-vous pour « ${categoryTitle} » a bien été prise en compte.`}
-      userEmail={email}
+      lead="Votre annulation est bien prise en compte. Le créneau est libéré, vous n'avez rien d'autre à faire."
       details={[
-        { label: "Catégorie", value: categoryTitle, underline: true },
-        { label: "Date et heure", value: startsAtLabel, underline: true },
-        { label: "Motif", value: reason, underline: true },
+        { label: "Rendez-vous", value: categoryTitle },
+        { label: "Date et heure", value: startsAtLabel },
+        { label: "Motif", value: reason },
       ]}
-      paragraphs={["Si besoin, vous pouvez réserver un nouveau créneau directement depuis le site."]}
+      paragraphs={["Vous pouvez reprendre rendez-vous quand vous le souhaitez."]}
       linkLabel="Prendre un nouveau rendez-vous"
       linkHref={getAppUrl()}
       reference={reference}
     />
   );
 }
+
+interface AdminBlackoutCancellationEmailProps {
+  firstName: string;
+  email: string;
+  categoryTitle: string;
+  appointmentDateLabel: string;
+  appointmentTimeLabel: string;
+  reason?: string;
+  reference: string;
+}
+
+/** Indisponibilité sur un créneau déjà réservé : le rendez-vous est annulé. */
+export function AdminBlackoutCancellationEmail({
+  firstName,
+  categoryTitle,
+  appointmentDateLabel,
+  appointmentTimeLabel,
+  reason,
+  reference,
+}: AdminBlackoutCancellationEmailProps) {
+  return (
+    <MailLayout
+      title="Votre rendez-vous ne peut pas avoir lieu"
+      preheader={`Je ne serai pas disponible le ${appointmentDateLabel} : votre rendez-vous est annulé.`}
+      greeting={`Bonjour ${firstName},`}
+      lead="Je suis désolé : je ne serai pas disponible sur le créneau que vous aviez réservé. Votre rendez-vous est donc annulé."
+      details={[
+        { label: "Rendez-vous", value: categoryTitle },
+        { label: "Date", value: appointmentDateLabel },
+        { label: "Heure", value: appointmentTimeLabel },
+        ...(reason ? [{ label: "Motif", value: reason }] : []),
+      ]}
+      paragraphs={[
+        "Je vous présente mes excuses pour ce contretemps. Vous pouvez choisir dès maintenant un autre créneau parmi les disponibilités à jour.",
+      ]}
+      linkLabel="Choisir un autre créneau"
+      linkHref={getAppUrl()}
+      reference={reference}
+    />
+  );
+}
+
+interface RefusedAppointmentEmailProps {
+  firstName: string;
+  email: string;
+  categoryTitle: string;
+  startsAtLabel: string;
+  reason: string;
+  reference: string;
+}
+
+export function RefusedAppointmentEmail({ firstName, categoryTitle, startsAtLabel, reason, reference }: RefusedAppointmentEmailProps) {
+  return (
+    <MailLayout
+      title="Votre demande n'a pas pu être acceptée"
+      preheader={`Demande de rendez-vous du ${startsAtLabel} : non acceptée.`}
+      greeting={`Bonjour ${firstName},`}
+      lead="Je ne peux malheureusement pas accepter votre demande de rendez-vous sur ce créneau."
+      details={[
+        { label: "Rendez-vous", value: categoryTitle },
+        { label: "Date et heure", value: startsAtLabel },
+        { label: "Motif", value: reason },
+      ]}
+      paragraphs={["Vous pouvez faire une nouvelle demande sur un autre créneau."]}
+      linkLabel="Choisir un autre créneau"
+      linkHref={getAppUrl()}
+      reference={reference}
+    />
+  );
+}
+
+/* =========================================================================
+   MESSAGES ET ALERTES
+   ========================================================================= */
 
 interface AdminAppointmentRequestNotificationEmailProps {
   categoryTitle: string;
@@ -347,66 +598,22 @@ export function AdminAppointmentRequestNotificationEmail({
   return (
     <MailLayout
       title="Nouvelle demande de rendez-vous"
+      preheader={`${clientFullName} demande un rendez-vous le ${startsAtLabel}.`}
       greeting="Bonjour,"
-      lead="Une nouvelle demande de rendez-vous vient d'être enregistrée."
+      lead="Une nouvelle demande de rendez-vous attend votre validation."
       details={[
-        { label: "Date et heure", value: startsAtLabel, underline: true },
-        { label: "Catégorie", value: categoryTitle, underline: true },
-        { label: "Type de rendez-vous", value: appointmentModeLabel, underline: true },
-        { label: "Client", value: clientFullName, underline: true },
-        { label: "Email", value: clientEmail, underline: true },
-        ...(clientPhone ? [{ label: "Téléphone", value: clientPhone, underline: true }] : []),
+        { label: "Date et heure", value: startsAtLabel },
+        { label: "Rendez-vous", value: categoryTitle },
+        { label: "Déroulement", value: appointmentModeLabel },
+        { label: "Client", value: clientFullName },
+        { label: "Email", value: clientEmail },
+        ...(clientPhone ? [{ label: "Téléphone", value: clientPhone }] : []),
+        ...(clientMessage ? [{ label: "Message", value: clientMessage }] : []),
       ]}
-      paragraphs={[
-        ...(clientMessage ? [`Message du client : ${clientMessage}`] : []),
-        "Vous pouvez consulter la fiche du rendez-vous via le lien ci-dessous.",
-      ]}
-      linkLabel="Voir le rendez-vous"
+      linkLabel="Ouvrir la demande"
       linkHref={adminAppointmentUrl}
       reference={reference}
-    />
-  );
-}
-
-interface AdminBlackoutCancellationEmailProps {
-  firstName: string;
-  email: string;
-  categoryTitle: string;
-  appointmentDateLabel: string;
-  appointmentTimeLabel: string;
-  reason?: string;
-  reference: string;
-}
-
-export function AdminBlackoutCancellationEmail({
-  firstName,
-  email,
-  categoryTitle,
-  appointmentDateLabel,
-  appointmentTimeLabel,
-  reason,
-  reference,
-}: AdminBlackoutCancellationEmailProps) {
-  return (
-    <MailLayout
-      title="Annulation de rendez-vous"
-      greeting={`Bonjour ${firstName},`}
-      lead="Je vous informe que votre rendez-vous a été annulé en raison d'une indisponibilité."
-      userEmail={email}
-      details={[
-        { label: "Date", value: appointmentDateLabel, underline: true },
-        { label: "Heure", value: appointmentTimeLabel, underline: true },
-        { label: "Type de rendez-vous", value: categoryTitle, underline: true },
-        ...(reason ? [{ label: "Motif", value: reason, underline: true }] : []),
-      ]}
-      paragraphs={[
-        `Vous aviez un rendez-vous le ${appointmentDateLabel} à ${appointmentTimeLabel} pour « ${categoryTitle} », mais je ne pourrai malheureusement pas l'honorer et il a donc été annulé.`,
-        "Je vous présente mes sincères excuses pour la gêne occasionnée.",
-        "Je vous invite à reprendre un rendez-vous sur un autre créneau disponible directement depuis le site.",
-      ]}
-      linkLabel="Prendre un nouveau rendez-vous"
-      linkHref={getAppUrl()}
-      reference={reference}
+      hideSignature
     />
   );
 }
@@ -418,61 +625,14 @@ interface CustomAdminEmailProps {
   reference: string;
 }
 
-export function CustomAdminEmail({
-  firstName,
-  subject,
-  message,
-  reference,
-}: CustomAdminEmailProps) {
+export function CustomAdminEmail({ firstName, subject, message, reference }: CustomAdminEmailProps) {
   return (
-    <MailLayout
-      title={subject}
-      greeting={`Bonjour ${firstName},`}
-      lead=""
-      reference={reference}
-    >
-      <div style={{ whiteSpace: "pre-wrap", color: "#475569", margin: "0 0 16px" }}>
-        {message}
-      </div>
+    <MailLayout title={subject} preheader={message.slice(0, 120)} greeting={`Bonjour ${firstName},`} lead="" reference={reference}>
+      <p style={{ ...paragraphStyle, whiteSpace: "pre-wrap" }}>{message}</p>
     </MailLayout>
   );
 }
 
-interface RefusedAppointmentEmailProps {
-  firstName: string;
-  email: string;
-  categoryTitle: string;
-  startsAtLabel: string;
-  reason: string;
-  reference: string;
-}
-
-export function RefusedAppointmentEmail({
-  firstName,
-  email,
-  categoryTitle,
-  startsAtLabel,
-  reason,
-  reference,
-}: RefusedAppointmentEmailProps) {
-  return (
-    <MailLayout
-      title="Demande de rendez-vous refusée"
-      greeting={`Bonjour ${firstName},`}
-      lead={`Votre demande pour « ${categoryTitle} » n'a pas pu être validée.`}
-      userEmail={email}
-      details={[
-        { label: "Catégorie", value: categoryTitle, underline: true },
-        { label: "Date et heure", value: startsAtLabel, underline: true },
-        { label: "Motif", value: reason, underline: true },
-      ]}
-      paragraphs={["Vous pouvez choisir un autre créneau si vous souhaitez effectuer une nouvelle demande."]}
-      linkLabel="Choisir un autre créneau"
-      linkHref={getAppUrl()}
-      reference={reference}
-    />
-  );
-}
 export interface ContactAcknowledgementEmailProps {
   civility: string;
   email: string;
@@ -486,38 +646,24 @@ export interface ContactAcknowledgementEmailProps {
 
 export function ContactAcknowledgementEmail({
   civility,
-  email,
   subject,
   isBookingBlocked,
   bookingBlockedMessage,
   reference,
 }: ContactAcknowledgementEmailProps) {
-  const paragraphs = [
-    "Nous traiterons votre demande dans les plus brefs délais.",
-    "Vous trouverez en pièce jointe de cet e-mail un récapitulatif de votre demande au format PDF.",
-  ];
-
-  const highlightedParagraphs = [];
-  
-  if (isBookingBlocked) {
-    highlightedParagraphs.push(
-      bookingBlockedMessage 
-        ? `Information importante : ${bookingBlockedMessage}`
-        : "Information importante : La prise de rendez-vous est actuellement suspendue."
-    );
-  }
-
   return (
     <MailLayout
-      title="Accusé de réception de votre message"
+      title="Votre message est bien reçu"
+      preheader="J'ai bien reçu votre message et je vous réponds dès que possible."
       greeting={`Bonjour ${civility},`}
-      lead="Nous avons bien reçu votre message."
-      userEmail={email}
-      details={[
-        { label: "Objet", value: subject, underline: true },
-      ]}
-      paragraphs={paragraphs}
-      highlightedParagraphs={highlightedParagraphs}
+      lead="J'ai bien reçu votre message et je vous réponds dès que possible."
+      details={[{ label: "Objet", value: subject }]}
+      notice={
+        isBookingBlocked
+          ? { tone: "warning", text: bookingBlockedMessage || "La prise de rendez-vous est actuellement suspendue." }
+          : undefined
+      }
+      paragraphs={["Vous trouverez en pièce jointe un récapitulatif de votre demande au format PDF."]}
       reference={reference}
     />
   );
@@ -532,30 +678,23 @@ export interface AdminContactNotificationEmailProps {
   reference: string;
 }
 
-export function AdminContactNotificationEmail({
-  civility,
-  email,
-  phone,
-  subject,
-  message,
-  reference,
-}: AdminContactNotificationEmailProps) {
+export function AdminContactNotificationEmail({ civility, email, phone, subject, message, reference }: AdminContactNotificationEmailProps) {
   return (
     <MailLayout
       title="Nouveau message de contact"
+      preheader={`${civility} — ${subject}`}
       greeting="Bonjour,"
-      lead="Vous avez reçu un nouveau message via le formulaire de contact urgence."
+      lead="Un nouveau message vient d'arriver par le formulaire de contact."
       details={[
         { label: "Civilité", value: civility },
-        { label: "Email", value: email, underline: true },
+        { label: "Email", value: email },
         { label: "Téléphone", value: phone || "Non renseigné" },
-        { label: "Objet", value: subject, underline: true },
-      ]}
-      paragraphs={[
-        "Message :",
-        message,
+        { label: "Objet", value: subject },
       ]}
       reference={reference}
-    />
+      hideSignature
+    >
+      <p style={{ ...paragraphStyle, whiteSpace: "pre-wrap" }}>{message}</p>
+    </MailLayout>
   );
 }

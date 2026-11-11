@@ -1,16 +1,20 @@
 import { notFound } from "next/navigation";
-import { Calendar, Mail, FileText, User, Tag, Clock, CheckCircle2, AlertCircle } from "lucide-react";
+import { Calendar, CalendarClock, Mail, FileText, User, Tag, Clock, CheckCircle2, AlertCircle } from "lucide-react";
 
 import { AppointmentDecisionPanel } from "@/components/admin/appointment-decision-panel";
 import { getAppointmentById, getCategoryById } from "@/lib/data-access";
-import { formatAppointmentMode, formatAppointmentStatus, formatDateTimeFr, formatPhone } from "@/lib/utils";
+import { formatAppointmentMode, formatAppointmentStatus, formatDateTimeFr, formatPhone, toParisInputValues } from "@/lib/utils";
+
+import { rescheduleAppointmentAction } from "../../actions";
 
 export default async function AppointmentDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ moved?: string; error?: string }>;
 }) {
-  const { id } = await params;
+  const [{ id }, { moved, error }] = await Promise.all([params, searchParams]);
   const appointment = await getAppointmentById(id);
 
   if (!appointment) {
@@ -18,9 +22,23 @@ export default async function AppointmentDetailPage({
   }
 
   const category = await getCategoryById(appointment.categoryId);
+  const canReschedule = appointment.status === "en_attente" || appointment.status === "accepte";
+  const currentSlot = toParisInputValues(appointment.startsAt);
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 pb-12">
+      {moved === "1" && (
+        <div className="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+          Le rendez-vous a été déplacé et le client a été prévenu par email.
+        </div>
+      )}
+
+      {error && (
+        <div role="alert" className="rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+          {error}
+        </div>
+      )}
+
       {/* Highlights Panel */}
       <section className="flex flex-col gap-6 rounded-lg border border-slate-200 bg-white p-4 shadow-sm md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-4">
@@ -182,6 +200,56 @@ export default async function AppointmentDetailPage({
             </section>
           )}
 
+          {canReschedule && (
+            <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
+              <div className="flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3">
+                <CalendarClock className="size-4 text-slate-600" />
+                <h2 className="font-semibold text-slate-800">Déplacer le rendez-vous</h2>
+              </div>
+              <form action={rescheduleAppointmentAction} className="space-y-4 p-4">
+                <input type="hidden" name="appointmentId" value={appointment.id} />
+                <div className="grid grid-cols-2 gap-3">
+                  <label className="block space-y-1.5 text-xs font-medium text-slate-700">
+                    <span>Nouvelle date</span>
+                    <input
+                      type="date"
+                      name="date"
+                      required
+                      defaultValue={currentSlot.date}
+                      className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    />
+                  </label>
+                  <label className="block space-y-1.5 text-xs font-medium text-slate-700">
+                    <span>Nouvelle heure</span>
+                    <input
+                      type="time"
+                      name="time"
+                      required
+                      step={900}
+                      defaultValue={currentSlot.time}
+                      className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    />
+                  </label>
+                </div>
+                <label className="block space-y-1.5 text-xs font-medium text-slate-700">
+                  <span>Motif (facultatif, visible par le client)</span>
+                  <input
+                    name="reason"
+                    maxLength={200}
+                    className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  />
+                </label>
+                <p className="text-xs text-slate-500">Heure de Paris. Le client reçoit un email avec l&apos;ancien et le nouveau créneau.</p>
+                <button
+                  type="submit"
+                  className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+                >
+                  Déplacer et prévenir le client
+                </button>
+              </form>
+            </section>
+          )}
+
           <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
             <div className="flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3">
               <Mail className="size-4 text-slate-600" />
@@ -200,6 +268,14 @@ export default async function AppointmentDetailPage({
                 <li className="flex items-start gap-2">
                   <span className="mt-1 block size-1.5 shrink-0 rounded-full bg-slate-400" />
                   Email de refus avec motif si la demande est rejetée.
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-1 block size-1.5 shrink-0 rounded-full bg-slate-400" />
+                  Rappel automatique la veille d&apos;un rendez-vous confirmé.
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-1 block size-1.5 shrink-0 rounded-full bg-slate-400" />
+                  Email de déplacement si le créneau est modifié.
                 </li>
               </ul>
             </div>

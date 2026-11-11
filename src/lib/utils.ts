@@ -97,3 +97,29 @@ export function toParisInputValues(iso: string) {
     time: `${parts.hour}:${parts.minute}`,
   };
 }
+
+/**
+ * Inverse de `toParisInputValues` : convertit une date et une heure saisies à
+ * l'heure de Paris en instant ISO, heure d'été ou d'hiver comprise.
+ */
+export function fromParisInputValues(date: string, time: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !/^\d{2}:\d{2}$/.test(time)) {
+    return null;
+  }
+
+  const wanted = Date.parse(`${date}T${time}:00Z`);
+
+  if (Number.isNaN(wanted)) {
+    return null;
+  }
+
+  // On part de l'hypothèse UTC puis on corrige de l'écart constaté à Paris.
+  let instant = wanted;
+
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    const shown = toParisInputValues(new Date(instant).toISOString());
+    instant -= Date.parse(`${shown.date}T${shown.time}:00Z`) - wanted;
+  }
+
+  return new Date(instant).toISOString();
+}

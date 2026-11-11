@@ -1501,6 +1501,113 @@ export async function updateAppointmentStatus(
   return null;
 }
 
+/**
+ * Rendez-vous confirmés qui commencent bientôt et n'ont pas encore reçu de
+ * rappel pour leur créneau actuel. Un rendez-vous déplacé après son rappel en
+ * reçoit un nouveau, puisque son créneau a changé.
+ */
+export async function getAppointmentsDueForReminder(hoursAhead: number) {
+  const supabase = getSupabaseAdminClient();
+
+  if (!supabase) {
+    return [];
+  }
+
+  const now = new Date();
+  const windowEnd = new Date(now.getTime() + hoursAhead * 60 * 60 * 1000);
+
+  const { data: rows } = await supabase
+    .from("appointments")
+    .select("*")
+    .eq("status", "accepte")
+    .gt("starts_at", now.toISOString())
+    .lte("starts_at", windowEnd.toISOString())
+    .order("starts_at");
+
+  const appointments = (rows ?? []).map((row) => mapAppointmentRow(row as Record<string, unknown>));
+
+  if (appointments.length === 0) {
+    return [];
+  }
+
+  const { data: logs } = await supabase
+    .from("email_logs")
+    .select("appointment_id, metadata")
+    .eq("template_key", "rappel_rendez_vous")
+    .eq("delivery_status", "sent")
+    .in(
+      "appointment_id",
+      appointments.map((appointment) => appointment.id),
+    );
+
+  const alreadyReminded = new Set(
+    (logs ?? []).map((log) => {
+      const metadata = (log.metadata ?? {}) as Record<string, unknown>;
+      return `${String(log.appointment_id)}|${String(metadata.startsAt ?? "")}`;
+    }),
+  );
+
+  const pending = appointments.filter((appointment) => !alreadyReminded.has(`${appointment.id}|${appointment.startsAt}`));
+  const categories = await getCategories();
+
+  return pending.map((appointment) => ({
+    appointment,
+    category: categories.find((category) => category.id === appointment.categoryId) ?? null,
+  }));
+}
+
+/** Déplace un rendez-vous en cours sur un nouveau créneau, sans changer sa durée. */
+export async function rescheduleAppointment(appointmentId: string, startsAtIso: string) {
+  const supabase = getSupabaseAdminClient();
+
+  if (!supabase) {
+    throw new Error("Base de données indisponible.");
+  }
+
+  const existing = await getAppointmentById(appointmentId);
+
+  if (!existing) {
+    throw new Error("Rendez-vous introuvable.");
+  }
+
+  if (!["en_attente", "accepte"].includes(existing.status)) {
+    throw new Error("Seul un rendez-vous en attente ou confirmé peut être déplacé.");
+  }
+
+  const startsAt = new Date(startsAtIso);
+
+  if (Number.isNaN(startsAt.getTime()) || startsAt.getTime() <= Date.now()) {
+    throw new Error("Le nouveau créneau doit être dans le futur.");
+  }
+
+  if (startsAt.getTime() === new Date(existing.startsAt).getTime()) {
+    throw new Error("Le rendez-vous est déjà sur ce créneau.");
+  }
+
+  const durationMs = new Date(existing.endsAt).getTime() - new Date(existing.startsAt).getTime();
+  const endsAt = new Date(startsAt.getTime() + durationMs);
+
+  const { data, error } = await supabase
+    .from("appointments")
+    .update({
+      starts_at: startsAt.toISOString(),
+      ends_at: endsAt.toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", appointmentId)
+    .select("*")
+    .maybeSingle();
+
+  if (error || !data) {
+    throw new Error(getAppointmentWriteErrorMessage(error));
+  }
+
+  return {
+    appointment: mapAppointmentRow(data as Record<string, unknown>),
+    previousStartsAt: existing.startsAt,
+  };
+}
+
 export async function getEmailLogByReference(reference: string) {
   const normalizedReference = reference.trim().toUpperCase();
   const supabase = getSupabaseAdminClient();
