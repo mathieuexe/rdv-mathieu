@@ -97,6 +97,53 @@ function toServableImageUrl(value: unknown, categoryId: string, kind: "thumbnail
   return `${CATEGORY_IMAGE_ROUTE_PREFIX}${categoryId}/${kind}/${version}`;
 }
 
+/**
+ * Colonnes de catégorie lues à l'affichage. Les deux colonnes de visuels en
+ * sont volontairement absentes : elles contiennent des images en base64
+ * (plusieurs centaines de Ko chacune) dont les pages n'ont jamais besoin,
+ * puisque les visuels sont servis par `/api/images/category/...`.
+ */
+const CATEGORY_COLUMNS =
+  "id, slug, title, description, duration_minutes, appointment_mode, is_online, is_hidden, custom_message, is_booking_blocked, booking_block_message, custom_fields, created_at, updated_at";
+
+type CategoryRow = Record<string, unknown>;
+
+/**
+ * Indique, sans télécharger les images, quel visuel possède chaque catégorie :
+ * un marqueur `data:` pour une image stockée en base, ou son URL si elle est
+ * hébergée ailleurs. `mapCategoryRow` en déduit l'URL à afficher.
+ */
+async function attachCategoryImageRefs(
+  supabase: NonNullable<ReturnType<typeof getSupabaseAdminClient>>,
+  rows: CategoryRow[],
+) {
+  if (rows.length === 0) {
+    return rows;
+  }
+
+  const ids = rows.map((row) => String(row.id));
+  const [storedThumbnails, storedBanners, linkedThumbnails, linkedBanners] = await Promise.all([
+    supabase.from("categories").select("id").in("id", ids).like("thumbnail_image_url", "data:%"),
+    supabase.from("categories").select("id").in("id", ids).like("banner_image_url", "data:%"),
+    supabase.from("categories").select("id, thumbnail_image_url").in("id", ids).like("thumbnail_image_url", "http%"),
+    supabase.from("categories").select("id, banner_image_url").in("id", ids).like("banner_image_url", "http%"),
+  ]);
+
+  const thumbnails = new Map<string, string>();
+  const banners = new Map<string, string>();
+
+  for (const row of storedThumbnails.data ?? []) thumbnails.set(String(row.id), "data:");
+  for (const row of storedBanners.data ?? []) banners.set(String(row.id), "data:");
+  for (const row of linkedThumbnails.data ?? []) thumbnails.set(String(row.id), String(row.thumbnail_image_url));
+  for (const row of linkedBanners.data ?? []) banners.set(String(row.id), String(row.banner_image_url));
+
+  return rows.map((row) => ({
+    ...row,
+    thumbnail_image_url: thumbnails.get(String(row.id)) ?? null,
+    banner_image_url: banners.get(String(row.id)) ?? null,
+  }));
+}
+
 function mapCategoryRow(
   row: Record<string, unknown>,
   rules: Array<Record<string, unknown>>,
@@ -299,13 +346,15 @@ export const getPublicCategories = unstable_cache(async () => {
 
   if (supabase) {
     const [{ data: categoryRows }, { data: ruleRows }, { data: blackoutRows }] = await Promise.all([
-      supabase.from("categories").select("*").eq("is_online", true).or("is_hidden.eq.false,is_hidden.is.null").order("created_at"),
+      supabase.from("categories").select(CATEGORY_COLUMNS).eq("is_online", true).or("is_hidden.eq.false,is_hidden.is.null").order("created_at"),
       supabase.from("category_availability_rules").select("*").order("weekday"),
       supabase.from("category_blackout_periods").select("*").order("start_date"),
     ]);
 
     if (categoryRows?.length) {
-      return categoryRows.map((row) =>
+      const rowsWithImages = await attachCategoryImageRefs(supabase, categoryRows as CategoryRow[]);
+
+      return rowsWithImages.map((row) =>
         mapCategoryRow(
           row as Record<string, unknown>,
           (ruleRows ?? []) as Array<Record<string, unknown>>,
@@ -323,13 +372,15 @@ export async function getCategories() {
 
   if (supabase) {
     const [{ data: categoryRows }, { data: ruleRows }, { data: blackoutRows }] = await Promise.all([
-      supabase.from("categories").select("*").order("created_at"),
+      supabase.from("categories").select(CATEGORY_COLUMNS).order("created_at"),
       supabase.from("category_availability_rules").select("*").order("weekday"),
       supabase.from("category_blackout_periods").select("*").order("start_date"),
     ]);
 
     if (categoryRows?.length) {
-      return categoryRows.map((row) =>
+      const rowsWithImages = await attachCategoryImageRefs(supabase, categoryRows as CategoryRow[]);
+
+      return rowsWithImages.map((row) =>
         mapCategoryRow(
           row as Record<string, unknown>,
           (ruleRows ?? []) as Array<Record<string, unknown>>,
@@ -348,14 +399,16 @@ export const getPublicCategoryBySlug = unstable_cache(async (slug: string) => {
   if (supabase) {
     const [{ data: categoryRow }, { data: ruleRows }, { data: blackoutRows }] = await Promise.all([
       // Une catégorie privée reste joignable par son lien, même décochée de « visible au public ».
-      supabase.from("categories").select("*").eq("slug", slug).or("is_online.eq.true,is_hidden.eq.true").maybeSingle(),
+      supabase.from("categories").select(CATEGORY_COLUMNS).eq("slug", slug).or("is_online.eq.true,is_hidden.eq.true").maybeSingle(),
       supabase.from("category_availability_rules").select("*").order("weekday"),
       supabase.from("category_blackout_periods").select("*").order("start_date"),
     ]);
 
     if (categoryRow) {
+      const [rowWithImages] = await attachCategoryImageRefs(supabase, [categoryRow as CategoryRow]);
+
       return mapCategoryRow(
-        categoryRow as Record<string, unknown>,
+        rowWithImages as Record<string, unknown>,
         (ruleRows ?? []) as Array<Record<string, unknown>>,
         (blackoutRows ?? []) as Array<Record<string, unknown>>,
       );
@@ -370,14 +423,16 @@ export async function getCategoryById(categoryId: string) {
 
   if (supabase) {
     const [{ data: categoryRow }, { data: ruleRows }, { data: blackoutRows }] = await Promise.all([
-      supabase.from("categories").select("*").eq("id", categoryId).maybeSingle(),
+      supabase.from("categories").select(CATEGORY_COLUMNS).eq("id", categoryId).maybeSingle(),
       supabase.from("category_availability_rules").select("*").order("weekday"),
       supabase.from("category_blackout_periods").select("*").order("start_date"),
     ]);
 
     if (categoryRow) {
+      const [rowWithImages] = await attachCategoryImageRefs(supabase, [categoryRow as CategoryRow]);
+
       return mapCategoryRow(
-        categoryRow as Record<string, unknown>,
+        rowWithImages as Record<string, unknown>,
         (ruleRows ?? []) as Array<Record<string, unknown>>,
         (blackoutRows ?? []) as Array<Record<string, unknown>>,
       );
@@ -392,14 +447,16 @@ export async function getAdminCategoryBySlug(slug: string) {
 
   if (supabase) {
     const [{ data: categoryRow }, { data: ruleRows }, { data: blackoutRows }] = await Promise.all([
-      supabase.from("categories").select("*").eq("slug", slug).maybeSingle(),
+      supabase.from("categories").select(CATEGORY_COLUMNS).eq("slug", slug).maybeSingle(),
       supabase.from("category_availability_rules").select("*").order("weekday"),
       supabase.from("category_blackout_periods").select("*").order("start_date"),
     ]);
 
     if (categoryRow) {
+      const [rowWithImages] = await attachCategoryImageRefs(supabase, [categoryRow as CategoryRow]);
+
       return mapCategoryRow(
-        categoryRow as Record<string, unknown>,
+        rowWithImages as Record<string, unknown>,
         (ruleRows ?? []) as Array<Record<string, unknown>>,
         (blackoutRows ?? []) as Array<Record<string, unknown>>,
       );

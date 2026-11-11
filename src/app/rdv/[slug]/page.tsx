@@ -1,6 +1,7 @@
 import { TriangleAlert } from "lucide-react";
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
+import { after } from "next/server";
 
 import { BookingForm } from "@/components/booking/booking-form";
 import { PublicFooter } from "@/components/public/public-footer";
@@ -18,10 +19,16 @@ export default async function BookingCategoryPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const requestHeaders = await headers();
-  await refreshPersonalAvailabilityIfStale();
+  // La synchronisation Google part après l'envoi de la page : elle peut prendre
+  // plusieurs secondes et ne doit pas retarder l'affichage. Les créneaux sont
+  // de toute façon revérifiés, synchro comprise, au moment de la réservation.
+  after(() => refreshPersonalAvailabilityIfStale());
 
-  const initialPayload = await getCategorySlots(slug);
+  const [requestHeaders, initialPayload, session] = await Promise.all([
+    headers(),
+    getCategorySlots(slug),
+    getPublicUserSession(),
+  ]);
 
   if (!initialPayload) {
     notFound();
@@ -39,7 +46,6 @@ export default async function BookingCategoryPage({
   }
 
   const bookingState = getBookingState(payload.category, payload.siteSettings);
-  const session = await getPublicUserSession();
 
   if (session.isBanned) {
     redirect("/");

@@ -60,11 +60,11 @@ export function Tracker({ userId }: { userId?: string }) {
         if (data.id) {
           currentViewIdRef.current = data.id;
           
-          // Start pinging every 5 seconds
+          // Un ping toutes les 15 secondes suffit à mesurer la durée de visite
           intervalRef.current = setInterval(async () => {
             if (!currentViewIdRef.current) return;
             
-            durationRef.current += 5;
+            durationRef.current += 15;
             
             // We use keepalive to ensure request is sent even if navigating away
             try {
@@ -81,7 +81,7 @@ export function Tracker({ userId }: { userId?: string }) {
             } catch (e) {
               // Ignore ping errors
             }
-          }, 5000);
+          }, 15000);
         }
       } catch (error) {
         // Ignore tracking errors

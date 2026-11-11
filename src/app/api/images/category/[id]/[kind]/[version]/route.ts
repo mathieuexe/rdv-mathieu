@@ -66,7 +66,7 @@ export async function GET(
     headers: {
       "Content-Type": parsed.contentType,
       "Content-Length": String(parsed.buffer.byteLength),
-      "Cache-Control": "public, max-age=31536000, immutable",
+      "Cache-Control": "public, max-age=31536000, s-maxage=31536000, immutable",
     },
   });
 }

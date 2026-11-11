@@ -1,8 +1,14 @@
+import { cache } from "react";
+
 import { isSupabaseConfigured } from "@/lib/env";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
-export async function getAdminSession() {
+/**
+ * `cache` dédoublonne ces lectures sur une même requête : le layout, l'en-tête
+ * et la page demandent tous la session, elle n'est résolue qu'une seule fois.
+ */
+export const getAdminSession = cache(async function getAdminSession() {
   if (!isSupabaseConfigured()) {
     return {
       isAuthenticated: false,
@@ -14,16 +20,17 @@ export async function getAdminSession() {
   const { data } = await supabase!.auth.getUser();
   const user = data.user;
   const email = user?.email?.toLowerCase();
-  const isAdmin = user ? await isUserAdmin(user.id) : false;
 
+  let isAdmin = false;
   let firstName, lastName, fullName, avatarUrl;
   if (user) {
-    const { data: profile } = await supabase!
-      .from("user_profiles")
-      .select("first_name, last_name, avatar_url")
-      .eq("user_id", user.id)
-      .maybeSingle();
-      
+    const [adminResult, { data: profile }] = await Promise.all([
+      isUserAdmin(user.id),
+      supabase!.from("user_profiles").select("first_name, last_name, avatar_url").eq("user_id", user.id).maybeSingle(),
+    ]);
+
+    isAdmin = adminResult;
+
     firstName = typeof profile?.first_name === "string" ? profile.first_name : user.user_metadata.first_name;
     lastName = typeof profile?.last_name === "string" ? profile.last_name : user.user_metadata.last_name;
     fullName = [firstName, lastName].filter(Boolean).join(" ").trim() || email;
@@ -39,7 +46,7 @@ export async function getAdminSession() {
     fullName,
     avatarUrl,
   };
-}
+});
 
 export interface PublicUserSession {
   isAuthenticated: boolean;
@@ -66,7 +73,7 @@ export async function isUserAdmin(userId: string) {
   return Boolean(data?.user_id);
 }
 
-export async function getPublicUserSession(): Promise<PublicUserSession> {
+export const getPublicUserSession = cache(async function getPublicUserSession(): Promise<PublicUserSession> {
   if (!isSupabaseConfigured()) {
     return {
       isAuthenticated: false,
@@ -91,13 +98,14 @@ export async function getPublicUserSession(): Promise<PublicUserSession> {
     };
   }
 
-  const isAdmin = await isUserAdmin(user.id);
-
-  const { data: profile } = await supabase
-    .from("user_profiles")
-    .select("first_name, last_name, avatar_url, phone, requires_password_change, is_banned")
-    .eq("user_id", user.id)
-    .maybeSingle();
+  const [isAdmin, { data: profile }] = await Promise.all([
+    isUserAdmin(user.id),
+    supabase
+      .from("user_profiles")
+      .select("first_name, last_name, avatar_url, phone, requires_password_change, is_banned")
+      .eq("user_id", user.id)
+      .maybeSingle(),
+  ]);
 
   const firstName =
     typeof profile?.first_name === "string"
@@ -130,4 +138,4 @@ export async function getPublicUserSession(): Promise<PublicUserSession> {
     requiresPasswordChange,
     isBanned,
   };
-}
+});

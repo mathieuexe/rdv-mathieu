@@ -55,7 +55,7 @@ export async function PublicFooter({ showBookingWidget = true }: PublicFooterPro
 
       {settings.enableWhatsappWidget ? (
         <>
-          <Script src="https://elfsightcdn.com/platform.js" strategy="afterInteractive" />
+          <Script src="https://elfsightcdn.com/platform.js" strategy="lazyOnload" />
           <div
             className="elfsight-app-662a0ae1-203a-46c9-b266-de8e2f78d432"
             data-elfsight-app-lazy
