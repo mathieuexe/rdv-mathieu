@@ -1,25 +1,26 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import dynamic from "next/dynamic";
 import Image from "next/image";
-import {
-  CalendarDays,
-  CheckSquare,
-  ChevronLeft,
-  ChevronRight,
-  Clock,
-  Globe,
-  LoaderCircle,
-  Video,
-} from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { CalendarDays, Check, ChevronLeft, ChevronRight, Clock, Info, LoaderCircle, MapPin, Zap } from "lucide-react";
 
 import { groupSlotsByDay } from "@/lib/booking";
-import { cn, formatAppointmentMode, formatDateTimeFr, formatPhone } from "@/lib/utils";
-import { PhoneInput } from "@/components/ui/phone-input";
+import { cn, formatAppointmentMode, formatDateTimeFr } from "@/lib/utils";
 import type { AppointmentCategory, BookingSlot } from "@/types/domain";
 
-const weekdayHeaders = ["LUN.", "MAR.", "MER.", "JEU.", "VEN.", "SAM.", "DIM."];
+// Le champ téléphone embarque une bibliothèque lourde et ne sert qu'à la
+// seconde étape : il est chargé à part pour ne pas ralentir le choix du créneau.
+const PhoneInput = dynamic(() => import("@/components/ui/phone-input").then((mod) => mod.PhoneInput), {
+  ssr: false,
+  loading: () => <input className="da-field" disabled aria-label="Téléphone" />,
+});
+
+const weekdayHeaders = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
+
+const DEFAULT_HELPER_MESSAGE = "Choisissez le créneau qui vous convient.";
 
 interface BookingFormProps {
   category: AppointmentCategory;
@@ -35,16 +36,18 @@ interface BookingFormProps {
   };
 }
 
+type FieldErrors = Record<string, string>;
+
 function toMonthKey(dateKey: string) {
   return dateKey.slice(0, 7);
 }
 
-function formatMonthLabel(dateKey: string) {
-  return new Intl.DateTimeFormat("fr-FR", {
-    month: "long",
-    year: "numeric",
-    timeZone: "Europe/Paris",
-  }).format(new Date(`${dateKey}-01T12:00:00`));
+function formatMonthLabel(monthKey: string) {
+  return new Intl.DateTimeFormat("fr-FR", { month: "long", year: "numeric" }).format(new Date(`${monthKey}-01T12:00:00`));
+}
+
+function formatDayLabel(dateKey: string, options: Intl.DateTimeFormatOptions) {
+  return new Intl.DateTimeFormat("fr-FR", options).format(new Date(`${dateKey}T12:00:00`));
 }
 
 function getCalendarCells(monthKey: string) {
@@ -54,128 +57,146 @@ function getCalendarCells(monthKey: string) {
   const offset = (firstDay.getDay() + 6) % 7;
 
   return [
-    ...Array.from({ length: offset }, (_, index) => ({ key: `empty-${index}`, dayNumber: null })),
+    ...Array.from({ length: offset }, (_, index) => ({ key: `empty-${index}`, dayNumber: null as number | null })),
     ...Array.from({ length: daysInMonth }, (_, index) => ({
       key: `${monthKey}-${String(index + 1).padStart(2, "0")}`,
-      dayNumber: index + 1,
+      dayNumber: (index + 1) as number | null,
     })),
   ];
 }
 
+/** Regroupe les créneaux d'une journée par moment, pour une lecture immédiate. */
+function groupSlotsByPeriod(daySlots: BookingSlot[]) {
+  const periods = [
+    { label: "Matin", slots: [] as BookingSlot[] },
+    { label: "Après-midi", slots: [] as BookingSlot[] },
+    { label: "Soir", slots: [] as BookingSlot[] },
+  ];
+
+  for (const slot of daySlots) {
+    const hour = Number.parseInt(slot.label.slice(0, 2), 10);
+    periods[hour < 12 ? 0 : hour < 18 ? 1 : 2].slots.push(slot);
+  }
+
+  return periods.filter((period) => period.slots.length > 0);
+}
+
 export function BookingForm({ category, categorySlug, slots, helperMessage, isAuthenticated, initialUser }: BookingFormProps) {
   const router = useRouter();
-  const groupedSlots = useMemo(() => groupSlotsByDay(slots), [slots]);
-  const dayEntries = useMemo(
-    () =>
-      Object.entries(groupedSlots)
-        .map(([dateKey, dateSlots]) => ({
-          dateKey,
-          dateSlots,
-          availableCount: dateSlots.filter((slot) => !slot.isBlocked).length,
-        }))
-        .sort((a, b) => a.dateKey.localeCompare(b.dateKey)),
-    [groupedSlots],
-  );
+  const topRef = useRef<HTMLDivElement>(null);
+  const slotsRef = useRef<HTMLDivElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  // Seuls les créneaux réservables sont proposés : inutile d'afficher ce qu'on ne peut pas choisir.
+  const dayEntries = useMemo(() => {
+    const grouped = groupSlotsByDay(slots.filter((slot) => !slot.isBlocked));
+
+    return Object.entries(grouped)
+      .map(([dateKey, dateSlots]) => ({ dateKey, dateSlots }))
+      .sort((a, b) => a.dateKey.localeCompare(b.dateKey));
+  }, [slots]);
   const monthKeys = useMemo(() => Array.from(new Set(dayEntries.map((entry) => toMonthKey(entry.dateKey)))), [dayEntries]);
-  const firstAvailableDateKey = dayEntries.find((entry) => entry.availableCount > 0)?.dateKey ?? dayEntries[0]?.dateKey ?? "";
-  const [selectedSlot, setSelectedSlot] = useState<string>("");
-  const [selectedDateKey, setSelectedDateKey] = useState(firstAvailableDateKey);
-  const [visibleMonthKey, setVisibleMonthKey] = useState(toMonthKey(firstAvailableDateKey || new Date().toISOString().slice(0, 10)));
-  const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
-  const [showOnlyAvailable, setShowOnlyAvailable] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string>("");
+  const firstDateKey = dayEntries[0]?.dateKey ?? "";
+  const earliestSlot = dayEntries[0]?.dateSlots[0] ?? null;
+
+  const [step, setStep] = useState<1 | 2>(1);
+  const [selectedDateKey, setSelectedDateKey] = useState(firstDateKey);
+  const [selectedSlot, setSelectedSlot] = useState("");
+  const [visibleMonthKey, setVisibleMonthKey] = useState(toMonthKey(firstDateKey || new Date().toISOString().slice(0, 10)));
   const [firstName, setFirstName] = useState(initialUser?.firstName ?? "");
   const [lastName, setLastName] = useState(initialUser?.lastName ?? "");
   const [email, setEmail] = useState(initialUser?.email ?? "");
   const [phone, setPhone] = useState(initialUser?.phone ?? "");
   const [message, setMessage] = useState("");
   const [customFieldResponses, setCustomFieldResponses] = useState<Record<string, string>>({});
-  const shouldSuggestSavedPhone = category.appointmentMode === "telephone" && Boolean(initialUser?.phone?.trim());
-  const [phoneConfirmation, setPhoneConfirmation] = useState<"pending" | "yes" | "no">(shouldSuggestSavedPhone ? "pending" : "yes");
-  const activeDateKey = selectedDateKey || firstAvailableDateKey;
-  const selectedDay = dayEntries.find((entry) => entry.dateKey === activeDateKey) ?? null;
-  const hasValidSelectedSlot = selectedDay?.dateSlots.some((slot) => slot.start === selectedSlot && !slot.isBlocked) ?? false;
-  const activeSelectedSlot = hasValidSelectedSlot ? selectedSlot : "";
-  const activeStep = activeSelectedSlot ? currentStep : 1;
-  const selectedSlotDetails = selectedDay?.dateSlots.find((slot) => slot.start === activeSelectedSlot) ?? null;
-  const visibleMonthIndex = Math.max(0, monthKeys.findIndex((monthKey) => monthKey === visibleMonthKey));
-  const calendarCells = getCalendarCells(monthKeys[visibleMonthIndex] ?? visibleMonthKey);
-  const hasAnyAvailableSlot = dayEntries.some((entry) => entry.availableCount > 0);
-  const todayKey = new Date().toISOString().slice(0, 10);
-  const initials = category.title
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? "")
-    .join("");
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  function validateStepTwo() {
-    if (firstName.trim().length < 2) {
-      return "Le prénom est requis.";
+  const selectedDay = dayEntries.find((entry) => entry.dateKey === selectedDateKey) ?? dayEntries[0] ?? null;
+  const activeSlot = dayEntries.flatMap((entry) => entry.dateSlots).find((slot) => slot.start === selectedSlot) ?? null;
+  const activeStep = activeSlot ? step : 1;
+  const visibleMonthIndex = Math.max(0, monthKeys.indexOf(visibleMonthKey));
+  const visibleMonth = monthKeys[visibleMonthIndex] ?? visibleMonthKey;
+  const calendarCells = getCalendarCells(visibleMonth);
+  const periods = selectedDay ? groupSlotsByPeriod(selectedDay.dateSlots) : [];
+  const modeLabel = formatAppointmentMode(category.appointmentMode);
+  const note = helperMessage && helperMessage !== DEFAULT_HELPER_MESSAGE ? helperMessage : "";
+  const initials =
+    category.title
+      .split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase() ?? "")
+      .join("") || "RDV";
+
+  // À chaque changement d'étape, on ramène le haut du tunnel à l'écran.
+  const isFirstRender = useRef(true);
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
     }
 
-    if (lastName.trim().length < 2) {
-      return "Le nom est requis.";
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      return "Veuillez saisir un email valide.";
-    }
-
-    if (phone.trim().length < 8) {
-      return "Le téléphone est requis.";
-    }
-
-    if (category.customFields) {
-      for (const field of category.customFields) {
-        if (field.required && (!customFieldResponses[field.id] || !customFieldResponses[field.id].trim())) {
-          return `Le champ "${field.label}" est requis.`;
-        }
-      }
-    }
-
-    return null;
-  }
-
-  function handleSelectSlot(slotStart: string) {
-    setSelectedSlot(slotStart);
-    setCurrentStep(2);
-    setError("");
-  }
+    topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [activeStep]);
 
   function handleSelectDate(dateKey: string) {
     setSelectedDateKey(dateKey);
-    setVisibleMonthKey(toMonthKey(dateKey));
     setSelectedSlot("");
-    setCurrentStep(1);
     setError("");
+
+    // Sur petit écran les horaires sont sous le calendrier : on les amène à l'écran.
+    requestAnimationFrame(() => {
+      const element = slotsRef.current;
+
+      if (element && element.getBoundingClientRect().top > window.innerHeight * 0.6) {
+        element.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    });
   }
 
-  function handleContinueToRecap() {
-    const validationError = validateStepTwo();
+  function handleSelectSlot(slot: BookingSlot) {
+    setSelectedDateKey(slot.start.slice(0, 10));
+    setSelectedSlot(slot.start);
+    setError("");
+    setStep(2);
+  }
 
-    if (validationError) {
-      setError(validationError);
+  function validate(): FieldErrors {
+    const errors: FieldErrors = {};
+
+    if (firstName.trim().length < 2) errors.firstName = "Indiquez votre prénom.";
+    if (lastName.trim().length < 2) errors.lastName = "Indiquez votre nom.";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) errors.email = "Indiquez une adresse email valide.";
+    if (phone.trim().length < 8) errors.phone = "Indiquez un numéro de téléphone valide.";
+
+    for (const field of category.customFields ?? []) {
+      if (field.required && !customFieldResponses[field.id]?.trim()) {
+        errors[`custom-${field.id}`] = "Ce champ est obligatoire.";
+      }
+    }
+
+    return errors;
+  }
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (isSubmitting || !activeSlot) {
       return;
     }
 
-    setError("");
-    setCurrentStep(3);
-  }
+    const errors = validate();
+    setFieldErrors(errors);
 
-  async function handleSubmit() {
-    if (!activeSelectedSlot) {
-      setError("Sélectionnez un créneau avant de confirmer.");
-      setCurrentStep(1);
-      return;
-    }
+    const firstInvalid = Object.keys(errors)[0];
 
-    const validationError = validateStepTwo();
-
-    if (validationError) {
-      setError(validationError);
-      setCurrentStep(2);
+    if (firstInvalid) {
+      setError("");
+      const target = formRef.current?.querySelector<HTMLElement>(`[data-field="${firstInvalid}"]`);
+      target?.scrollIntoView({ behavior: "smooth", block: "center" });
+      target?.querySelector<HTMLElement>("input, select, textarea")?.focus({ preventScroll: true });
       return;
     }
 
@@ -190,7 +211,7 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
       phone: phone.trim(),
       message: message.trim(),
       customFieldResponsesJson: JSON.stringify(customFieldResponses),
-      startsAt: activeSelectedSlot,
+      startsAt: activeSlot.start,
     };
 
     let response: Response;
@@ -198,512 +219,473 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
     try {
       response = await fetch("/api/public/appointments", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
     } catch {
-      setError("Impossible de contacter le serveur pour le moment.");
+      setError("Impossible de contacter le serveur. Vérifiez votre connexion puis réessayez.");
       setIsSubmitting(false);
       return;
     }
 
-    let data: { success?: boolean; error?: string } = {};
+    let data: { error?: string } = {};
 
     try {
-      data = (await response.json()) as { success?: boolean; error?: string };
+      data = (await response.json()) as { error?: string };
     } catch {
       data = {};
     }
 
     if (!response.ok) {
-      setError(data.error ?? "Une erreur est survenue lors de l'envoi.");
       setIsSubmitting(false);
+
+      // Créneau pris entre-temps : retour au choix de l'horaire avec des
+      // disponibilités à jour, sans perdre les coordonnées déjà saisies.
+      if (response.status === 409) {
+        setError(data.error ?? "Ce créneau vient d'être réservé. Choisissez-en un autre.");
+        setSelectedSlot("");
+        setStep(1);
+        router.refresh();
+        return;
+      }
+
+      setError(data.error ?? "Une erreur est survenue. Réessayez dans un instant.");
       return;
     }
 
-    const params = new URLSearchParams({
-      slot: payload.startsAt,
-      firstName: payload.firstName,
-    });
-
+    const params = new URLSearchParams({ slot: payload.startsAt, firstName: payload.firstName });
     router.push(`/rdv/${categorySlug}/confirmation?${params.toString()}`);
   }
 
+  function clearFieldError(name: string) {
+    if (fieldErrors[name]) {
+      setFieldErrors((current) => {
+        const next = { ...current };
+        delete next[name];
+        return next;
+      });
+    }
+  }
+
+  const steps = [
+    { number: 1, label: "Date et heure" },
+    { number: 2, label: "Vos coordonnées" },
+  ];
+
   return (
-    <div className="mx-auto max-w-[1120px] space-y-6">
-      <section className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-        <div className="grid lg:grid-cols-[280px_minmax(0,1fr)_240px]">
-          <aside className="border-b border-slate-200 bg-white p-6 lg:border-r lg:border-b-0 lg:p-8">
-            {category.bannerImageUrl ? (
-              <div className="relative -m-6 mb-6 overflow-hidden border-b border-slate-200 bg-slate-50 rounded-t-xl lg:-m-8 lg:mb-8 lg:rounded-tr-none">
-                <div className="relative h-[240px] w-full">
-                  <Image src={category.bannerImageUrl} alt="" fill sizes="(max-width: 1024px) 100vw, 280px" className="object-cover object-center" priority />
-                </div>
-              </div>
-            ) : (
-              <div className="-m-6 mb-6 h-[240px] rounded-t-xl border-b border-slate-200 bg-slate-50 lg:-m-8 lg:mb-8 lg:rounded-tr-none" />
-            )}
+    <div ref={topRef} className="mx-auto w-full max-w-[920px] scroll-mt-24">
+      {/* ------------------------------------------------------------ En-tête */}
+      <header className="flex items-center gap-4">
+        <span className="relative flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-accent-soft text-sm font-semibold text-accent">
+          {category.thumbnailImageUrl ? (
+            <Image src={category.thumbnailImageUrl} alt="" fill priority sizes="56px" className="object-cover" />
+          ) : (
+            initials
+          )}
+        </span>
+        <div className="min-w-0">
+          <h1 className="da-title text-[20px] sm:text-[24px]">{category.title}</h1>
+          <p className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-[14px] text-slate-500">
+            <span className="inline-flex items-center gap-1.5">
+              <Clock className="size-4 text-accent" />
+              {category.durationMinutes} min
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <MapPin className="size-4 text-accent" />
+              {modeLabel}
+            </span>
+          </p>
+        </div>
+      </header>
 
-            <div className="relative flex size-16 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-accent-soft text-sm font-semibold text-accent">
-              {category.thumbnailImageUrl ? (
-                <Image src={category.thumbnailImageUrl} alt="" fill priority sizes="64px" className="object-cover" />
-              ) : (
-                initials || "RDV"
-              )}
+      {category.description && activeStep === 1 ? (
+        <p className="mt-4 text-[15px] leading-relaxed text-slate-500">{category.description}</p>
+      ) : null}
+
+      {/* -------------------------------------------------------------- Étapes */}
+      <ol className="mt-6 flex items-center gap-3 text-[14px] font-medium">
+        {steps.map((item, index) => {
+          const isDone = activeStep > item.number;
+          const isCurrent = activeStep === item.number;
+
+          return (
+            <li key={item.number} className="flex items-center gap-3" aria-current={isCurrent ? "step" : undefined}>
+              {index > 0 ? <span className="h-px w-6 bg-slate-200 sm:w-10" aria-hidden="true" /> : null}
+              <span
+                className={cn(
+                  "flex size-7 shrink-0 items-center justify-center rounded-full border text-[13px] font-semibold",
+                  isCurrent && "border-accent bg-accent text-white",
+                  isDone && "border-accent bg-accent-soft text-accent",
+                  !isCurrent && !isDone && "border-slate-200 text-slate-400",
+                )}
+              >
+                {isDone ? <Check className="size-4" /> : item.number}
+              </span>
+              <span className={cn(isCurrent ? "text-slate-900" : "text-slate-400")}>{item.label}</span>
+            </li>
+          );
+        })}
+      </ol>
+
+      {error ? (
+        <p role="alert" className="mt-5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-[14px] font-medium text-rose-700">
+          {error}
+        </p>
+      ) : null}
+
+      {activeStep === 1 ? (
+        /* ================================================= Étape 1 : créneau */
+        <section className="mt-5 rounded-2xl border border-slate-200 bg-white">
+          {dayEntries.length === 0 ? (
+            <div className="px-6 py-14 text-center">
+              <CalendarDays className="mx-auto size-9 text-slate-300" />
+              <p className="da-title mt-4 text-[18px]">Aucun créneau disponible pour le moment</p>
+              <p className="mt-2 text-[15px] text-slate-500">Revenez un peu plus tard, de nouvelles disponibilités sont ajoutées régulièrement.</p>
+              <Link href="/" className="da-btn da-btn-secondary da-btn-sm mt-6">
+                Voir les autres rendez-vous
+              </Link>
             </div>
-            <p className="da-title mt-4 text-[20px]">{category.title}</p>
-            <p className="mt-2 text-[14px] leading-relaxed text-slate-500">{category.description}</p>
+          ) : (
+            <>
+              {note ? (
+                <p className="flex items-start gap-2.5 border-b border-slate-200 px-4 py-3 text-[14px] leading-relaxed text-slate-600 sm:px-6">
+                  <Info className="mt-0.5 size-4 shrink-0 text-accent" />
+                  <span>{note}</span>
+                </p>
+              ) : null}
 
-            <div className="mt-6 space-y-3 border-t border-slate-200/70 pt-5 text-[14px] text-slate-500">
-              <div className="flex items-start gap-3">
-                <CheckSquare className="mt-0.5 size-4 shrink-0 text-accent" />
-                <span>{category.customMessage || "Choisissez le créneau qui vous convient."}</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <Clock className="size-4 shrink-0 text-accent" />
-                <span>{category.durationMinutes} min</span>
-              </div>
-              <div className="flex items-center gap-3">
-                {category.appointmentMode === "discord" && <Globe className="size-4 shrink-0 text-accent" />}
-                {category.appointmentMode === "physique" && <Globe className="size-4 shrink-0 text-accent" />}
-                {category.appointmentMode === "visioconference" && <Video className="size-4 shrink-0 text-accent" />}
-                {category.appointmentMode === "telephone" && <Video className="size-4 shrink-0 text-accent" />}
-                <span>{formatAppointmentMode(category.appointmentMode)}</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <Globe className="size-4 shrink-0 text-accent" />
-                <span>Europe, Paris (24h)</span>
-              </div>
-            </div>
-
-          </aside>
-
-          <section
-            className={cn(
-              "border-b border-slate-200 p-4 sm:p-6 lg:border-b-0 lg:p-8",
-              currentStep === 1 ? "lg:border-r" : "lg:col-span-2",
-            )}
-          >
-            {activeStep === 1 ? (
-              <>
-                <div className="flex items-center gap-3">
-                  <CalendarDays className="size-5 shrink-0 text-accent" />
-                  <div>
-                    <p className="da-title text-[17px] sm:text-[19px]">Sélectionnez la date et l&apos;heure</p>
-                    <p className="text-[13px] text-slate-500 sm:text-[14px]">Choisissez d&apos;abord un jour, puis un créneau disponible.</p>
-                  </div>
+              {earliestSlot ? (
+                <div className="border-b border-slate-200 p-4 sm:px-6">
+                  <button
+                    type="button"
+                    onClick={() => handleSelectSlot(earliestSlot)}
+                    className="group flex w-full items-center gap-3 rounded-xl border border-accent/30 bg-accent-soft px-4 py-3 text-left transition-colors hover:border-accent"
+                  >
+                    <Zap className="size-5 shrink-0 text-accent" />
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-[13px] font-medium text-accent">Au plus tôt</span>
+                      <span className="block text-[15px] font-semibold text-slate-900 first-letter:uppercase">
+                        {formatDayLabel(earliestSlot.start.slice(0, 10), { weekday: "long", day: "numeric", month: "long" })} à{" "}
+                        {earliestSlot.label}
+                      </span>
+                    </span>
+                    <ChevronRight className="size-5 shrink-0 text-accent transition-transform group-hover:translate-x-0.5" />
+                  </button>
                 </div>
+              ) : null}
 
-                <div className="mt-6">
+              <div className="grid md:grid-cols-2">
+                {/* ---------------------------------------------- Calendrier */}
+                <div className="border-b border-slate-200 p-4 sm:p-6 md:border-b-0 md:border-r">
                   <div className="flex items-center justify-between">
-                    <p className="text-[15px] font-semibold capitalize text-slate-900">
-                      {formatMonthLabel(monthKeys[visibleMonthIndex] ?? visibleMonthKey)}
-                    </p>
+                    <h2 className="text-[16px] font-semibold capitalize text-slate-900">{formatMonthLabel(visibleMonth)}</h2>
                     <div className="flex items-center gap-2">
                       <button
                         type="button"
-                        onClick={() => setVisibleMonthKey(monthKeys[Math.max(0, visibleMonthIndex - 1)] ?? visibleMonthKey)}
+                        aria-label="Mois précédent"
+                        onClick={() => setVisibleMonthKey(monthKeys[Math.max(0, visibleMonthIndex - 1)] ?? visibleMonth)}
                         disabled={visibleMonthIndex === 0}
-                        className="flex size-8 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition-all hover:border-accent hover:bg-accent-soft hover:text-accent disabled:cursor-not-allowed disabled:opacity-40 sm:size-9"
+                        className="flex size-10 items-center justify-center rounded-full border border-slate-200 text-slate-600 transition-colors hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-30"
                       >
-                        <ChevronLeft className="size-4" />
+                        <ChevronLeft className="size-5" />
                       </button>
                       <button
                         type="button"
+                        aria-label="Mois suivant"
                         onClick={() =>
-                          setVisibleMonthKey(monthKeys[Math.min(monthKeys.length - 1, visibleMonthIndex + 1)] ?? visibleMonthKey)
+                          setVisibleMonthKey(monthKeys[Math.min(monthKeys.length - 1, visibleMonthIndex + 1)] ?? visibleMonth)
                         }
                         disabled={visibleMonthIndex >= monthKeys.length - 1}
-                        className="flex size-8 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition-all hover:border-accent hover:bg-accent-soft hover:text-accent disabled:cursor-not-allowed disabled:opacity-40 sm:size-9"
+                        className="flex size-10 items-center justify-center rounded-full border border-slate-200 text-slate-600 transition-colors hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-30"
                       >
-                        <ChevronRight className="size-4" />
+                        <ChevronRight className="size-5" />
                       </button>
                     </div>
                   </div>
 
-                  <div className="mt-6 grid grid-cols-7 gap-1 text-center text-[10px] uppercase tracking-[0.1em] text-slate-400 sm:gap-2 sm:text-[11px]">
+                  <div className="mt-4 grid grid-cols-7 gap-1 text-center text-[12px] font-medium text-slate-400">
                     {weekdayHeaders.map((label) => (
-                      <div key={label} className="hidden sm:block">{label}</div>
-                    ))}
-                    {weekdayHeaders.map((label) => (
-                      <div key={`short-${label}`} className="sm:hidden">{label.slice(0, 1)}</div>
+                      <div key={label}>{label}</div>
                     ))}
                   </div>
 
-                  <div className="mt-4 grid grid-cols-7 gap-1 sm:gap-2 text-center">
+                  <div className="mt-2 grid grid-cols-7 gap-1">
                     {calendarCells.map((cell) => {
                       if (cell.dayNumber === null) {
-                        return <div key={cell.key} className="h-8 sm:h-10" />;
+                        return <div key={cell.key} />;
                       }
 
-                      const entry = dayEntries.find((item) => item.dateKey === cell.key);
-                      const isSelected = activeDateKey === cell.key;
-                      const isDisabled = !entry || entry.availableCount === 0;
-                      const isPastDay = cell.key < todayKey;
-                      const isBlackoutDay =
-                        !!entry &&
-                        entry.availableCount === 0 &&
-                        entry.dateSlots.some((slot) => slot.reason?.toLowerCase().includes("indispon"));
+                      const isAvailable = dayEntries.some((entry) => entry.dateKey === cell.key);
+                      const isSelected = selectedDay?.dateKey === cell.key;
 
                       return (
-                        <div key={cell.key} className="flex justify-center">
-                          <button
-                            type="button"
-                            disabled={isDisabled}
-                            onClick={() => handleSelectDate(cell.key)}
-                            className={cn(
-                              "flex size-8 items-center justify-center rounded-xl text-sm font-medium transition-all sm:size-10",
-                            isDisabled && isPastDay && "cursor-not-allowed bg-slate-50 text-slate-300",
-                            isDisabled && !isPastDay && !isBlackoutDay && "cursor-not-allowed text-slate-300",
-                            isDisabled && isBlackoutDay && "cursor-not-allowed border border-rose-200 bg-rose-50 text-rose-600",
-                              !isDisabled && !isSelected && "border border-slate-200 bg-white text-slate-900 hover:border-accent hover:bg-accent-soft hover:text-accent",
-                              isSelected && "border border-accent bg-accent text-white",
-                            )}
-                          >
-                            {cell.dayNumber}
-                          </button>
-                        </div>
+                        <button
+                          key={cell.key}
+                          type="button"
+                          disabled={!isAvailable}
+                          aria-pressed={isSelected}
+                          aria-label={formatDayLabel(cell.key, { weekday: "long", day: "numeric", month: "long" })}
+                          onClick={() => handleSelectDate(cell.key)}
+                          className={cn(
+                            "mx-auto flex aspect-square w-full max-w-12 items-center justify-center rounded-full text-[15px] transition-colors",
+                            !isAvailable && "cursor-not-allowed text-slate-300",
+                            isAvailable && !isSelected && "bg-accent-soft font-semibold text-accent hover:bg-accent hover:text-white",
+                            isSelected && "bg-accent font-semibold text-white",
+                          )}
+                        >
+                          {cell.dayNumber}
+                        </button>
                       );
                     })}
                   </div>
 
-                  <div className="da-pill mt-8 py-1.5 text-[13px]">
-                    Heure d&apos;Europe, Paris (24h)
-                  </div>
+                  <p className="mt-4 text-[13px] text-slate-400">Les jours en bleu ont des créneaux libres.</p>
                 </div>
+
+                {/* ------------------------------------------------ Horaires */}
+                <div ref={slotsRef} className="scroll-mt-24 p-4 sm:p-6">
+                  {selectedDay ? (
+                    <>
+                      <h2 className="text-[16px] font-semibold text-slate-900 first-letter:uppercase">
+                        {formatDayLabel(selectedDay.dateKey, { weekday: "long", day: "numeric", month: "long" })}
+                      </h2>
+                      <p className="mt-1 text-[13px] text-slate-400">Heure de Paris · choisissez un horaire</p>
+
+                      <div className="mt-4 space-y-5">
+                        {periods.map((period) => (
+                          <div key={period.label}>
+                            <p className="text-[13px] font-medium text-slate-500">{period.label}</p>
+                            <div className="mt-2 grid grid-cols-3 gap-2 min-[420px]:grid-cols-4 md:grid-cols-3 lg:grid-cols-4">
+                              {period.slots.map((slot) => (
+                                <button
+                                  key={slot.start}
+                                  type="button"
+                                  onClick={() => handleSelectSlot(slot)}
+                                  className="flex h-12 items-center justify-center rounded-xl border border-slate-200 bg-white text-[15px] font-semibold text-slate-900 transition-colors hover:border-accent hover:bg-accent hover:text-white"
+                                >
+                                  {slot.label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  ) : null}
+                </div>
+              </div>
+            </>
+          )}
+        </section>
+      ) : (
+        /* ============================================= Étape 2 : coordonnées */
+        <form ref={formRef} onSubmit={handleSubmit} noValidate className="mt-5 space-y-5">
+          <div className="flex items-center gap-3 rounded-2xl border border-accent/30 bg-accent-soft p-4">
+            <CalendarDays className="size-5 shrink-0 text-accent" />
+            <div className="min-w-0 flex-1">
+              <p className="text-[13px] font-medium text-accent">Votre créneau</p>
+              <p className="text-[15px] font-semibold text-slate-900 first-letter:uppercase">
+                {activeSlot ? formatDateTimeFr(activeSlot.start, { dateStyle: "full", timeStyle: "short" }) : ""}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setStep(1);
+                setError("");
+              }}
+              className="shrink-0 rounded-lg px-3 py-2 text-[14px] font-semibold text-accent underline underline-offset-4 hover:text-accent-hover"
+            >
+              Modifier
+            </button>
+          </div>
+
+          <div className="space-y-4 rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field name="firstName" label="Prénom" error={fieldErrors.firstName}>
+                <input
+                  id="booking-firstName"
+                  value={firstName}
+                  onChange={(event) => {
+                    setFirstName(event.target.value);
+                    clearFieldError("firstName");
+                  }}
+                  autoComplete="given-name"
+                  autoCapitalize="words"
+                  enterKeyHint="next"
+                  aria-invalid={Boolean(fieldErrors.firstName)}
+                  className={cn("da-field", fieldErrors.firstName && "border-rose-400")}
+                />
+              </Field>
+
+              <Field name="lastName" label="Nom" error={fieldErrors.lastName}>
+                <input
+                  id="booking-lastName"
+                  value={lastName}
+                  onChange={(event) => {
+                    setLastName(event.target.value);
+                    clearFieldError("lastName");
+                  }}
+                  autoComplete="family-name"
+                  autoCapitalize="words"
+                  enterKeyHint="next"
+                  aria-invalid={Boolean(fieldErrors.lastName)}
+                  className={cn("da-field", fieldErrors.lastName && "border-rose-400")}
+                />
+              </Field>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field name="email" label="Email" hint="Pour recevoir la confirmation." error={fieldErrors.email}>
+                <input
+                  id="booking-email"
+                  type="email"
+                  inputMode="email"
+                  value={email}
+                  onChange={(event) => {
+                    setEmail(event.target.value);
+                    clearFieldError("email");
+                  }}
+                  autoComplete="email"
+                  autoCapitalize="none"
+                  spellCheck={false}
+                  enterKeyHint="next"
+                  aria-invalid={Boolean(fieldErrors.email)}
+                  className={cn("da-field", fieldErrors.email && "border-rose-400")}
+                />
+              </Field>
+
+              <Field name="phone" label="Téléphone" error={fieldErrors.phone} asGroup>
+                <PhoneInput
+                  value={phone}
+                  onChange={(value) => {
+                    setPhone(value || "");
+                    clearFieldError("phone");
+                  }}
+                />
+              </Field>
+            </div>
+
+            {category.customFields?.map((field) => {
+              const name = `custom-${field.id}`;
+              const update = (value: string) => {
+                setCustomFieldResponses((current) => ({ ...current, [field.id]: value }));
+                clearFieldError(name);
+              };
+
+              return (
+                <Field key={field.id} name={name} label={field.label} optional={!field.required} error={fieldErrors[name]}>
+                  {field.type === "text" ? (
+                    <input
+                      id={`booking-${name}`}
+                      value={customFieldResponses[field.id] || ""}
+                      onChange={(event) => update(event.target.value)}
+                      placeholder={field.placeholder || ""}
+                      aria-invalid={Boolean(fieldErrors[name])}
+                      className={cn("da-field", fieldErrors[name] && "border-rose-400")}
+                    />
+                  ) : (
+                    <select
+                      id={`booking-${name}`}
+                      value={customFieldResponses[field.id] || ""}
+                      onChange={(event) => update(event.target.value)}
+                      aria-invalid={Boolean(fieldErrors[name])}
+                      className={cn("da-field", fieldErrors[name] && "border-rose-400")}
+                    >
+                      <option value="" disabled>
+                        Sélectionnez une option…
+                      </option>
+                      {field.options?.map((option, index) => (
+                        <option key={index} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </Field>
+              );
+            })}
+
+            <Field name="message" label="Message" optional>
+              <textarea
+                id="booking-message"
+                rows={3}
+                value={message}
+                onChange={(event) => setMessage(event.target.value)}
+                placeholder="Précisez l'objet du rendez-vous si vous le souhaitez."
+                className="da-field"
+              />
+            </Field>
+          </div>
+
+          <div className="sticky bottom-0 z-10 -mx-4 border-t border-slate-200 bg-white/95 px-4 py-3 backdrop-blur sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none">
+            <button type="submit" disabled={isSubmitting} className="da-btn da-btn-primary w-full">
+              {isSubmitting ? <LoaderCircle className="size-5 animate-spin" /> : null}
+              {isSubmitting ? "Envoi en cours…" : "Confirmer le rendez-vous"}
+            </button>
+          </div>
+
+          <p className="text-center text-[13px] leading-relaxed text-slate-500">
+            Votre demande est transmise pour validation : vous recevez la réponse par email.
+            {!isAuthenticated ? (
+              <>
+                {" "}
+                Un compte n&apos;est pas nécessaire, mais vous pouvez{" "}
+                <Link href="/connexion" className="font-semibold text-accent underline underline-offset-4">
+                  vous connecter
+                </Link>{" "}
+                pour retrouver vos rendez-vous.
               </>
-            ) : activeStep === 2 ? (
-              <div className="mx-auto max-w-2xl space-y-5">
-                <div className="space-y-1">
-                  <p className="da-title text-[19px]">Vos informations</p>
-                  <p className="text-sm text-slate-500">
-                    {activeSelectedSlot
-                      ? `Créneau choisi : ${formatDateTimeFr(activeSelectedSlot, { dateStyle: "full", timeStyle: "short" })}`
-                      : "Complétez vos informations pour continuer."}
-                  </p>
-                </div>
+            ) : null}
+          </p>
+        </form>
+      )}
+    </div>
+  );
+}
 
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <label className="space-y-2 text-[14px] font-medium text-slate-900">
-                    <span>Prénom</span>
-                    <input
-                      value={firstName}
-                      onChange={(event) => setFirstName(event.target.value)}
-                      className="da-field"
-                    />
-                  </label>
+function Field({
+  name,
+  label,
+  hint,
+  error,
+  optional,
+  asGroup,
+  children,
+}: {
+  name: string;
+  label: string;
+  hint?: string;
+  error?: string;
+  optional?: boolean;
+  /** Pour un champ composé (téléphone) : pas de `<label>` lié à un identifiant unique. */
+  asGroup?: boolean;
+  children: React.ReactNode;
+}) {
+  const labelContent = (
+    <>
+      {label}
+      {optional ? <span className="ml-1.5 font-normal text-slate-400">(facultatif)</span> : null}
+    </>
+  );
 
-                  <label className="space-y-2 text-[14px] font-medium text-slate-900">
-                    <span>Nom</span>
-                    <input
-                      value={lastName}
-                      onChange={(event) => setLastName(event.target.value)}
-                      className="da-field"
-                    />
-                  </label>
-                </div>
-
-                <label className="space-y-2 text-[14px] font-medium text-slate-900">
-                  <span>Email</span>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(event) => setEmail(event.target.value)}
-                    className="da-field"
-                  />
-                </label>
-
-                {initialUser?.email ? (
-                  <p className="text-xs text-slate-500">
-                    Les champs préremplis peuvent être corrigés avant la confirmation du rendez-vous.
-                  </p>
-                ) : null}
-
-                {shouldSuggestSavedPhone ? (
-                  <div className="da-card bg-slate-50 px-5 py-4 text-[14px] leading-relaxed text-slate-500">
-                    <p className="font-medium text-slate-900">
-                      Lors de votre dernier rendez-vous téléphonique, vous aviez utilisé le numéro de téléphone{" "}
-                      <span className="font-semibold">{initialUser?.phone}</span>. Est-ce toujours correct ?
-                    </p>
-                    <div className="mt-3 flex flex-wrap gap-3">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setPhone(initialUser?.phone ?? "");
-                          setPhoneConfirmation("yes");
-                        }}
-                        className={cn(
-                          "rounded-xl border px-4 py-2 text-sm font-medium transition-all",
-                          phoneConfirmation === "yes"
-                            ? "border-accent bg-accent text-white"
-                            : "border-slate-200 bg-white text-slate-700 hover:border-accent hover:text-accent",
-                        )}
-                      >
-                        Oui
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setPhone("");
-                          setPhoneConfirmation("no");
-                        }}
-                        className={cn(
-                          "rounded-xl border px-4 py-2 text-sm font-medium transition-all",
-                          phoneConfirmation === "no"
-                            ? "border-accent bg-accent text-white"
-                            : "border-slate-200 bg-white text-slate-700 hover:border-accent hover:text-accent",
-                        )}
-                      >
-                        Non
-                      </button>
-                    </div>
-                    {phoneConfirmation === "no" ? (
-                      <p className="mt-3 text-xs text-slate-500">
-                        Si non, vous pouvez modifier le numéro ci-dessous.
-                      </p>
-                    ) : null}
-                  </div>
-                ) : null}
-
-                <label className="space-y-2 text-[14px] font-medium text-slate-900">
-                  <span>Téléphone</span>
-                  <PhoneInput
-                    value={phone}
-                    onChange={(val) => setPhone(val || "")}
-                  />
-                </label>
-
-                {!isAuthenticated ? (
-                  <div className="da-card bg-slate-50 px-5 py-4 text-[14px] leading-relaxed text-slate-500">
-                    <p className="font-medium text-slate-900">Avez-vous un compte ?</p>
-                    <p className="mt-2">
-                      Ce n&apos;est pas obligatoire. Cela sert uniquement à retrouver l&apos;historique de vos rendez-vous et à
-                      annuler un rendez-vous en ligne si besoin.
-                    </p>
-                    <div className="mt-3 flex flex-wrap gap-4">
-                      <a href="/connexion" className="font-semibold text-accent underline underline-offset-4 transition-colors hover:text-accent-hover">
-                        Connectez-vous
-                      </a>
-                      <a href="/inscription" className="font-semibold text-accent underline underline-offset-4 transition-colors hover:text-accent-hover">
-                        Inscrivez-vous
-                      </a>
-                    </div>
-                  </div>
-                ) : null}
-
-                <label className="space-y-2 text-[14px] font-medium text-slate-900">
-                  <span>Message optionnel</span>
-                  <textarea
-                    rows={4}
-                    value={message}
-                    onChange={(event) => setMessage(event.target.value)}
-                    className="da-field"
-                  />
-                </label>
-
-                {category.customFields && category.customFields.length > 0 && (
-                  <div className="space-y-4 pt-2 border-t border-slate-100">
-                    <p className="da-eyebrow">Informations complémentaires</p>
-                    {category.customFields.map((field) => (
-                      <label key={field.id} className="block space-y-2 text-[14px] font-medium text-slate-900">
-                        <span>{field.label} {field.required && <span className="text-rose-600">*</span>}</span>
-                        {field.type === "text" ? (
-                          <input
-                            value={customFieldResponses[field.id] || ""}
-                            onChange={(e) => setCustomFieldResponses({ ...customFieldResponses, [field.id]: e.target.value })}
-                            placeholder={field.placeholder || ""}
-                            className="da-field"
-                          />
-                        ) : (
-                          <select
-                            value={customFieldResponses[field.id] || ""}
-                            onChange={(e) => setCustomFieldResponses({ ...customFieldResponses, [field.id]: e.target.value })}
-                            className="da-field"
-                          >
-                            <option value="" disabled>Sélectionnez une option...</option>
-                            {field.options?.map((opt, i) => (
-                              <option key={i} value={opt.value}>{opt.label}</option>
-                            ))}
-                          </select>
-                        )}
-                      </label>
-                    ))}
-                  </div>
-                )}
-
-                {error ? (
-                  <p className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-[14px] font-medium text-rose-600">{error}</p>
-                ) : null}
-
-                <div className="flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setCurrentStep(1);
-                      setError("");
-                    }}
-                    className="da-btn da-btn-quiet da-btn-sm flex-1"
-                  >
-                    Modifier le créneau
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleContinueToRecap}
-                    className="da-btn da-btn-primary da-btn-sm flex-1"
-                  >
-                    Continuer
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="mx-auto max-w-2xl space-y-5">
-                <div className="da-card bg-slate-50 px-5 py-5">
-                  <p className="da-eyebrow">Récapitulatif</p>
-                  <dl className="mt-4 space-y-3 text-sm text-slate-600">
-                    <div>
-                      <dt className="font-medium text-slate-900">Catégorie</dt>
-                      <dd>{category.title}</dd>
-                    </div>
-                    <div>
-                      <dt className="font-medium text-slate-900">Date et heure</dt>
-                      <dd>
-                        {selectedSlotDetails
-                          ? formatDateTimeFr(selectedSlotDetails.start, { dateStyle: "full", timeStyle: "short" })
-                          : "Aucun créneau sélectionné"}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="font-medium text-slate-900">Nom</dt>
-                      <dd>{firstName} {lastName}</dd>
-                    </div>
-                    <div>
-                      <dt className="font-medium text-slate-900">Email</dt>
-                      <dd>{email}</dd>
-                    </div>
-                    <div>
-                      <dt className="font-medium text-slate-900">Téléphone</dt>
-                      <dd>{formatPhone(phone)}</dd>
-                    </div>
-                    <div>
-                      <dt className="font-medium text-slate-900">Message</dt>
-                      <dd>{message.trim() || "Aucun message"}</dd>
-                    </div>
-                    {category.customFields?.map((field) => {
-                      if (!customFieldResponses[field.id]) return null;
-                      return (
-                        <div key={field.id}>
-                          <dt className="font-medium text-slate-900">{field.label}</dt>
-                          <dd>{customFieldResponses[field.id]}</dd>
-                        </div>
-                      );
-                    })}
-                  </dl>
-                </div>
-
-                <div className="da-card bg-slate-50 px-5 py-5 text-[14px] text-slate-700">
-                  <div className="flex items-center gap-2 font-medium">
-                    <CheckSquare className="size-4 text-accent" />
-                    <span>Confirmation</span>
-                  </div>
-                  <p className="mt-2 text-slate-600">
-                    En confirmant, votre demande sera enregistrée puis transmise pour validation.
-                  </p>
-                </div>
-
-                {error ? (
-                  <p className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-[14px] font-medium text-rose-600">{error}</p>
-                ) : null}
-
-                <div className="flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setCurrentStep(2);
-                      setError("");
-                    }}
-                    className="da-btn da-btn-quiet da-btn-sm flex-1"
-                  >
-                    Modifier les informations
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleSubmit}
-                    disabled={isSubmitting}
-                    className="da-btn da-btn-primary da-btn-sm flex-1"
-                  >
-                    {isSubmitting ? <LoaderCircle className="size-4 animate-spin" /> : null}
-                    <span>{isSubmitting ? "Confirmation..." : "Confirmer la demande"}</span>
-                  </button>
-                </div>
-              </div>
-            )}
-          </section>
-
-          {activeStep === 1 ? (
-            <section className="p-6 lg:p-8">
-              <div className="mb-6 space-y-4">
-                <p className="da-eyebrow">Créneaux horaires</p>
-                <label className="flex cursor-pointer items-center justify-between rounded-xl border border-slate-200 bg-white p-3 transition-colors hover:border-slate-300">
-                  <span className="text-[13px] font-medium text-slate-900">Masquer les indisponibles</span>
-                  <div
-                    className={cn(
-                      "relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors",
-                      showOnlyAvailable ? "bg-accent" : "bg-slate-300"
-                    )}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setShowOnlyAvailable(!showOnlyAvailable);
-                    }}
-                  >
-                    <span
-                      className={cn(
-                        "inline-block size-3.5 transform rounded-full bg-white transition-transform",
-                        showOnlyAvailable ? "translate-x-4" : "translate-x-1"
-                      )}
-                    />
-                  </div>
-                </label>
-              </div>
-
-              <div className="max-h-[460px] space-y-3 overflow-y-auto pr-1">
-                {selectedDay ? (
-                  selectedDay.dateSlots
-                    .filter((slot) => !showOnlyAvailable || !slot.isBlocked)
-                    .map((slot) => {
-                    const active = activeSelectedSlot === slot.start;
-
-                    return (
-                      <button
-                        key={slot.start}
-                        type="button"
-                        disabled={slot.isBlocked}
-                        onClick={() => handleSelectSlot(slot.start)}
-                        className={cn(
-                          "flex w-full items-center justify-center rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium transition-all",
-                          slot.isBlocked
-                            ? "cursor-not-allowed bg-slate-50 text-slate-300"
-                            : "bg-white text-slate-900 hover:-translate-y-0.5 hover:border-accent hover:text-accent hover:shadow-[0_8px_24px_rgba(48,128,238,0.15)]",
-                          active && "border-accent bg-accent text-white hover:border-accent-hover hover:bg-accent-hover hover:text-white",
-                        )}
-                      >
-                        {slot.label}
-                      </button>
-                    );
-                  })
-                ) : (
-                  <div className="rounded-xl border border-dashed border-slate-200 px-4 py-8 text-center text-[14px] text-slate-500">
-                    {hasAnyAvailableSlot
-                      ? "Sélectionnez une date dans le calendrier."
-                      : "Aucun créneau n'est disponible pour le moment."}
-                  </div>
-                )}
-              </div>
-            </section>
-          ) : null}
-        </div>
-      </section>
+  return (
+    <div data-field={name} className="space-y-1.5">
+      {asGroup ? (
+        <p className="text-[14px] font-medium text-slate-900">{labelContent}</p>
+      ) : (
+        <label htmlFor={`booking-${name}`} className="block text-[14px] font-medium text-slate-900">
+          {labelContent}
+        </label>
+      )}
+      {children}
+      {error ? (
+        <p role="alert" className="text-[13px] font-medium text-rose-600">
+          {error}
+        </p>
+      ) : hint ? (
+        <p className="text-[13px] text-slate-400">{hint}</p>
+      ) : null}
     </div>
   );
 }

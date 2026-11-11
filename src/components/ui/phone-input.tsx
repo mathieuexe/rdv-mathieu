@@ -40,6 +40,8 @@ export const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
           className={className}
           numberInputProps={{
             required,
+            autoComplete: "tel",
+            "aria-label": "Numéro de téléphone",
             className: "da-field disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500"
           }}
         />

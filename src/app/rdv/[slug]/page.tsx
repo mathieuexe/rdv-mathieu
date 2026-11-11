@@ -55,7 +55,7 @@ export default async function BookingCategoryPage({
     <div className="flex min-h-screen flex-col bg-white text-slate-900">
       <PublicHeader />
 
-      <main className="flex-1 px-6 py-10 sm:py-14">
+      <main className="flex-1 px-4 py-6 sm:px-6 sm:py-12">
         <div className="mx-auto max-w-[1120px]">
           {!bookingState.available ? (
             <section className="da-card mx-auto max-w-[620px] p-8 text-center">
