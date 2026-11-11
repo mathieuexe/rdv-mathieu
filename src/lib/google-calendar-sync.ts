@@ -145,10 +145,20 @@ export async function syncGoogleCalendarIfStale(): Promise<GoogleSyncResult> {
  * personnelles sont à jour avant de calculer les créneaux, sans jamais
  * faire échouer la requête si Google est indisponible.
  */
+let lastStaleCheckAt = 0;
+
 export async function refreshPersonalAvailabilityIfStale() {
   if (!isGoogleCalendarConfigured()) {
     return;
   }
+
+  // Garde-fou mémoire : sans lui, chaque affichage d'une page de réservation
+  // déclencherait une lecture en base juste pour savoir s'il faut resynchroniser.
+  if (Date.now() - lastStaleCheckAt < SYNC_STALE_AFTER_MS) {
+    return;
+  }
+
+  lastStaleCheckAt = Date.now();
 
   try {
     await syncGoogleCalendarIfStale();

@@ -5,12 +5,39 @@ import { getPublicSupabaseEnv, isSupabaseConfigured } from "@/lib/env";
 import { extractClientIpFromHeaders, isMaintenanceBypassedForIp, normalizeAllowedIps } from "@/lib/maintenance";
 import type { SiteSettings } from "@/types/domain";
 
+/**
+ * Le middleware s'exécute avant *chaque* page : chaque appel réseau qu'il fait
+ * s'ajoute au temps d'affichage. Deux garde-fous ici :
+ *  - la vérification de session n'a lieu que si un cookie d'authentification
+ *    existe (un visiteur anonyme ne paie aucun aller-retour) ;
+ *  - les réglages du site sont gardés en mémoire quelques secondes par
+ *    instance, au lieu d'une requête base à chaque navigation.
+ */
+
+const SETTINGS_CACHE_TTL_MS = 30_000;
+
+type MaintenanceSettings = Pick<
+  SiteSettings,
+  "maintenanceMode" | "maintenanceAllowedIps"
+>;
+
+let cachedSettings: { value: MaintenanceSettings; expiresAt: number } | null = null;
+
+function hasSupabaseAuthCookie(request: NextRequest) {
+  return request.cookies.getAll().some((cookie) => cookie.name.startsWith("sb-") && cookie.name.includes("auth-token"));
+}
+
 export async function middleware(request: NextRequest) {
-  let response = NextResponse.next({
-    request,
-  });
+  let response = NextResponse.next({ request });
 
   if (!isSupabaseConfigured()) {
+    return response;
+  }
+
+  const pathname = request.nextUrl.pathname;
+
+  // Les routes API portent leur propre authentification.
+  if (pathname.startsWith("/api")) {
     return response;
   }
 
@@ -23,53 +50,52 @@ export async function middleware(request: NextRequest) {
       },
       setAll(cookiesToSet) {
         cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-        response = NextResponse.next({
-          request,
-        });
+        response = NextResponse.next({ request });
         cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
       },
     },
   });
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const pathname = request.nextUrl.pathname;
-  const isAdminRoute = pathname.startsWith("/admin");
-  const isApiRoute = pathname.startsWith("/api");
   const isMaintenancePage = pathname === "/maintenance";
   const isSecurityPage = pathname === "/compte/securite";
 
-  if (isAdminRoute || isApiRoute) {
+  // Un seul appel au service d'authentification, et uniquement si une session
+  // existe : il rafraîchit au passage les jetons de l'utilisateur connecté.
+  const user = hasSupabaseAuthCookie(request) ? (await supabase.auth.getUser()).data.user : null;
+
+  // L'administration vérifie ses propres droits côté serveur.
+  if (pathname.startsWith("/admin")) {
     return response;
   }
 
-  const { data: settingsRow } = await supabase.from("site_settings").select("*").limit(1).maybeSingle();
+  let settings = cachedSettings && cachedSettings.expiresAt > Date.now() ? cachedSettings.value : null;
 
-  const siteSettings: SiteSettings = {
-    maintenanceMode: Boolean(settingsRow?.maintenance_mode),
-    maintenanceMessage: settingsRow?.maintenance_message || "",
-    maintenanceAllowedIps: normalizeAllowedIps(settingsRow?.maintenance_allowed_ips),
-    enableWhatsappWidget: Boolean(settingsRow?.enable_whatsapp_widget),
-    enableBlackoutMarquee: settingsRow?.enable_blackout_marquee !== false,
-    bookingBlocked: Boolean(settingsRow?.booking_blocked),
-    bookingBlockedMessage: typeof settingsRow?.booking_blocked_message === "string" ? settingsRow.booking_blocked_message : null,
-    globalBlackoutPeriods: [],
-  };
+  if (!settings) {
+    const { data: settingsRow } = await supabase
+      .from("site_settings")
+      .select("maintenance_mode, maintenance_allowed_ips")
+      .limit(1)
+      .maybeSingle();
+
+    settings = {
+      maintenanceMode: Boolean(settingsRow?.maintenance_mode),
+      maintenanceAllowedIps: normalizeAllowedIps(settingsRow?.maintenance_allowed_ips),
+    };
+    cachedSettings = { value: settings, expiresAt: Date.now() + SETTINGS_CACHE_TTL_MS };
+  }
 
   const clientIp = extractClientIpFromHeaders(request.headers);
-  const bypassMaintenance = isMaintenanceBypassedForIp(clientIp, siteSettings);
+  const bypassMaintenance = isMaintenanceBypassedForIp(clientIp, settings as SiteSettings);
 
-  if (!siteSettings.maintenanceMode && isMaintenancePage) {
+  if (!settings.maintenanceMode && isMaintenancePage) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  if (siteSettings.maintenanceMode && !bypassMaintenance && !isMaintenancePage) {
+  if (settings.maintenanceMode && !bypassMaintenance && !isMaintenancePage) {
     return NextResponse.redirect(new URL("/maintenance", request.url));
   }
 
-  if (siteSettings.maintenanceMode && bypassMaintenance && isMaintenancePage) {
+  if (settings.maintenanceMode && bypassMaintenance && isMaintenancePage) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
@@ -95,5 +121,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff|woff2)$).*)"],
+  matcher: ["/((?!_next/static|_next/image|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff|woff2|mp3)$).*)"],
 };

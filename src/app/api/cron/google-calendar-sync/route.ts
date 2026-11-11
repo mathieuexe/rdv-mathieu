@@ -1,4 +1,4 @@
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 import { getGoogleCalendarSyncSecret } from "@/lib/env";
 import { syncGoogleCalendar } from "@/lib/google-calendar-sync";
@@ -27,6 +27,7 @@ export async function GET(request: Request) {
   const result = await syncGoogleCalendar();
 
   if (result.status === "success") {
+    revalidateTag("google-calendar-events", { expire: 0 });
     revalidatePath("/admin/google-calendar");
     revalidatePath("/admin/rendez-vous/agenda");
   }

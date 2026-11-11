@@ -76,12 +76,35 @@ function findOverlappingBlackoutPeriod(startIso: string, endIso: string, periods
   });
 }
 
+/** Préfixe des visuels servis par la route image plutôt qu'inlinés en base64. */
+export const CATEGORY_IMAGE_ROUTE_PREFIX = "/api/images/category/";
+
+/**
+ * Les visuels sont stockés en base sous forme de data URL. On ne les expose
+ * jamais telles quelles : le HTML embarquerait des centaines de Ko par image.
+ * On renvoie une URL servie par `/api/images/category/...`, mise en cache par
+ * le navigateur et l'optimiseur d'images.
+ */
+function toServableImageUrl(value: unknown, categoryId: string, kind: "thumbnail" | "banner", version: string) {
+  if (typeof value !== "string" || !value) {
+    return undefined;
+  }
+
+  if (!value.startsWith("data:")) {
+    return value;
+  }
+
+  return `${CATEGORY_IMAGE_ROUTE_PREFIX}${categoryId}/${kind}/${version}`;
+}
+
 function mapCategoryRow(
   row: Record<string, unknown>,
   rules: Array<Record<string, unknown>>,
   blackouts: Array<Record<string, unknown>>,
 ): AppointmentCategory {
   const categoryId = String(row.id);
+  // Empreinte de cache : change dès que la catégorie (donc son visuel) évolue.
+  const imageVersion = String(Date.parse(String(row.updated_at ?? row.created_at ?? "")) || 0);
   const categoryRules = rules.filter((rule) => String(rule.category_id) === categoryId);
   const categoryBlackouts = blackouts.filter((period) => String(period.category_id) === categoryId);
 
@@ -95,8 +118,8 @@ function mapCategoryRow(
     isOnline: Boolean(row.is_online),
     isHidden: Boolean(row.is_hidden),
     customMessage: typeof row.custom_message === "string" ? row.custom_message : undefined,
-    thumbnailImageUrl: typeof row.thumbnail_image_url === "string" ? row.thumbnail_image_url : undefined,
-    bannerImageUrl: typeof row.banner_image_url === "string" ? row.banner_image_url : undefined,
+    thumbnailImageUrl: toServableImageUrl(row.thumbnail_image_url, categoryId, "thumbnail", imageVersion),
+    bannerImageUrl: toServableImageUrl(row.banner_image_url, categoryId, "banner", imageVersion),
     isBookingBlocked: Boolean(row.is_booking_blocked),
     bookingBlockMessage: typeof row.booking_block_message === "string" ? row.booking_block_message : undefined,
     customFields: Array.isArray(row.custom_fields) ? (row.custom_fields as any) : undefined,
@@ -399,6 +422,33 @@ export async function getAppointments() {
   return [];
 }
 
+/**
+ * Rendez-vous utiles au calcul des créneaux : uniquement ceux qui bloquent
+ * réellement une plage, sur la fenêtre affichée. Évite de charger toute la
+ * table à chaque affichage d'une page de réservation.
+ */
+export async function getActiveAppointmentsForSlots(daysToShow = 21) {
+  const supabase = getSupabaseAdminClient();
+
+  if (!supabase) {
+    return [];
+  }
+
+  const windowStart = new Date();
+  windowStart.setHours(0, 0, 0, 0);
+  const windowEnd = new Date(windowStart.getTime() + daysToShow * 24 * 60 * 60 * 1000);
+
+  const { data } = await supabase
+    .from("appointments")
+    .select("id, category_id, first_name, last_name, email, phone, starts_at, ends_at, status, origin, created_at")
+    .in("status", ["en_attente", "accepte"])
+    .gte("ends_at", windowStart.toISOString())
+    .lte("starts_at", windowEnd.toISOString())
+    .order("starts_at");
+
+  return (data ?? []).map((row) => mapAppointmentRow(row as Record<string, unknown>));
+}
+
 export async function getAppointmentById(appointmentId: string) {
   const supabase = getSupabaseAdminClient();
 
@@ -414,8 +464,7 @@ export async function getAppointmentById(appointmentId: string) {
 }
 
 export async function getDashboardMetrics(): Promise<DashboardMetrics> {
-  const appointments = await getAppointments();
-  const categories = await getCategories();
+  const [appointments, categories] = await Promise.all([getAppointments(), getCategories()]);
 
   return {
     totalAppointments: appointments.length,
@@ -435,7 +484,7 @@ export async function getCategorySlots(slug: string, options?: { bypassMaintenan
 
   const [siteSettings, appointments, busyPeriods] = await Promise.all([
     getSiteSettings(),
-    getAppointments(),
+    getActiveAppointmentsForSlots(),
     getPersonalBusyPeriods(),
   ]);
   const effectiveSiteSettings = getEffectiveSiteSettings(siteSettings, Boolean(options?.bypassMaintenance));
@@ -1039,6 +1088,38 @@ export async function saveCategory(input: {
     throw new Error("Sélectionnez au moins un jour de disponibilité.");
   }
 
+  // Le formulaire (ou la duplication) renvoie l'URL de service quand le visuel
+  // n'a pas changé : on retrouve alors l'image réellement stockée en base.
+  async function resolveImageValue(submitted: string | undefined) {
+    if (!submitted) {
+      return null;
+    }
+
+    if (!submitted.startsWith(CATEGORY_IMAGE_ROUTE_PREFIX)) {
+      return submitted;
+    }
+
+    const [sourceId, kind] = submitted
+      .slice(CATEGORY_IMAGE_ROUTE_PREFIX.length)
+      .split("?")[0]
+      .split("/");
+    const column = kind === "banner" ? "banner_image_url" : "thumbnail_image_url";
+
+    if (!sourceId) {
+      return null;
+    }
+
+    const { data } = await supabase!.from("categories").select(column).eq("id", sourceId).maybeSingle();
+    const stored = data ? (data as unknown as Record<string, unknown>)[column] : null;
+
+    return typeof stored === "string" ? stored : null;
+  }
+
+  const [thumbnailImageValue, bannerImageValue] = await Promise.all([
+    resolveImageValue(input.thumbnailImageUrl),
+    resolveImageValue(input.bannerImageUrl),
+  ]);
+
   const categoryPayload = {
     title: input.title,
     slug: input.slug,
@@ -1048,8 +1129,8 @@ export async function saveCategory(input: {
     is_online: input.isOnline,
     is_hidden: input.isHidden ?? false,
     custom_message: input.customMessage ?? null,
-    thumbnail_image_url: input.thumbnailImageUrl ?? null,
-    banner_image_url: input.bannerImageUrl ?? null,
+    thumbnail_image_url: thumbnailImageValue,
+    banner_image_url: bannerImageValue,
     is_booking_blocked: input.isBookingBlocked ?? false,
     booking_block_message: input.bookingBlockMessage ?? null,
     custom_fields: input.customFields ?? [],
@@ -1825,14 +1906,22 @@ export async function getUpcomingGoogleCalendarEvents(daysAhead = 120) {
   return getGoogleCalendarEventsBetween(start.toISOString(), end.toISOString());
 }
 
-/** Périodes occupées à prendre en compte dans le calcul des créneaux publics. */
-export async function getPersonalBusyPeriods(daysToShow = 21): Promise<BusyPeriod[]> {
-  const start = new Date();
-  const end = new Date(start.getTime() + daysToShow * 24 * 60 * 60 * 1000);
-  const events = await getGoogleCalendarEventsBetween(start.toISOString(), end.toISOString());
+/**
+ * Périodes occupées à prendre en compte dans le calcul des créneaux publics.
+ * Mises en cache : elles ne changent qu'au rythme des synchronisations Google
+ * (au plus toutes les 10 minutes) et sont lues à chaque affichage de créneaux.
+ */
+export const getPersonalBusyPeriods = unstable_cache(
+  async (): Promise<BusyPeriod[]> => {
+    const start = new Date();
+    const end = new Date(start.getTime() + 21 * 24 * 60 * 60 * 1000);
+    const events = await getGoogleCalendarEventsBetween(start.toISOString(), end.toISOString());
 
-  return events.map((event) => ({ start: event.startsAt, end: event.endsAt }));
-}
+    return events.map((event) => ({ start: event.startsAt, end: event.endsAt }));
+  },
+  ["personal-busy-periods"],
+  { revalidate: 60, tags: ["google-calendar-events"] },
+);
 
 /** Rendez-vous du site qui entrent en conflit avec un évènement personnel importé. */
 export async function getGoogleCalendarConflicts() {

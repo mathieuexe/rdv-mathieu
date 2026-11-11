@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { getAdminSession } from "@/lib/auth";
@@ -28,6 +28,7 @@ async function requireAdminSession() {
 }
 
 function revalidateGoogleCalendarViews() {
+  updateTag("google-calendar-events");
   revalidatePath(GOOGLE_CALENDAR_PATH);
   revalidatePath("/admin/rendez-vous/agenda");
   revalidatePath("/admin");
