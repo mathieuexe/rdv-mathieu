@@ -5,6 +5,7 @@ import { getPublicUserSession } from "@/lib/auth";
 import { refreshPersonalAvailabilityIfStale } from "@/lib/google-calendar-sync";
 import { sendAdminAppointmentRequestNotificationEmail, sendProvisionalAppointmentEmail } from "@/lib/email";
 import { isMaintenanceBypassedForHeaders } from "@/lib/maintenance";
+import { formatSiren } from "@/lib/company";
 import { formatDateTimeFr } from "@/lib/utils";
 import { appointmentRequestSchema } from "@/lib/validators";
 
@@ -88,6 +89,9 @@ export async function POST(request: Request) {
       clientEmail: result.appointment.email,
       clientPhone: result.appointment.phone,
       clientMessage: result.appointment.clientMessage,
+      clientCompany: result.appointment.companySiren
+        ? `${result.appointment.companyName} (SIREN ${formatSiren(result.appointment.companySiren)})`
+        : result.appointment.companyName,
       categoryTitle: result.category.title,
       startsAtLabel,
       appointmentMode: result.category.appointmentMode,

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { Calendar, CalendarClock, Mail, FileText, User, Tag, Clock, CheckCircle2, AlertCircle } from "lucide-react";
 
 import { AppointmentDecisionPanel } from "@/components/admin/appointment-decision-panel";
+import { formatSiren } from "@/lib/company";
 import { getAppointmentById, getCategoryById } from "@/lib/data-access";
 import { formatAppointmentMode, formatAppointmentStatus, formatDateTimeFr, formatPhone, toParisInputValues } from "@/lib/utils";
 
@@ -104,6 +105,13 @@ export default async function AppointmentDetailPage({
                 <div>
                   <p className="text-xs text-slate-500">Téléphone</p>
                   <p className="mt-1 text-sm font-medium text-slate-900">{formatPhone(appointment.phone) || "Non renseigné"}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-slate-500">Entreprise</p>
+                  <p className="mt-1 text-sm font-medium text-slate-900">{appointment.companyName || "Non renseignée"}</p>
+                  {appointment.companySiren ? (
+                    <p className="mt-0.5 text-xs text-slate-500">SIREN {formatSiren(appointment.companySiren)}</p>
+                  ) : null}
                 </div>
                 <div>
                   <p className="text-xs text-slate-500">Créé par</p>

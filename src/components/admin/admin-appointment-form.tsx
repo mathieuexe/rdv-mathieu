@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState, useTransition, type FormEvent } f
 import { CalendarDays, Clock3, MapPinned } from "lucide-react";
 
 import { CalendarLegend } from "@/components/shared/calendar-legend";
+import { CompanyField } from "@/components/shared/company-field";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { groupSlotsByDay } from "@/lib/booking";
 import { cn, formatAppointmentMode } from "@/lib/utils";
@@ -56,6 +57,7 @@ export function AdminAppointmentForm({ categories, registeredClients, action, er
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
+  const [company, setCompany] = useState({ name: "", siren: "" });
   const [customFieldResponses, setCustomFieldResponses] = useState<Record<string, string>>({});
   const [slots, setSlots] = useState<BookingSlot[]>([]);
   const [selectedSlot, setSelectedSlot] = useState("");
@@ -213,6 +215,8 @@ export function AdminAppointmentForm({ categories, registeredClients, action, er
 
       <form onSubmit={handleSubmit} className="grid items-start gap-6 lg:grid-cols-3">
         <input type="hidden" name="customFieldResponsesJson" value={JSON.stringify(customFieldResponses)} />
+        <input type="hidden" name="companyName" value={company.name.trim()} />
+        <input type="hidden" name="companySiren" value={company.name.trim() ? company.siren : ""} />
         <div className="space-y-6 lg:col-span-2">
           {/* Client Info Card */}
           <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
@@ -313,6 +317,21 @@ export function AdminAppointmentForm({ categories, registeredClients, action, er
                     className="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   />
                 </label>
+              </div>
+
+              <div className="space-y-1.5 text-sm font-medium text-slate-700">
+                <p>
+                  Entreprise <span className="font-normal text-slate-400">(facultatif)</span>
+                </p>
+                <CompanyField
+                  name={company.name}
+                  siren={company.siren}
+                  onChange={setCompany}
+                  inputClassName="w-full rounded-md border border-slate-300 px-3 py-2 font-normal outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+                <p className="text-xs font-normal text-slate-500">
+                  Tapez un nom ou un SIREN pour retrouver la société, ou saisissez le nom librement.
+                </p>
               </div>
 
               <label className="block space-y-1.5 text-sm font-medium text-slate-700">

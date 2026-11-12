@@ -51,6 +51,9 @@ export function AppointmentsTable({ appointments }: AppointmentsTableProps) {
                 <p className="font-semibold text-slate-900">
                   {appointment.firstName} {appointment.lastName}
                 </p>
+                {appointment.companyName && (
+                  <p className="mt-0.5 text-xs font-medium text-slate-700">{appointment.companyName}</p>
+                )}
                 <p className="mt-0.5 text-xs text-slate-500">{appointment.email || "Sans email"}</p>
                 {appointment.phone && (
                   <p className="mt-0.5 text-xs text-slate-500">{formatPhone(appointment.phone)}</p>

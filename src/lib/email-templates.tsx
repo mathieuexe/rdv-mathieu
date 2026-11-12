@@ -577,6 +577,7 @@ interface AdminAppointmentRequestNotificationEmailProps {
   startsAtLabel: string;
   appointmentModeLabel: string;
   clientFullName: string;
+  clientCompany?: string;
   clientEmail: string;
   clientPhone?: string;
   clientMessage?: string;
@@ -589,6 +590,7 @@ export function AdminAppointmentRequestNotificationEmail({
   startsAtLabel,
   appointmentModeLabel,
   clientFullName,
+  clientCompany,
   clientEmail,
   clientPhone,
   clientMessage,
@@ -606,6 +608,7 @@ export function AdminAppointmentRequestNotificationEmail({
         { label: "Rendez-vous", value: categoryTitle },
         { label: "Déroulement", value: appointmentModeLabel },
         { label: "Client", value: clientFullName },
+        ...(clientCompany ? [{ label: "Entreprise", value: clientCompany }] : []),
         { label: "Email", value: clientEmail },
         ...(clientPhone ? [{ label: "Téléphone", value: clientPhone }] : []),
         ...(clientMessage ? [{ label: "Message", value: clientMessage }] : []),

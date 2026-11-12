@@ -90,6 +90,9 @@ export interface AppointmentRecord {
   email: string;
   phone: string;
   clientMessage?: string;
+  /** Entreprise du client, si le rendez-vous est pris à titre professionnel. */
+  companyName?: string;
+  companySiren?: string;
   customFieldResponses?: Record<string, string>;
   startsAt: string;
   endsAt: string;
@@ -151,6 +154,8 @@ export interface AppointmentRequestPayload {
   email: string;
   phone: string;
   message?: string;
+  companyName?: string;
+  companySiren?: string;
   customFieldResponses?: Record<string, string>;
   startsAt: string;
 }

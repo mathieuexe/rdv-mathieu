@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CalendarDays, Check, ChevronLeft, ChevronRight, Clock, Info, LoaderCircle, MapPin, Zap } from "lucide-react";
 
+import { CompanyField } from "@/components/shared/company-field";
 import { groupSlotsByDay } from "@/lib/booking";
 import { cn, formatAppointmentMode, formatDateTimeFr } from "@/lib/utils";
 import type { AppointmentCategory, BookingSlot } from "@/types/domain";
@@ -108,6 +109,7 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
   const [email, setEmail] = useState(initialUser?.email ?? "");
   const [phone, setPhone] = useState(initialUser?.phone ?? "");
   const [message, setMessage] = useState("");
+  const [company, setCompany] = useState({ name: "", siren: "" });
   const [customFieldResponses, setCustomFieldResponses] = useState<Record<string, string>>({});
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [error, setError] = useState("");
@@ -210,6 +212,8 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
       email: email.trim(),
       phone: phone.trim(),
       message: message.trim(),
+      companyName: company.name.trim(),
+      companySiren: company.name.trim() ? company.siren : "",
       customFieldResponsesJson: JSON.stringify(customFieldResponses),
       startsAt: activeSlot.start,
     };
@@ -565,6 +569,10 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
                 />
               </Field>
             </div>
+
+            <Field name="company" label="Entreprise" optional hint="Tapez un nom ou un SIREN pour retrouver votre société." asGroup>
+              <CompanyField name={company.name} siren={company.siren} onChange={setCompany} inputClassName="da-field" />
+            </Field>
 
             {category.customFields?.map((field) => {
               const name = `custom-${field.id}`;

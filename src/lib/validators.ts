@@ -7,6 +7,8 @@ export const appointmentRequestSchema = z.object({
   email: z.string().trim().email("Veuillez saisir un email valide."),
   phone: z.string().trim().min(8, "Le téléphone est requis."),
   message: z.string().trim().max(800, "Le message est trop long.").optional().or(z.literal("")),
+  companyName: z.string().trim().max(150, "Le nom de l'entreprise est trop long.").optional().or(z.literal("")),
+  companySiren: z.string().trim().regex(/^\d{9}$/, "Le SIREN est invalide.").optional().or(z.literal("")),
   customFieldResponsesJson: z.string().optional().or(z.literal("")),
   startsAt: z.string().trim().min(10, "Le créneau sélectionné est invalide."),
 });

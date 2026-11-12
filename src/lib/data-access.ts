@@ -4,6 +4,7 @@ import { addMinutes, parseISO } from "date-fns";
 import { unstable_cache } from "next/cache";
 
 import { buildBookingSlots } from "@/lib/booking";
+import { splitCompany, withCompany } from "@/lib/company";
 import { getEffectiveSiteSettings, normalizeAllowedIps } from "@/lib/maintenance";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
@@ -196,6 +197,12 @@ function mapCategoryRow(
 }
 
 function mapAppointmentRow(row: Record<string, unknown>): AppointmentRecord {
+  const { responses, company } = splitCompany(
+    row.custom_field_responses && typeof row.custom_field_responses === "object"
+      ? (row.custom_field_responses as Record<string, string>)
+      : undefined,
+  );
+
   return {
     id: String(row.id),
     categoryId: String(row.category_id),
@@ -205,7 +212,9 @@ function mapAppointmentRow(row: Record<string, unknown>): AppointmentRecord {
     email: String(row.email),
     phone: String(row.phone),
     clientMessage: typeof row.client_message === "string" ? row.client_message : undefined,
-    customFieldResponses: row.custom_field_responses && typeof row.custom_field_responses === "object" ? (row.custom_field_responses as Record<string, string>) : undefined,
+    companyName: company.name,
+    companySiren: company.siren,
+    customFieldResponses: responses,
     startsAt: String(row.starts_at),
     endsAt: String(row.ends_at),
     status: row.status as AppointmentRecord["status"],
@@ -604,7 +613,10 @@ export async function createAppointmentRequest(
         email: record.email,
         phone: record.phone,
         client_message: record.clientMessage ?? null,
-        custom_field_responses: record.customFieldResponses ?? {},
+        custom_field_responses: withCompany(record.customFieldResponses, {
+          name: payload.companyName,
+          siren: payload.companySiren,
+        }),
         starts_at: record.startsAt,
         ends_at: record.endsAt,
         status: record.status,
@@ -1391,6 +1403,8 @@ export async function createAdminAppointment(input: {
   email: string;
   phone: string;
   message?: string;
+  companyName?: string;
+  companySiren?: string;
   customFieldResponses?: Record<string, string>;
   startsAt: string;
   linkedUserId?: string;
@@ -1449,7 +1463,10 @@ export async function createAdminAppointment(input: {
         email: record.email,
         phone: record.phone,
         client_message: record.clientMessage ?? null,
-        custom_field_responses: record.customFieldResponses ?? {},
+        custom_field_responses: withCompany(record.customFieldResponses, {
+          name: input.companyName,
+          siren: input.companySiren,
+        }),
         starts_at: record.startsAt,
         ends_at: record.endsAt,
         status: record.status,

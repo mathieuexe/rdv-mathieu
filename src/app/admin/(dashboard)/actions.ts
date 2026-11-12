@@ -287,6 +287,8 @@ export async function createAdminAppointmentAction(formData: FormData): Promise<
     email: formData.get("email"),
     phone: formData.get("phone"),
     message: formData.get("message"),
+    companyName: formData.get("companyName") ?? "",
+    companySiren: formData.get("companySiren") ?? "",
     customFieldResponsesJson: formData.get("customFieldResponsesJson"),
     startsAt: formData.get("startsAt"),
     updateLinkedUserProfile: formData.get("updateLinkedUserProfile") === "on",

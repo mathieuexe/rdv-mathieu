@@ -462,6 +462,7 @@ export async function sendAdminAppointmentRequestNotificationEmail(input: {
   clientEmail: string;
   clientPhone?: string;
   clientMessage?: string;
+  clientCompany?: string;
   categoryTitle: string;
   startsAtLabel: string;
   appointmentMode: AppointmentMode;
@@ -492,6 +493,7 @@ export async function sendAdminAppointmentRequestNotificationEmail(input: {
         startsAtLabel: input.startsAtLabel,
         appointmentModeLabel: formatAppointmentMode(input.appointmentMode),
         clientFullName: `${input.firstName} ${input.lastName}`.trim(),
+        clientCompany: input.clientCompany,
         clientEmail: input.clientEmail,
         clientPhone: input.clientPhone,
         clientMessage: input.clientMessage,
