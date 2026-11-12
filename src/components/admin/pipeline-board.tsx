@@ -60,6 +60,8 @@ function sortCards(cards: PipelineCard[]) {
 export function PipelineBoard({ initialCards }: PipelineBoardProps) {
   const [cards, setCards] = useState(() => sortCards(initialCards));
   const [draft, setDraft] = useState<CardDraft | null>(null);
+  // Sur téléphone, une seule colonne est affichée à la fois : celle de l'étape choisie.
+  const [mobileStage, setMobileStage] = useState<PipelineStage>("nouveau");
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [dropTarget, setDropTarget] = useState<{ stage: PipelineStage; beforeId: string | null } | null>(null);
   const [error, setError] = useState("");
@@ -151,6 +153,7 @@ export function PipelineBoard({ initialCards }: PipelineBoardProps) {
       const saved = changedStage ? { ...result.card, position: lastPosition + 1 } : result.card;
 
       setCards((current) => sortCards([...current.filter((card) => card.id !== saved.id), saved]));
+      setMobileStage(saved.stage);
       setDraft(null);
 
       if (changedStage) {
@@ -193,7 +196,13 @@ export function PipelineBoard({ initialCards }: PipelineBoardProps) {
           <p className="mt-1 text-sm text-slate-500">
             {cards.length === 0
               ? "Créez une fiche par prospect, puis faites-la avancer d'étape en étape."
-              : `${cards.length} fiche${cards.length > 1 ? "s" : ""} · ${euros.format(openTotal)} en cours. Glissez une fiche pour la changer d'étape.`}
+              : `${cards.length} fiche${cards.length > 1 ? "s" : ""} · ${euros.format(openTotal)} en cours.`}
+            {cards.length > 0 ? (
+              <>
+                <span className="hidden md:inline"> Glissez une fiche pour la changer d&apos;étape.</span>
+                <span className="md:hidden"> Ouvrez une fiche pour changer son étape.</span>
+              </>
+            ) : null}
           </p>
         </div>
         <button
@@ -202,7 +211,7 @@ export function PipelineBoard({ initialCards }: PipelineBoardProps) {
             setFormError("");
             setDraft(emptyDraft("nouveau"));
           }}
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
         >
           <Plus className="size-4" />
           Nouveau prospect
@@ -215,8 +224,37 @@ export function PipelineBoard({ initialCards }: PipelineBoardProps) {
         </div>
       ) : null}
 
-      <div className="-mx-4 overflow-x-auto px-4 pb-4 sm:mx-0 sm:px-0">
-        <div className="flex min-w-max items-start gap-4">
+      {/* Téléphone : sélecteur d'étape, une colonne à la fois. */}
+      <div className="-mx-4 overflow-x-auto px-4 md:hidden" role="tablist" aria-label="Étapes du pipeline">
+        <div className="flex min-w-max gap-2">
+          {columns.map((column) => {
+            const isActive = column.key === mobileStage;
+
+            return (
+              <button
+                key={column.key}
+                type="button"
+                role="tab"
+                aria-selected={isActive}
+                onClick={() => setMobileStage(column.key)}
+                className={cn(
+                  "inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-medium transition-colors",
+                  isActive ? "border-slate-900 bg-slate-900 text-white" : "border-slate-200 bg-white text-slate-700",
+                )}
+              >
+                <span className={cn("size-2 rounded-full", column.accent)} />
+                {column.label}
+                <span className={cn("text-xs", isActive ? "text-slate-300" : "text-slate-400")}>{column.cards.length}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Tablette et ordinateur : toutes les colonnes, avec défilement horizontal
+          si l'écran est trop étroit ; sur très grand écran elles se partagent la largeur. */}
+      <div className="pb-4 md:overflow-x-auto">
+        <div className="flex items-start gap-4 md:min-w-max 2xl:min-w-0">
           {columns.map((column) => {
             const total = column.cards.reduce((sum, card) => sum + (card.estimatedAmount ?? 0), 0);
             const isDropColumn = dropTarget?.stage === column.key;
@@ -238,7 +276,8 @@ export function PipelineBoard({ initialCards }: PipelineBoardProps) {
                   setDropTarget(null);
                 }}
                 className={cn(
-                  "flex w-[272px] shrink-0 flex-col rounded-lg border bg-slate-100/70 transition-colors",
+                  "w-full flex-col rounded-lg border bg-slate-100/70 transition-colors md:flex md:w-[272px] md:shrink-0 2xl:w-auto 2xl:min-w-0 2xl:flex-1 2xl:shrink",
+                  column.key === mobileStage ? "flex" : "hidden",
                   isDropColumn ? "border-blue-400 bg-blue-50/60" : "border-slate-200",
                 )}
               >

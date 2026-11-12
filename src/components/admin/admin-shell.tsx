@@ -52,16 +52,16 @@ const navigationSections = [
   },
 ];
 
+/**
+ * Entrée de menu correspondant à la page affichée. On retient l'adresse la plus
+ * précise : sans cela « /admin » (Tableau de bord) correspondrait à toutes les
+ * pages de l'administration.
+ */
 function getCurrentSection(pathname: string) {
-  for (const section of navigationSections) {
-    for (const item of section.items) {
-      if (pathname === item.href || pathname.startsWith(`${item.href}/`)) {
-        return item;
-      }
-    }
-  }
+  const items = navigationSections.flatMap((section) => section.items);
+  const matches = items.filter((item) => pathname === item.href || pathname.startsWith(`${item.href}/`));
 
-  return navigationSections[0].items[0];
+  return matches.sort((a, b) => b.href.length - a.href.length)[0] ?? items[0];
 }
 
 interface AdminShellProps {
@@ -114,7 +114,7 @@ export function AdminShell({ children, session }: AdminShellProps) {
                 <p className="da-eyebrow mb-3 text-[11px]">{section.title}</p>
                 <nav className="space-y-1">
                   {section.items.map((item) => {
-                    const isActive = currentPath === item.href || currentPath.startsWith(`${item.href}/`);
+                    const isActive = item.href === currentSection.href;
                     const Icon = item.icon;
 
                     return (
@@ -141,7 +141,7 @@ export function AdminShell({ children, session }: AdminShellProps) {
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex flex-1 flex-col lg:pl-64">
+      <div className="flex min-w-0 flex-1 flex-col lg:pl-64">
         {/* Top Header CRM Style */}
         <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2 text-sm font-medium text-slate-900">
@@ -178,8 +178,38 @@ export function AdminShell({ children, session }: AdminShellProps) {
           </div>
         </header>
 
+        {/* Navigation sur téléphone et tablette, où la barre latérale est masquée. */}
+        <nav
+          aria-label="Navigation de l'administration"
+          className="sticky top-16 z-10 overflow-x-auto border-b border-slate-200 bg-white lg:hidden"
+        >
+          <div className="flex min-w-max gap-1 px-3 py-2">
+            {navigationSections
+              .flatMap((section) => section.items)
+              .map((item) => {
+                const isActive = item.href === currentSection.href;
+                const Icon = item.icon;
+
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    aria-current={isActive ? "page" : undefined}
+                    className={cn(
+                      "inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                      isActive ? "bg-accent-soft text-accent" : "text-slate-600 hover:bg-slate-50",
+                    )}
+                  >
+                    <Icon className={cn("size-4", isActive ? "text-accent" : "text-slate-400")} />
+                    {item.label}
+                  </Link>
+                );
+              })}
+          </div>
+        </nav>
+
         {/* Page Content */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
+        <main className="min-w-0 flex-1 p-4 sm:p-6 lg:p-8">
           {children}
         </main>
       </div>
