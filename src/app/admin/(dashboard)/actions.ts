@@ -267,7 +267,11 @@ export async function saveSettingsAction(formData: FormData) {
   redirect("/admin/parametres?saved=1");
 }
 
-export async function createAdminAppointmentAction(formData: FormData) {
+/**
+ * En cas d'erreur, l'action renvoie le message au lieu de recharger la page :
+ * l'administrateur conserve toute sa saisie.
+ */
+export async function createAdminAppointmentAction(formData: FormData): Promise<{ error: string } | void> {
   const session = await getAdminSession();
 
   if (!session.isAuthenticated || !session.userId || !session.email) {
@@ -289,9 +293,12 @@ export async function createAdminAppointmentAction(formData: FormData) {
   });
 
   if (!parsed.success) {
-    const message = encodeURIComponent(parsed.error.issues[0]?.message ?? "Le formulaire contient au moins une erreur.");
-    redirect(`/admin/rendez-vous/nouveau?error=${message}`);
+    return { error: parsed.error.issues[0]?.message ?? "Le formulaire contient au moins une erreur." };
   }
+
+  // Email et téléphone sont facultatifs pour un prospect : chaîne vide en base.
+  const email = parsed.data.email ?? "";
+  const phone = parsed.data.phone ?? "";
 
   let createdAccount:
     | {
@@ -307,19 +314,19 @@ export async function createAdminAppointmentAction(formData: FormData) {
     if (parsed.data.linkedUserId && parsed.data.updateLinkedUserProfile) {
       await updateManagedUserAccount({
         userId: parsed.data.linkedUserId,
-        email: parsed.data.email,
+        email,
         firstName: parsed.data.firstName,
         lastName: parsed.data.lastName,
-        phone: parsed.data.phone,
+        phone,
       });
     }
 
     if (!parsed.data.linkedUserId && parsed.data.createClientAccount) {
       createdAccount = await createManagedUserAccount({
-        email: parsed.data.email,
+        email,
         firstName: parsed.data.firstName,
         lastName: parsed.data.lastName,
-        phone: parsed.data.phone,
+        phone,
       });
       effectiveLinkedUserId = createdAccount.userId;
     }
@@ -333,6 +340,8 @@ export async function createAdminAppointmentAction(formData: FormData) {
 
     const appointment = await createAdminAppointment({
       ...parsed.data,
+      email,
+      phone,
       customFieldResponses,
       linkedUserId: effectiveLinkedUserId,
       message: parsed.data.message || undefined,
@@ -396,10 +405,7 @@ export async function createAdminAppointmentAction(formData: FormData) {
       } catch {}
     }
 
-    const message = encodeURIComponent(
-      error instanceof Error ? error.message : "Impossible de créer le rendez-vous pour le moment.",
-    );
-    redirect(`/admin/rendez-vous/nouveau?error=${message}`);
+    return { error: error instanceof Error ? error.message : "Impossible de créer le rendez-vous pour le moment." };
   }
 
   revalidatePath("/admin");

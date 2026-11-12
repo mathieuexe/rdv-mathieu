@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition, type FormEvent } from "react";
 import { CalendarDays, Clock3, MapPinned } from "lucide-react";
 
 import { CalendarLegend } from "@/components/shared/calendar-legend";
@@ -12,7 +12,7 @@ import type { AppointmentCategory, BookingSlot, UserProfileRecord } from "@/type
 interface AdminAppointmentFormProps {
   categories: AppointmentCategory[];
   registeredClients: UserProfileRecord[];
-  action: (formData: FormData) => Promise<void>;
+  action: (formData: FormData) => Promise<{ error: string } | void>;
   errorMessage?: string;
 }
 
@@ -63,6 +63,33 @@ export function AdminAppointmentForm({ categories, registeredClients, action, er
   const [visibleMonthKey, setVisibleMonthKey] = useState(toMonthKey(new Date().toISOString().slice(0, 10)));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [submitError, setSubmitError] = useState(errorMessage ?? "");
+  const [isSaving, startSaving] = useTransition();
+  const errorRef = useRef<HTMLDivElement>(null);
+  const hasEmail = email.trim().length > 0;
+
+  // Envoi manuel plutôt que `<form action>` : en cas d'erreur, la page n'est
+  // pas rechargée et toute la saisie reste en place.
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+
+    setSubmitError("");
+    startSaving(async () => {
+      let message = "";
+
+      try {
+        message = (await action(formData))?.error ?? "";
+      } catch {
+        message = "L'enregistrement a échoué. Vérifiez votre connexion puis réessayez.";
+      }
+
+      if (message) {
+        setSubmitError(message);
+        requestAnimationFrame(() => errorRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }));
+      }
+    });
+  }
 
   useEffect(() => {
     async function loadSlots() {
@@ -172,18 +199,19 @@ export function AdminAppointmentForm({ categories, registeredClients, action, er
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Créer un rendez-vous</h1>
           <p className="mt-1 text-sm text-slate-500">
-            L&apos;administrateur peut réserver directement un créneau disponible au nom d&apos;un client.
+            Réservez un créneau pour un client ou un prospect. Seuls le prénom et le nom sont obligatoires : aucun compte
+            n&apos;est nécessaire.
           </p>
         </div>
       </section>
 
-      {errorMessage && (
-        <div className="rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-          {errorMessage}
+      {submitError && (
+        <div ref={errorRef} role="alert" className="scroll-mt-24 rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+          {submitError} Votre saisie a été conservée.
         </div>
       )}
 
-      <form action={action} className="grid items-start gap-6 lg:grid-cols-3">
+      <form onSubmit={handleSubmit} className="grid items-start gap-6 lg:grid-cols-3">
         <input type="hidden" name="customFieldResponsesJson" value={JSON.stringify(customFieldResponses)} />
         <div className="space-y-6 lg:col-span-2">
           {/* Client Info Card */}
@@ -193,7 +221,7 @@ export function AdminAppointmentForm({ categories, registeredClients, action, er
             </div>
             <div className="space-y-5 p-4 md:p-6">
               <label className="block space-y-1.5 text-sm font-medium text-slate-700">
-                <span>Client déjà inscrit</span>
+                <span>Client déjà inscrit <span className="font-normal text-slate-400">(facultatif)</span></span>
                 <input
                   type="search"
                   value={clientSearch}
@@ -207,7 +235,7 @@ export function AdminAppointmentForm({ categories, registeredClients, action, er
                   onChange={(event) => handleClientChange(event.target.value)}
                   className="mt-2 w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 >
-                  <option value="">Aucun lien client</option>
+                  <option value="">Aucun : prospect sans compte</option>
                   {filteredClients.map((client) => (
                     <option key={client.userId} value={client.userId}>
                       {client.firstName} {client.lastName} - {client.email}
@@ -246,14 +274,17 @@ export function AdminAppointmentForm({ categories, registeredClients, action, er
                     <input
                       name="createClientAccount"
                       type="checkbox"
-                      checked={createClientAccount}
+                      checked={createClientAccount && hasEmail}
+                      disabled={!hasEmail}
                       onChange={(event) => setCreateClientAccount(event.target.checked)}
                       className="mt-0.5 size-4 rounded border-slate-300 text-emerald-600"
                     />
                     <span>
                       <span className="block font-medium text-slate-900">Créer aussi un compte client</span>
                       <span className="mt-0.5 block text-xs text-slate-500">
-                        Le client recevra un email avec un mot de passe temporaire.
+                        {hasEmail
+                          ? "Facultatif. Le client recevra un email avec un mot de passe temporaire."
+                          : "Facultatif. Renseignez un email pour pouvoir créer un compte."}
                       </span>
                     </span>
                   </span>
@@ -285,29 +316,32 @@ export function AdminAppointmentForm({ categories, registeredClients, action, er
               </div>
 
               <label className="block space-y-1.5 text-sm font-medium text-slate-700">
-                <span>Email</span>
+                <span>Email <span className="font-normal text-slate-400">(facultatif)</span></span>
                 <input
                   name="email"
                   type="email"
-                  required
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   className="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 />
+                <span className="block text-xs font-normal text-slate-500">
+                  {hasEmail
+                    ? "La personne recevra la confirmation, le rappel et les changements par email."
+                    : "Sans email, aucune notification n'est envoyée : le rendez-vous est simplement inscrit à l'agenda."}
+                </span>
               </label>
 
               <label className="block space-y-1.5 text-sm font-medium text-slate-700">
-                <span>Téléphone</span>
+                <span>Téléphone <span className="font-normal text-slate-400">(facultatif)</span></span>
                 <PhoneInput
                   name="phone"
-                  required
                   value={phone}
                   onChange={(val) => setPhone(val || "")}
                 />
               </label>
 
               <label className="block space-y-1.5 text-sm font-medium text-slate-700">
-                <span>Message</span>
+                <span>Message <span className="font-normal text-slate-400">(facultatif)</span></span>
                 <textarea
                   name="message"
                   rows={4}
@@ -368,6 +402,7 @@ export function AdminAppointmentForm({ categories, registeredClients, action, er
                   {categories.map((category) => (
                     <option key={category.id} value={category.slug}>
                       {category.title}
+                      {category.isHidden ? " (privé)" : ""}
                     </option>
                   ))}
                 </select>
@@ -505,11 +540,14 @@ export function AdminAppointmentForm({ categories, registeredClients, action, er
             <div className="border-t border-slate-200 bg-slate-50 p-4">
               <button
                 type="submit"
-                disabled={!selectedSlot}
+                disabled={!selectedSlot || isSaving}
                 className="flex w-full items-center justify-center rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-all hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(48,128,238,0.25)]"
               >
-                Créer le rendez-vous
+                {isSaving ? "Création…" : "Créer le rendez-vous"}
               </button>
+              {!selectedSlot ? (
+                <p className="mt-2 text-center text-xs text-slate-500">Choisissez une date puis un horaire.</p>
+              ) : null}
             </div>
           </section>
         </div>

@@ -29,7 +29,9 @@ export default async function AppointmentDetailPage({
     <div className="mx-auto max-w-7xl space-y-6 pb-12">
       {moved === "1" && (
         <div className="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-          Le rendez-vous a été déplacé et le client a été prévenu par email.
+          {appointment.email
+            ? "Le rendez-vous a été déplacé et le client a été prévenu par email."
+            : "Le rendez-vous a été déplacé. Aucun email n'est renseigné : le client n'a pas été prévenu."}
         </div>
       )}
 
@@ -97,7 +99,7 @@ export default async function AppointmentDetailPage({
                 </div>
                 <div>
                   <p className="text-xs text-slate-500">Email</p>
-                  <p className="mt-1 text-sm font-medium text-slate-900">{appointment.email}</p>
+                  <p className="mt-1 text-sm font-medium text-slate-900">{appointment.email || "Non renseigné"}</p>
                 </div>
                 <div>
                   <p className="text-xs text-slate-500">Téléphone</p>
@@ -239,12 +241,16 @@ export default async function AppointmentDetailPage({
                     className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   />
                 </label>
-                <p className="text-xs text-slate-500">Heure de Paris. Le client reçoit un email avec l&apos;ancien et le nouveau créneau.</p>
+                <p className="text-xs text-slate-500">
+                  {appointment.email
+                    ? "Heure de Paris. Le client reçoit un email avec l'ancien et le nouveau créneau."
+                    : "Heure de Paris. Aucun email n'est renseigné : pensez à prévenir le client vous-même."}
+                </p>
                 <button
                   type="submit"
                   className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
                 >
-                  Déplacer et prévenir le client
+                  {appointment.email ? "Déplacer et prévenir le client" : "Déplacer le rendez-vous"}
                 </button>
               </form>
             </section>

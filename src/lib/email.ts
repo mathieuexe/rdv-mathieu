@@ -53,7 +53,7 @@ interface TransactionalEmailPayload {
 interface TransactionalEmailResult {
   delivered: boolean;
   reference: string;
-  reason?: "email_not_configured" | "email_request_failed";
+  reason?: "email_not_configured" | "email_request_failed" | "no_recipient";
 }
 
 /**
@@ -170,6 +170,13 @@ export async function sendTransactionalEmail({
   buildTemplate,
 }: TransactionalEmailPayload): Promise<TransactionalEmailResult> {
   const reference = createMailReference();
+
+  // Rendez-vous saisi par l'administration pour un prospect sans email :
+  // il n'y a personne à prévenir, aucun envoi ni journal.
+  if (!to?.trim()) {
+    return { delivered: false, reference, reason: "no_recipient" };
+  }
+
   const apiKey = process.env.RESEND_API_KEY?.trim();
   const from = getResendFromValue();
   const isConfigured = Boolean(apiKey && from);

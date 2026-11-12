@@ -153,12 +153,33 @@ export const settingsSchema = z
     message: "Le message de maintenance est requis.",
   });
 
-export const adminAppointmentSchema = appointmentRequestSchema.extend({
-  categorySlug: z.string().trim().min(1, "La catégorie est requise."),
-  linkedUserId: z.string().trim().uuid("Le client sélectionné est invalide.").optional().or(z.literal("")),
-  createClientAccount: z.boolean(),
-  updateLinkedUserProfile: z.boolean(),
-});
+/**
+ * Rendez-vous créé par l'administration. Seuls le nom et le prénom sont
+ * obligatoires : un prospect peut être inscrit à l'agenda sans compte, sans
+ * email (il ne reçoit alors aucune notification) et sans téléphone.
+ */
+export const adminAppointmentSchema = appointmentRequestSchema
+  .extend({
+    categorySlug: z.string().trim().min(1, "La catégorie est requise."),
+    email: z.string().trim().email("Veuillez saisir un email valide.").optional().or(z.literal("")),
+    phone: z.string().trim().min(8, "Le numéro de téléphone est incomplet.").optional().or(z.literal("")),
+    linkedUserId: z.string().trim().uuid("Le client sélectionné est invalide.").optional().or(z.literal("")),
+    createClientAccount: z.boolean(),
+    updateLinkedUserProfile: z.boolean(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.createClientAccount && !data.email) {
+      ctx.addIssue({ code: "custom", path: ["email"], message: "Un email est nécessaire pour créer un compte client." });
+    }
+
+    if (data.updateLinkedUserProfile && (!data.email || !data.phone)) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["email"],
+        message: "L'email et le téléphone sont nécessaires pour mettre à jour la fiche client.",
+      });
+    }
+  });
 
 export const accountProfileSchema = z.object({
   firstName: z.string().trim().min(2, "Le prénom est requis."),

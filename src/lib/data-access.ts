@@ -1520,6 +1520,7 @@ export async function getAppointmentsDueForReminder(hoursAhead: number) {
     .from("appointments")
     .select("*")
     .eq("status", "accepte")
+    .neq("email", "")
     .gt("starts_at", now.toISOString())
     .lte("starts_at", windowEnd.toISOString())
     .order("starts_at");
