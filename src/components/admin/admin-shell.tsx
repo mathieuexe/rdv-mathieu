@@ -106,14 +106,14 @@ function Sidebar({
   onNavigate?: () => void;
 }) {
   return (
-    <div className="flex h-full flex-col bg-[#0d1424] text-slate-300">
+    <div className="flex h-full flex-col bg-[#023047] text-white/80">
       <div className="flex h-14 shrink-0 items-center gap-3 px-5">
         <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-blue-500 font-serif text-sm font-black text-white">
           M
         </span>
         <div className="min-w-0 leading-tight">
           <p className="truncate text-sm font-semibold text-white">Mathieu Cerenzia</p>
-          <p className="text-xs text-slate-400">Administration</p>
+          <p className="text-xs text-white/60">Administration</p>
         </div>
       </div>
 
@@ -121,7 +121,7 @@ function Sidebar({
         <Link
           href="/admin/rendez-vous/nouveau"
           onClick={onNavigate}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-500 px-3 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-400"
+          className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#219ebc] px-3 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#1a8ba6]"
         >
           <CalendarPlus2 className="size-4" />
           Nouveau rendez-vous
@@ -131,7 +131,7 @@ function Sidebar({
       <nav aria-label="Navigation de l'administration" className="flex-1 space-y-6 overflow-y-auto px-3 py-6">
         {navigationSections.map((section) => (
           <div key={section.title}>
-            <p className="mb-1.5 px-2.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500">{section.title}</p>
+            <p className="mb-1.5 px-2.5 text-[11px] font-semibold uppercase tracking-wider text-white/45">{section.title}</p>
             <ul className="space-y-0.5">
               {section.items.map((item) => {
                 const isActive = item.href === currentHref;
@@ -145,11 +145,10 @@ function Sidebar({
                       aria-current={isActive ? "page" : undefined}
                       className={cn(
                         "group relative flex items-center gap-3 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors",
-                        isActive ? "bg-white/10 text-white" : "text-slate-400 hover:bg-white/5 hover:text-white",
+                        isActive ? "bg-[#219ebc] text-white shadow-sm" : "text-white/75 hover:bg-white/10 hover:text-white",
                       )}
                     >
-                      {isActive ? <span className="absolute inset-y-1.5 left-0 w-0.5 rounded-full bg-blue-400" aria-hidden="true" /> : null}
-                      <Icon className={cn("size-[18px] shrink-0", isActive ? "text-blue-400" : "text-slate-500 group-hover:text-slate-300")} />
+                      <Icon className={cn("size-[18px] shrink-0", isActive ? "text-white" : "text-white/55 group-hover:text-white")} />
                       {item.label}
                     </Link>
                   </li>
@@ -163,9 +162,9 @@ function Sidebar({
       <div className="space-y-1 border-t border-white/10 p-3">
         <Link
           href="/"
-          className="flex items-center gap-3 rounded-lg px-2.5 py-2 text-sm font-medium text-slate-400 transition-colors hover:bg-white/5 hover:text-white"
+          className="flex items-center gap-3 rounded-lg px-2.5 py-2 text-sm font-medium text-white/75 transition-colors hover:bg-white/10 hover:text-white"
         >
-          <ArrowUpRight className="size-[18px] text-slate-500" />
+          <ArrowUpRight className="size-[18px] text-white/55" />
           Voir le site
         </Link>
 
@@ -174,14 +173,14 @@ function Sidebar({
             <Avatar session={session} className="size-8 shrink-0" />
             <div className="min-w-0 flex-1 leading-tight">
               <p className="truncate text-sm font-medium text-white">{session.fullName}</p>
-              <p className="truncate text-xs text-slate-500">{session.email ?? "Administrateur"}</p>
+              <p className="truncate text-xs text-white/55">{session.email ?? "Administrateur"}</p>
             </div>
             <form action={logoutAction}>
               <button
                 type="submit"
                 title="Se déconnecter"
                 aria-label="Se déconnecter"
-                className="flex size-8 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-white/10 hover:text-white"
+                className="flex size-8 items-center justify-center rounded-lg text-white/60 transition-colors hover:bg-white/10 hover:text-white"
               >
                 <LogOut className="size-4" />
               </button>
@@ -217,7 +216,7 @@ export function AdminShell({ children, session }: AdminShellProps) {
   }, [isMenuOpen]);
 
   return (
-    <div className="min-h-screen bg-[#f5f6f8]">
+    <div className="admin-theme min-h-screen bg-[#f5f6f8]">
       {/* Ordinateur : barre latérale fixe */}
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 lg:block">
         <Sidebar currentHref={currentSection.href} session={session} />
@@ -238,7 +237,7 @@ export function AdminShell({ children, session }: AdminShellProps) {
               type="button"
               onClick={() => setIsMenuOpen(false)}
               aria-label="Fermer le menu"
-              className="absolute right-3 top-3 flex size-8 items-center justify-center rounded-lg text-slate-400 hover:bg-white/10 hover:text-white"
+              className="absolute right-3 top-3 flex size-8 items-center justify-center rounded-lg text-white/60 hover:bg-white/10 hover:text-white"
             >
               <X className="size-5" />
             </button>

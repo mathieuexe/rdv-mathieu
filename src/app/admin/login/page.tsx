@@ -13,7 +13,7 @@ export default async function AdminLoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-white px-6 py-12 text-slate-900">
+    <main className="admin-theme flex min-h-screen items-center justify-center bg-white px-6 py-12 text-slate-900">
       <div className="w-full max-w-[440px]">
         <div className="mb-10 flex flex-col items-center text-center">
           <span className="flex size-12 items-center justify-center rounded-full border border-slate-200 bg-accent-soft font-serif text-lg font-black text-accent">

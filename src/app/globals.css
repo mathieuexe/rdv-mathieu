@@ -483,6 +483,27 @@
    sur ces classes : une page peut toujours les ajuster ponctuellement.
    ========================================================================= */
 
+/* Couleurs de l'administration : marine #023047 pour la navigation, bleu
+   canard #219ebc pour les boutons, la page active et tous les accents. Les
+   variables sont redéfinies sur la racine de l'administration : les utilitaires
+   « blue-* » et l'accent du site y prennent automatiquement ces teintes, sans
+   toucher au site public. */
+.admin-theme {
+  --color-accent: #219ebc;
+  --color-accent-hover: #1a8ba6;
+  --color-accent-soft: #e8f6fa;
+  --color-blue-50: #e8f6fa;
+  --color-blue-100: #d0eef5;
+  --color-blue-200: #a5dceb;
+  --color-blue-300: #6fc4db;
+  --color-blue-400: #3eb0cc;
+  --color-blue-500: #219ebc;
+  --color-blue-600: #219ebc;
+  --color-blue-700: #1a8ba6;
+  --color-blue-800: #13708a;
+  --color-blue-900: #023047;
+}
+
 @layer components {
   .adm-page {
     margin-inline: auto;
@@ -573,7 +594,7 @@
 
   .adm-input:focus {
     border-color: var(--color-accent);
-    box-shadow: 0 0 0 3px rgba(48, 128, 238, 0.15);
+    box-shadow: 0 0 0 3px rgba(33, 158, 188, 0.2);
   }
 
   .adm-input:disabled {
