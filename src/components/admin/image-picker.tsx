@@ -233,7 +233,7 @@ export function ImagePicker({
         </p>
       ) : null}
 
-      <div className="rounded-md border border-slate-200">
+      <div className="rounded-lg border border-slate-200">
         <div className="flex border-b border-slate-200 bg-slate-50 text-xs font-medium">
           {tabs.map((tab) => {
             const Icon = tab.icon;
@@ -280,7 +280,7 @@ export function ImagePicker({
                   }
                 }}
                 placeholder="https://images.unsplash.com/photo-..."
-                className="min-w-0 flex-1 rounded-md border border-slate-300 px-3 py-1.5 text-xs outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                className="min-w-0 flex-1 adm-input px-3 py-1.5 text-xs"
               />
               <button
                 type="button"
@@ -297,7 +297,7 @@ export function ImagePicker({
           {activeTab === "stock" ? (
             <div className="space-y-3">
               <div className="flex flex-wrap items-center gap-2">
-                <div className="flex rounded-md border border-slate-200 p-0.5">
+                <div className="flex rounded-lg border border-slate-200 p-0.5">
                   {(Object.keys(providerLabels) as StockProvider[]).map((item) => (
                     <button
                       key={item}
@@ -328,7 +328,7 @@ export function ImagePicker({
                       }
                     }}
                     placeholder="bureau, nature, portrait…"
-                    className="min-w-0 flex-1 rounded-md border border-slate-300 px-3 py-1.5 text-xs outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    className="min-w-0 flex-1 adm-input px-3 py-1.5 text-xs"
                   />
                   <button
                     type="button"
@@ -356,7 +356,7 @@ export function ImagePicker({
                       type="button"
                       onClick={() => void selectStockPhoto(photo)}
                       title={`${photo.description} — ${photo.authorName}`}
-                      className="group relative aspect-[4/3] overflow-hidden rounded-md border border-slate-200 bg-slate-100"
+                      className="group relative aspect-[4/3] overflow-hidden rounded-lg border border-slate-200 bg-slate-100"
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img

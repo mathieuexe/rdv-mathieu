@@ -56,11 +56,11 @@ export function GlobalBlackoutPeriodsEditor({ periods }: GlobalBlackoutPeriodsEd
   }
 
   return (
-    <div className="rounded-[22px] border border-slate-200 p-5">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+    <div className="p-5">
+      <div className="flex flex-col gap-3">
         <div>
-          <p className="text-sm font-semibold text-slate-900">Périodes d&apos;indisponibilité globales</p>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
+          <p className="adm-card-title">Périodes d&apos;indisponibilité globales</p>
+          <p className="mt-1 text-sm leading-6 text-slate-500">
             Bloquez complètement les réservations pendant une période donnée. La raison est affichée publiquement si
             vous la renseignez.
           </p>
@@ -69,7 +69,7 @@ export function GlobalBlackoutPeriodsEditor({ periods }: GlobalBlackoutPeriodsEd
         <button
           type="button"
           onClick={addItem}
-          className="inline-flex items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+          className="adm-btn adm-btn-secondary self-start"
         >
           <Plus className="size-4" />
           <span>Ajouter une période</span>
@@ -77,13 +77,13 @@ export function GlobalBlackoutPeriodsEditor({ periods }: GlobalBlackoutPeriodsEd
       </div>
 
       {items.length === 0 ? (
-        <div className="mt-5 rounded-2xl border border-dashed border-slate-300 px-4 py-8 text-center text-sm text-slate-500">
+        <div className="mt-5 rounded-xl border border-dashed border-slate-300 px-4 py-8 text-center text-sm text-slate-500">
           Aucune indisponibilité globale configurée.
         </div>
       ) : (
         <div className="mt-5 space-y-4">
           {items.map((item, index) => (
-            <div key={item.key} className="rounded-[22px] border border-slate-200 bg-slate-50/60 p-4">
+            <div key={item.key} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
               <div className="flex items-center justify-between gap-3">
                 <p className="inline-flex items-center gap-2 text-sm font-medium text-slate-900">
                   <CalendarRange className="size-4 text-slate-500" />
@@ -107,7 +107,7 @@ export function GlobalBlackoutPeriodsEditor({ periods }: GlobalBlackoutPeriodsEd
                     name="blackoutStartDate"
                     value={item.startDate}
                     onChange={(event) => updateItem(item.key, "startDate", event.target.value)}
-                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-slate-950"
+                    className="adm-input w-full"
                   />
                 </label>
 
@@ -118,7 +118,7 @@ export function GlobalBlackoutPeriodsEditor({ periods }: GlobalBlackoutPeriodsEd
                     name="blackoutStartTime"
                     value={item.startTime}
                     onChange={(event) => updateItem(item.key, "startTime", event.target.value)}
-                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-slate-950"
+                    className="adm-input w-full"
                   />
                 </label>
 
@@ -129,7 +129,7 @@ export function GlobalBlackoutPeriodsEditor({ periods }: GlobalBlackoutPeriodsEd
                     name="blackoutEndDate"
                     value={item.endDate}
                     onChange={(event) => updateItem(item.key, "endDate", event.target.value)}
-                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-slate-950"
+                    className="adm-input w-full"
                   />
                 </label>
 
@@ -140,7 +140,7 @@ export function GlobalBlackoutPeriodsEditor({ periods }: GlobalBlackoutPeriodsEd
                     name="blackoutEndTime"
                     value={item.endTime}
                     onChange={(event) => updateItem(item.key, "endTime", event.target.value)}
-                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-slate-950"
+                    className="adm-input w-full"
                   />
                 </label>
               </div>
@@ -153,7 +153,7 @@ export function GlobalBlackoutPeriodsEditor({ periods }: GlobalBlackoutPeriodsEd
                   value={item.message}
                   onChange={(event) => updateItem(item.key, "message", event.target.value)}
                   placeholder="Facultatif. Exemple : congés annuels, fermeture exceptionnelle, déplacement professionnel..."
-                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-slate-950"
+                  className="adm-input w-full"
                 />
               </label>
             </div>

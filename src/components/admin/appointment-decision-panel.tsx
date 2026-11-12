@@ -31,14 +31,14 @@ export function AppointmentDecisionPanel({ appointmentId }: AppointmentDecisionP
   }
 
   return (
-    <div className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-[0_16px_50px_rgba(15,23,42,0.04)]">
+    <div className="adm-card p-5">
       <p className="text-sm font-semibold text-slate-950">Décision administrateur</p>
       <textarea
         value={reason}
         onChange={(event) => setReason(event.target.value)}
         rows={4}
         placeholder="Motif de refus obligatoire si vous refusez la demande..."
-        className="mt-4 w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 text-slate-950 outline-none transition duration-150 placeholder:text-slate-400 focus:border-slate-950 focus:bg-white"
+        className="adm-input mt-4 w-full"
       />
 
       {feedback ? <p className="mt-4 text-sm font-medium text-slate-700">{feedback}</p> : null}

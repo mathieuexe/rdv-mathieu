@@ -18,9 +18,9 @@ export function LoginForm({ action }: LoginFormProps) {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <form action={formAction} className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+    <form action={formAction} className="adm-card p-6 sm:p-8">
       <div className="space-y-4">
-        <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+        <label className="block space-y-1.5 adm-label">
           <span>Email</span>
           <div className="relative">
             <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -31,13 +31,13 @@ export function LoginForm({ action }: LoginFormProps) {
               type="email"
               required
               disabled={pending}
-              className="w-full rounded-md border border-slate-300 bg-white py-2.5 pl-9 pr-4 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500"
+              className="w-full adm-input py-2.5 pl-9 pr-4 text-sm"
               placeholder="admin@exemple.com"
             />
           </div>
         </label>
 
-        <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+        <label className="block space-y-1.5 adm-label">
           <span>Mot de passe</span>
           <div className="relative">
             <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -48,7 +48,7 @@ export function LoginForm({ action }: LoginFormProps) {
               type={showPassword ? "text" : "password"}
               required
               disabled={pending}
-              className="w-full rounded-md border border-slate-300 bg-white py-2.5 pl-9 pr-10 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500"
+              className="w-full adm-input py-2.5 pl-9 pr-10 text-sm"
               placeholder="••••••••"
             />
             <button
@@ -71,7 +71,7 @@ export function LoginForm({ action }: LoginFormProps) {
       <button
         type="submit"
         disabled={pending}
-        className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(48,128,238,0.25)]"
+        className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 shadow-sm px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {pending ? <LoaderCircle className="size-4 animate-spin" /> : null}
         <span>{pending ? "Connexion en cours..." : "Se connecter"}</span>

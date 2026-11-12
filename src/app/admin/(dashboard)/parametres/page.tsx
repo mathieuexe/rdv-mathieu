@@ -18,10 +18,10 @@ export default async function SettingsPage({
   const isCurrentIpAlreadyAllowed = currentIp ? settings.maintenanceAllowedIps.includes(currentIp) : false;
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 pb-12">
-      <section className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="adm-page">
+      <section className="adm-page-header">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Paramètres globaux</h1>
+          <h1 className="adm-page-title">Paramètres globaux</h1>
           <p className="mt-1 text-sm text-slate-500">
             Maintenance, widget, indisponibilités et sécurité d'accès.
           </p>
@@ -29,12 +29,12 @@ export default async function SettingsPage({
       </section>
 
       {saved ? (
-        <div className="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
           Configuration enregistrée avec succès.
         </div>
       ) : null}
       {error ? (
-        <div className="rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
+        <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
           {decodedError}
         </div>
       ) : null}
@@ -43,13 +43,13 @@ export default async function SettingsPage({
         <div className="space-y-6 lg:col-span-2">
           
           {/* General Config Card */}
-          <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
-            <div className="flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3">
-              <Settings className="size-4 text-slate-600" />
-              <h2 className="font-semibold text-slate-800">Configuration du site</h2>
+          <section className="adm-card">
+            <div className="adm-card-header">
+              <Settings className="adm-card-icon" />
+              <h2 className="adm-card-title">Configuration du site</h2>
             </div>
             <div className="space-y-6 p-4 md:p-6">
-              <div className="flex flex-col gap-4 rounded-md border border-slate-200 bg-slate-50 p-4">
+              <div className="flex flex-col gap-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
                 <label className="flex items-center gap-3 text-sm font-medium text-slate-900">
                   <input type="checkbox" name="maintenanceMode" defaultChecked={settings.maintenanceMode} className="size-4 rounded border-slate-300" />
                   <span>Activer le mode maintenance global</span>
@@ -64,29 +64,29 @@ export default async function SettingsPage({
                 </label>
               </div>
 
-              <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+              <label className="block space-y-1.5 adm-label">
                 <span>Message de maintenance</span>
                 <textarea
                   name="maintenanceMessage"
                   rows={4}
                   defaultValue={settings.maintenanceMessage}
-                  className="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  className="w-full adm-input px-3 py-2"
                 />
               </label>
 
-              <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+              <label className="block space-y-1.5 adm-label">
                 <span>Adresses IP autorisées (Bypass maintenance)</span>
                 <textarea
                   name="maintenanceAllowedIps"
                   rows={4}
                   defaultValue={settings.maintenanceAllowedIps.join("\n")}
                   placeholder={"82.66.10.25\n2001:db8::1"}
-                  className="w-full rounded-md border border-slate-300 px-3 py-2 font-mono text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  className="w-full adm-input px-3 py-2 font-mono text-sm"
                 />
                 <span className="block text-xs text-slate-500">Une IP par ligne.</span>
               </label>
 
-              <div className="rounded-md border border-blue-100 bg-blue-50 p-4 text-sm">
+              <div className="rounded-lg border border-blue-100 bg-blue-50 p-4 text-sm">
                 <p className="font-medium text-blue-900">Mon IP actuelle : <span className="font-mono">{currentIp ?? "Non détectée"}</span></p>
                 <label className="mt-3 flex items-center gap-2 text-sm font-medium text-blue-900">
                   <input type="checkbox" name="allowCurrentIp" defaultChecked={isCurrentIpAlreadyAllowed} className="size-4 rounded border-blue-300" />
@@ -97,26 +97,26 @@ export default async function SettingsPage({
           </section>
 
           {/* Booking Blocking Card */}
-          <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
+          <section className="adm-card">
             <div className="flex items-center gap-2 border-b border-slate-200 bg-rose-50 px-4 py-3">
               <h2 className="font-semibold text-rose-800">Blocage des rendez-vous</h2>
             </div>
             <div className="space-y-6 p-4 md:p-6">
-              <div className="flex flex-col gap-4 rounded-md border border-slate-200 bg-slate-50 p-4">
+              <div className="flex flex-col gap-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
                 <label className="flex items-center gap-3 text-sm font-medium text-slate-900">
                   <input type="checkbox" name="bookingBlocked" defaultChecked={settings.bookingBlocked} className="size-4 rounded border-slate-300" />
                   <span>Bloquer totalement la prise de rendez-vous</span>
                 </label>
               </div>
 
-              <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+              <label className="block space-y-1.5 adm-label">
                 <span>Motif du blocage (affiché publiquement)</span>
                 <textarea
                   name="bookingBlockedMessage"
                   rows={3}
                   defaultValue={settings.bookingBlockedMessage || ""}
                   placeholder="Ex: Les prises de rendez-vous sont actuellement suspendues pour l'été."
-                  className="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500"
+                  className="w-full adm-input px-3 py-2"
                 />
               </label>
             </div>
@@ -124,14 +124,14 @@ export default async function SettingsPage({
         </div>
 
         <div className="space-y-6">
-          <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
+          <section className="adm-card">
             <GlobalBlackoutPeriodsEditor periods={settings.globalBlackoutPeriods} />
           </section>
           
           <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
             <button
               type="submit"
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-all hover:bg-blue-700 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(48,128,238,0.25)]"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 shadow-sm px-4 py-2.5 text-sm font-medium text-white transition-all hover:bg-blue-700"
             >
               <Save className="size-4" />
               Enregistrer les modifications

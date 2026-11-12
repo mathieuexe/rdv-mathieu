@@ -11,10 +11,10 @@ export default async function CategoriesPage() {
   const categories = await getCategories();
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 pb-12">
-      <section className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="adm-page">
+      <section className="adm-page-header">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Catégories de rendez-vous</h1>
+          <h1 className="adm-page-title">Catégories de rendez-vous</h1>
           <p className="mt-1 text-sm text-slate-500">
             Gérez vos types de rendez-vous, leurs durées et disponibilités.
           </p>
@@ -22,7 +22,7 @@ export default async function CategoriesPage() {
 
         <Link
           href="/admin/categories/nouvelle"
-          className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-all hover:bg-blue-700 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(48,128,238,0.25)]"
+          className="inline-flex items-center gap-2 rounded-lg bg-blue-600 shadow-sm px-4 py-2.5 text-sm font-medium text-white transition-all hover:bg-blue-700"
         >
           <Plus className="size-4" />
           <span>Nouvelle catégorie</span>
@@ -38,7 +38,7 @@ export default async function CategoriesPage() {
           categories.map((category) => (
             <article
               key={category.id}
-              className="flex flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition-colors hover:border-slate-300"
+              className="flex flex-col overflow-hidden adm-card transition-colors hover:border-slate-300"
             >
               {category.bannerImageUrl ? (
                 <div className="relative aspect-[8/3] w-full overflow-hidden border-b border-slate-200 bg-slate-100">
@@ -50,11 +50,11 @@ export default async function CategoriesPage() {
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-4">
                     {category.thumbnailImageUrl ? (
-                      <div className="relative flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-md border border-slate-200 bg-slate-100">
+                      <div className="relative flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
                         <Image src={category.thumbnailImageUrl} alt="" fill sizes="48px" className="object-cover" />
                       </div>
                     ) : (
-                      <div className="flex size-12 shrink-0 items-center justify-center rounded-md border border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                      <div className="flex size-12 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wider text-slate-400">
                         RDV
                       </div>
                     )}
@@ -83,14 +83,14 @@ export default async function CategoriesPage() {
                 </div>
 
                 <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
-                  <div className="rounded-md border border-slate-100 bg-slate-50 p-3">
+                  <div className="rounded-lg border border-slate-100 bg-slate-50 p-3">
                     <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
                       <TimerReset className="size-3.5" />
                       <span>Durée</span>
                     </div>
                     <p className="mt-1 text-sm font-semibold text-slate-900">{category.durationMinutes} min</p>
                   </div>
-                  <div className="rounded-md border border-slate-100 bg-slate-50 p-3">
+                  <div className="rounded-lg border border-slate-100 bg-slate-50 p-3">
                     <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
                       <MapPin className="size-3.5" />
                       <span>Mode</span>
@@ -99,7 +99,7 @@ export default async function CategoriesPage() {
                       {formatAppointmentMode(category.appointmentMode)}
                     </p>
                   </div>
-                  <div className="col-span-2 rounded-md border border-slate-100 bg-slate-50 p-3 sm:col-span-1">
+                  <div className="col-span-2 rounded-lg border border-slate-100 bg-slate-50 p-3 sm:col-span-1">
                     <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
                       <CalendarRange className="size-3.5" />
                       <span>Indispos.</span>
@@ -111,7 +111,7 @@ export default async function CategoriesPage() {
                 <div className="mt-auto pt-6 flex items-center gap-2">
                   <Link 
                     href={`/admin/categories/${category.slug}`} 
-                    className="flex flex-1 items-center justify-center gap-2 rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 hover:text-slate-900"
+                    className="flex flex-1 items-center justify-center gap-2 adm-card px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 hover:text-slate-900"
                   >
                     <Settings className="size-4" />
                     Modifier la catégorie

@@ -30,7 +30,7 @@ export function AdminUsersTable({ users }: AdminUsersTableProps) {
     <div className="flex flex-col">
       <div className="flex flex-col gap-4 border-b border-slate-200 bg-slate-50 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
         <label className="block w-full max-w-md">
-          <div className="flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 shadow-sm focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500">
+          <div className="flex items-center gap-2 adm-card px-3 py-2 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500">
             <Search className="size-4 text-slate-400" />
             <input
               value={query}

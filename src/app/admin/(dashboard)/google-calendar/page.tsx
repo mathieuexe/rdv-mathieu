@@ -88,8 +88,8 @@ export default async function GoogleCalendarPage({
   });
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 pb-12">
-      <section className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="adm-page">
+      <section className="adm-page-header">
         <div>
           <h1 className="flex items-center gap-2 text-2xl font-bold text-slate-900">
             <GoogleCalendarIcon className="size-6" />
@@ -103,38 +103,38 @@ export default async function GoogleCalendarPage({
       </section>
 
       {connected ? (
-        <div className="flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+        <div className="flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
           <CheckCircle2 className="size-4" />
           Compte Google connecté et agenda synchronisé.
         </div>
       ) : null}
       {disconnected ? (
-        <div className="rounded-md border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700">
+        <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700">
           Compte Google déconnecté. Les indisponibilités importées ont été supprimées.
         </div>
       ) : null}
       {saved ? (
-        <div className="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
           Préférences de synchronisation enregistrées.
         </div>
       ) : null}
       {updated ? (
-        <div className="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
           Indisponibilité modifiée. La retouche sera conservée lors des prochaines synchronisations.
         </div>
       ) : null}
       {restored ? (
-        <div className="rounded-md border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700">
+        <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700">
           Valeurs d&apos;origine Google rétablies.
         </div>
       ) : null}
       {synced ? (
-        <div className="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
           Synchronisation terminée : {synced} évènement(s) personnel(s) importé(s).
         </div>
       ) : null}
       {error ? (
-        <div className="flex items-start gap-2 rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
+        <div className="flex items-start gap-2 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
           <AlertTriangle className="mt-0.5 size-4 shrink-0" />
           <span>{decodeURIComponent(error)}</span>
         </div>
@@ -155,21 +155,21 @@ export default async function GoogleCalendarPage({
         </section>
       ) : null}
 
-      <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
-        <div className="flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3">
-          <CalendarSync className="size-4 text-slate-600" />
-          <h2 className="font-semibold text-slate-800">Compte connecté</h2>
+      <section className="adm-card">
+        <div className="adm-card-header">
+          <CalendarSync className="adm-card-icon" />
+          <h2 className="adm-card-title">Compte connecté</h2>
         </div>
 
         <div className="space-y-5 p-4 md:p-6">
           {account ? (
             <>
               <div className="grid gap-4 sm:grid-cols-3">
-                <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
+                <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
                   <p className="text-xs uppercase tracking-[0.14em] text-slate-400">Compte Google</p>
                   <p className="mt-1 text-sm font-medium text-slate-900">{account.googleEmail || "Compte Google"}</p>
                 </div>
-                <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
+                <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
                   <p className="text-xs uppercase tracking-[0.14em] text-slate-400">Dernière synchronisation</p>
                   <p className="mt-1 text-sm font-medium text-slate-900">
                     {account.lastSyncedAt
@@ -177,28 +177,28 @@ export default async function GoogleCalendarPage({
                       : "Jamais"}
                   </p>
                 </div>
-                <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
+                <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
                   <p className="text-xs uppercase tracking-[0.14em] text-slate-400">Indisponibilités importées</p>
                   <p className="mt-1 text-sm font-medium text-slate-900">{upcomingEvents.length} à venir</p>
                 </div>
               </div>
 
               {account.lastSyncError ? (
-                <div className="flex items-start gap-2 rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                <div className="flex items-start gap-2 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
                   <AlertTriangle className="mt-0.5 size-4 shrink-0" />
                   <span>Dernière erreur : {account.lastSyncError}</span>
                 </div>
               ) : null}
 
               {!account.hasRefreshToken ? (
-                <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
                   Aucun jeton de rafraîchissement enregistré : reconnectez le compte pour que la synchronisation
                   automatique continue de fonctionner.
                 </div>
               ) : null}
 
               <form action={saveGoogleCalendarPreferencesAction} className="space-y-4">
-                <div className="rounded-md border border-slate-200 p-4">
+                <div className="rounded-lg border border-slate-200 p-4">
                   <p className="text-sm font-semibold text-slate-800">Agendas synchronisés</p>
                   <p className="mt-1 text-xs text-slate-500">
                     Seuls les évènements « occupé » sont importés. Les évènements marqués « disponible » et les
@@ -244,7 +244,7 @@ export default async function GoogleCalendarPage({
                   </div>
                 </div>
 
-                <label className="flex items-center gap-3 rounded-md border border-slate-200 bg-slate-50 p-4 text-sm font-medium text-slate-900">
+                <label className="flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm font-medium text-slate-900">
                   <input
                     type="checkbox"
                     name="syncEnabled"
@@ -349,11 +349,11 @@ export default async function GoogleCalendarPage({
         </section>
       ) : null}
 
-      <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
+      <section className="adm-card">
         <div className="flex items-center justify-between gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3">
           <div className="flex items-center gap-2">
             <GoogleCalendarIcon className="size-4" />
-            <h2 className="font-semibold text-slate-800">Indisponibilités importées</h2>
+            <h2 className="adm-card-title">Indisponibilités importées</h2>
           </div>
           <GoogleCalendarBadge />
         </div>

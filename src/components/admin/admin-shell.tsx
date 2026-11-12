@@ -1,22 +1,28 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   ArrowUpRight,
   BarChart3,
-  KanbanSquare,
   CalendarPlus2,
   CalendarRange,
   CalendarSync,
+  ChevronRight,
   Clock3,
+  KanbanSquare,
   LayoutDashboard,
-  Search,
+  LogOut,
+  Menu,
+  MailSearch,
   Settings2,
   Shapes,
   Users,
+  X,
 } from "lucide-react";
 
+import { logoutAction } from "@/app/admin/login/actions";
 import { AdminNotifications } from "@/components/admin/admin-notifications";
 import { cn } from "@/lib/utils";
 
@@ -46,11 +52,13 @@ const navigationSections = [
     items: [
       { href: "/admin/categories", label: "Catégories", icon: Shapes },
       { href: "/admin/utilisateurs", label: "Utilisateurs", icon: Users },
-      { href: "/admin/checker-ref-mail", label: "Suivi emails", icon: Search },
+      { href: "/admin/checker-ref-mail", label: "Suivi emails", icon: MailSearch },
       { href: "/admin/parametres", label: "Paramètres", icon: Settings2 },
     ],
   },
 ];
+
+const allItems = navigationSections.flatMap((section) => section.items.map((item) => ({ ...item, section: section.title })));
 
 /**
  * Entrée de menu correspondant à la page affichée. On retient l'adresse la plus
@@ -58,10 +66,9 @@ const navigationSections = [
  * pages de l'administration.
  */
 function getCurrentSection(pathname: string) {
-  const items = navigationSections.flatMap((section) => section.items);
-  const matches = items.filter((item) => pathname === item.href || pathname.startsWith(`${item.href}/`));
+  const matches = allItems.filter((item) => pathname === item.href || pathname.startsWith(`${item.href}/`));
 
-  return matches.sort((a, b) => b.href.length - a.href.length)[0] ?? items[0];
+  return matches.sort((a, b) => b.href.length - a.href.length)[0] ?? allItems[0];
 }
 
 interface AdminShellProps {
@@ -75,143 +82,200 @@ interface AdminShellProps {
   };
 }
 
-export function AdminShell({ children, session }: AdminShellProps) {
-  const currentPath = usePathname();
-  const currentSection = getCurrentSection(currentPath);
+function Avatar({ session, className }: { session: NonNullable<AdminShellProps["session"]>; className?: string }) {
+  const initials = `${session.firstName?.charAt(0) ?? ""}${session.lastName?.charAt(0) ?? ""}` || "A";
 
+  return session.avatarUrl ? (
+    // eslint-disable-next-line @next/next/no-img-element -- avatar distant de petite taille, sans intérêt à optimiser
+    <img src={session.avatarUrl} alt="" className={cn("rounded-full object-cover", className)} />
+  ) : (
+    <span className={cn("flex items-center justify-center rounded-full bg-blue-500 text-xs font-semibold text-white", className)}>
+      {initials}
+    </span>
+  );
+}
+
+/** Barre latérale sombre : navigation, raccourci de création et compte. */
+function Sidebar({
+  currentHref,
+  session,
+  onNavigate,
+}: {
+  currentHref: string;
+  session?: AdminShellProps["session"];
+  onNavigate?: () => void;
+}) {
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      {/* Sidebar CRM Style */}
-      <aside className="fixed inset-y-0 left-0 z-10 hidden w-64 flex-col border-r border-slate-200 bg-white lg:flex">
-        <div className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 px-6">
-          <div className="flex items-center gap-2.5">
-            <span className="flex size-7 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-accent-soft font-serif text-xs font-black text-accent">
-              M
-            </span>
-            <span className="text-[12px] font-medium uppercase tracking-[0.1em] text-slate-900">Administration</span>
-          </div>
-          <Link
-            href="/"
-            className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-accent-soft hover:text-accent"
-            title="Voir le site public"
-          >
-            <ArrowUpRight className="size-4" />
-          </Link>
+    <div className="flex h-full flex-col bg-[#0d1424] text-slate-300">
+      <div className="flex h-14 shrink-0 items-center gap-3 px-5">
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-blue-500 font-serif text-sm font-black text-white">
+          M
+        </span>
+        <div className="min-w-0 leading-tight">
+          <p className="truncate text-sm font-semibold text-white">Mathieu Cerenzia</p>
+          <p className="text-xs text-slate-400">Administration</p>
         </div>
+      </div>
 
-        <div className="flex-1 overflow-y-auto px-4 py-6">
-          <Link
-            href="/admin/rendez-vous/nouveau"
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-blue-700 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(48,128,238,0.25)]"
-          >
-            <CalendarPlus2 className="size-4" />
-            <span>Nouveau RDV</span>
-          </Link>
-
-          <div className="mt-8 space-y-8">
-            {navigationSections.map((section) => (
-              <div key={section.title}>
-                <p className="da-eyebrow mb-3 text-[11px]">{section.title}</p>
-                <nav className="space-y-1">
-                  {section.items.map((item) => {
-                    const isActive = item.href === currentSection.href;
-                    const Icon = item.icon;
-
-                    return (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        className={cn(
-                          "flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors",
-                          isActive
-                            ? "bg-accent-soft text-accent"
-                            : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
-                        )}
-                      >
-                        <Icon className={cn("size-4", isActive ? "text-accent" : "text-slate-400")} />
-                        {item.label}
-                      </Link>
-                    );
-                  })}
-                </nav>
-              </div>
-            ))}
-          </div>
-        </div>
-      </aside>
-
-      {/* Main Content Area */}
-      <div className="flex min-w-0 flex-1 flex-col lg:pl-64">
-        {/* Top Header CRM Style */}
-        <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-2 text-sm font-medium text-slate-900">
-            <span className="text-slate-500">App /</span> {currentSection.label}
-          </div>
-          
-          <div className="flex items-center gap-4">
-            <AdminNotifications />
-            
-            {/* Mobile menu link if needed - hidden on desktop */}
-            <Link
-               href="/"
-               className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:border-accent hover:text-accent lg:hidden"
-             >
-               Site
-               <ArrowUpRight className="size-3" />
-            </Link>
-
-            {session && (
-              <div className="flex items-center gap-3 border-l border-slate-200 pl-4">
-                <div className="hidden text-right sm:block">
-                  <p className="text-sm font-medium text-slate-900">{session.fullName}</p>
-                  <p className="text-xs text-slate-500">Administrateur</p>
-                </div>
-                {session.avatarUrl ? (
-                  <img src={session.avatarUrl} alt={session.fullName || "Avatar"} className="size-8 rounded-full border border-slate-200 object-cover" />
-                ) : (
-                  <div className="flex size-8 items-center justify-center rounded-full border border-slate-200 bg-accent-soft text-sm font-medium text-accent">
-                    {session.firstName?.charAt(0)}{session.lastName?.charAt(0)}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </header>
-
-        {/* Navigation sur téléphone et tablette, où la barre latérale est masquée. */}
-        <nav
-          aria-label="Navigation de l'administration"
-          className="sticky top-16 z-10 overflow-x-auto border-b border-slate-200 bg-white lg:hidden"
+      <div className="px-3 pt-3">
+        <Link
+          href="/admin/rendez-vous/nouveau"
+          onClick={onNavigate}
+          className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-500 px-3 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-400"
         >
-          <div className="flex min-w-max gap-1 px-3 py-2">
-            {navigationSections
-              .flatMap((section) => section.items)
-              .map((item) => {
-                const isActive = item.href === currentSection.href;
+          <CalendarPlus2 className="size-4" />
+          Nouveau rendez-vous
+        </Link>
+      </div>
+
+      <nav aria-label="Navigation de l'administration" className="flex-1 space-y-6 overflow-y-auto px-3 py-6">
+        {navigationSections.map((section) => (
+          <div key={section.title}>
+            <p className="mb-1.5 px-2.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500">{section.title}</p>
+            <ul className="space-y-0.5">
+              {section.items.map((item) => {
+                const isActive = item.href === currentHref;
                 const Icon = item.icon;
 
                 return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    aria-current={isActive ? "page" : undefined}
-                    className={cn(
-                      "inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                      isActive ? "bg-accent-soft text-accent" : "text-slate-600 hover:bg-slate-50",
-                    )}
-                  >
-                    <Icon className={cn("size-4", isActive ? "text-accent" : "text-slate-400")} />
-                    {item.label}
-                  </Link>
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      onClick={onNavigate}
+                      aria-current={isActive ? "page" : undefined}
+                      className={cn(
+                        "group relative flex items-center gap-3 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors",
+                        isActive ? "bg-white/10 text-white" : "text-slate-400 hover:bg-white/5 hover:text-white",
+                      )}
+                    >
+                      {isActive ? <span className="absolute inset-y-1.5 left-0 w-0.5 rounded-full bg-blue-400" aria-hidden="true" /> : null}
+                      <Icon className={cn("size-[18px] shrink-0", isActive ? "text-blue-400" : "text-slate-500 group-hover:text-slate-300")} />
+                      {item.label}
+                    </Link>
+                  </li>
                 );
               })}
+            </ul>
           </div>
-        </nav>
+        ))}
+      </nav>
 
-        {/* Page Content */}
-        <main className="min-w-0 flex-1 p-4 sm:p-6 lg:p-8">
-          {children}
-        </main>
+      <div className="space-y-1 border-t border-white/10 p-3">
+        <Link
+          href="/"
+          className="flex items-center gap-3 rounded-lg px-2.5 py-2 text-sm font-medium text-slate-400 transition-colors hover:bg-white/5 hover:text-white"
+        >
+          <ArrowUpRight className="size-[18px] text-slate-500" />
+          Voir le site
+        </Link>
+
+        {session ? (
+          <div className="flex items-center gap-3 rounded-lg px-2.5 py-2">
+            <Avatar session={session} className="size-8 shrink-0" />
+            <div className="min-w-0 flex-1 leading-tight">
+              <p className="truncate text-sm font-medium text-white">{session.fullName}</p>
+              <p className="truncate text-xs text-slate-500">{session.email ?? "Administrateur"}</p>
+            </div>
+            <form action={logoutAction}>
+              <button
+                type="submit"
+                title="Se déconnecter"
+                aria-label="Se déconnecter"
+                className="flex size-8 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-white/10 hover:text-white"
+              >
+                <LogOut className="size-4" />
+              </button>
+            </form>
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+export function AdminShell({ children, session }: AdminShellProps) {
+  const currentPath = usePathname();
+  const currentSection = getCurrentSection(currentPath);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // Le menu mobile se referme avec Échap et bloque le défilement de la page tant qu'il est ouvert.
+  useEffect(() => {
+    if (!isMenuOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setIsMenuOpen(false);
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isMenuOpen]);
+
+  return (
+    <div className="min-h-screen bg-[#f5f6f8]">
+      {/* Ordinateur : barre latérale fixe */}
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 lg:block">
+        <Sidebar currentHref={currentSection.href} session={session} />
+      </aside>
+
+      {/* Téléphone et tablette : la même barre, en tiroir */}
+      {isMenuOpen ? (
+        <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="Menu de l'administration">
+          <button
+            type="button"
+            aria-label="Fermer le menu"
+            onClick={() => setIsMenuOpen(false)}
+            className="absolute inset-0 bg-slate-950/50"
+          />
+          <div className="absolute inset-y-0 left-0 w-72 max-w-[85vw] shadow-2xl">
+            <Sidebar currentHref={currentSection.href} session={session} onNavigate={() => setIsMenuOpen(false)} />
+            <button
+              type="button"
+              onClick={() => setIsMenuOpen(false)}
+              aria-label="Fermer le menu"
+              className="absolute right-3 top-3 flex size-8 items-center justify-center rounded-lg text-slate-400 hover:bg-white/10 hover:text-white"
+            >
+              <X className="size-5" />
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      <div className="flex min-h-screen min-w-0 flex-col lg:pl-60">
+        <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center justify-between gap-4 border-b border-slate-200/80 bg-white/85 px-4 backdrop-blur-md sm:px-6 lg:px-8">
+          <div className="flex min-w-0 items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setIsMenuOpen(true)}
+              aria-label="Ouvrir le menu"
+              className="-ml-1.5 flex size-9 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 lg:hidden"
+            >
+              <Menu className="size-5" />
+            </button>
+
+            <nav aria-label="Fil d'Ariane" className="flex min-w-0 items-center gap-1.5 text-sm">
+              <span className="hidden text-slate-500 sm:inline">{currentSection.section}</span>
+              <ChevronRight className="hidden size-3.5 shrink-0 text-slate-300 sm:block" />
+              <span className="truncate font-medium text-slate-900">{currentSection.label}</span>
+            </nav>
+          </div>
+
+          <div className="flex shrink-0 items-center gap-1.5">
+            <AdminNotifications />
+            {session ? (
+              <div className="ml-1.5 border-l border-slate-200 pl-3 lg:hidden">
+                <Avatar session={session} className="size-8" />
+              </div>
+            ) : null}
+          </div>
+        </header>
+
+        <main className="min-w-0 flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
       </div>
     </div>
   );

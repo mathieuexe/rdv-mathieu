@@ -70,35 +70,35 @@ export function AdminUserEmailDialog({ userEmail, userFirstName, action }: Admin
               <input type="hidden" name="firstName" value={userFirstName} />
 
               {error && (
-                <div className="mb-4 rounded-md border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">
+                <div className="mb-4 rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">
                   {error}
                 </div>
               )}
               {success && (
-                <div className="mb-4 rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
+                <div className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
                   {success}
                 </div>
               )}
 
               <div className="space-y-4">
-                <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+                <label className="block space-y-1.5 adm-label">
                   <span>Sujet</span>
                   <input
                     name="subject"
                     required
                     placeholder="Sujet de l'email"
-                    className="w-full rounded-md border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    className="w-full adm-input px-3 py-2"
                   />
                 </label>
 
-                <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+                <label className="block space-y-1.5 adm-label">
                   <span>Message</span>
                   <textarea
                     name="message"
                     required
                     rows={8}
                     placeholder="Tapez votre message ici..."
-                    className="w-full rounded-md border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 whitespace-pre-wrap"
+                    className="w-full adm-input px-3 py-2 whitespace-pre-wrap"
                   />
                 </label>
               </div>
@@ -114,7 +114,7 @@ export function AdminUserEmailDialog({ userEmail, userFirstName, action }: Admin
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-blue-700 disabled:opacity-50 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(48,128,238,0.25)]"
+                  className="inline-flex items-center justify-center rounded-lg bg-blue-600 shadow-sm px-4 py-2 text-sm font-medium text-white transition-all hover:bg-blue-700 disabled:opacity-50"
                 >
                   {isPending ? "Envoi en cours..." : "Envoyer"}
                 </button>

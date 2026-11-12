@@ -2,9 +2,10 @@ import { notFound } from "next/navigation";
 import { Calendar, CalendarClock, Mail, FileText, User, Tag, Clock, CheckCircle2, AlertCircle } from "lucide-react";
 
 import { AppointmentDecisionPanel } from "@/components/admin/appointment-decision-panel";
+import { StatusBadge } from "@/components/admin/status-badge";
 import { formatSiren } from "@/lib/company";
 import { getAppointmentById, getCategoryById } from "@/lib/data-access";
-import { formatAppointmentMode, formatAppointmentStatus, formatDateTimeFr, formatPhone, toParisInputValues } from "@/lib/utils";
+import { formatAppointmentMode, formatDateTimeFr, formatPhone, toParisInputValues } from "@/lib/utils";
 
 import { rescheduleAppointmentAction } from "../../actions";
 
@@ -27,9 +28,9 @@ export default async function AppointmentDetailPage({
   const currentSlot = toParisInputValues(appointment.startsAt);
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 pb-12">
+    <div className="adm-page">
       {moved === "1" && (
-        <div className="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
           {appointment.email
             ? "Le rendez-vous a été déplacé et le client a été prévenu par email."
             : "Le rendez-vous a été déplacé. Aucun email n'est renseigné : le client n'a pas été prévenu."}
@@ -37,20 +38,20 @@ export default async function AppointmentDetailPage({
       )}
 
       {error && (
-        <div role="alert" className="rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+        <div role="alert" className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
           {error}
         </div>
       )}
 
       {/* Highlights Panel */}
-      <section className="flex flex-col gap-6 rounded-lg border border-slate-200 bg-white p-4 shadow-sm md:flex-row md:items-center md:justify-between">
+      <section className="flex flex-col gap-6 adm-card p-4 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-4">
-          <div className="flex size-14 shrink-0 items-center justify-center rounded-md bg-indigo-600 text-white">
+          <div className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 ring-1 ring-inset ring-blue-600/10">
             <Calendar className="size-8" />
           </div>
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Demande de Rendez-vous</p>
-            <h1 className="text-2xl font-bold text-slate-900">
+            <h1 className="adm-page-title">
               {appointment.firstName} {appointment.lastName}
             </h1>
           </div>
@@ -59,7 +60,7 @@ export default async function AppointmentDetailPage({
         <div className="flex flex-wrap gap-6 md:gap-12">
           <div>
             <p className="text-xs text-slate-500">Statut</p>
-            <p className="text-sm font-medium text-slate-900">{formatAppointmentStatus(appointment.status)}</p>
+            <StatusBadge status={appointment.status} className="mt-0.5" />
           </div>
           <div>
             <p className="text-xs text-slate-500">Date et heure</p>
@@ -85,10 +86,10 @@ export default async function AppointmentDetailPage({
         {/* Left Column: Details */}
         <div className="space-y-6 lg:col-span-2">
           {/* Contact & Info Card */}
-          <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
-            <div className="flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3">
-              <User className="size-4 text-slate-600" />
-              <h2 className="font-semibold text-slate-800">Informations Client</h2>
+          <section className="adm-card">
+            <div className="adm-card-header">
+              <User className="adm-card-icon" />
+              <h2 className="adm-card-title">Informations Client</h2>
             </div>
             <div className="p-4 md:p-6">
               <div className="grid gap-6 sm:grid-cols-2">
@@ -126,10 +127,10 @@ export default async function AppointmentDetailPage({
           </section>
 
           {/* Appointment Details Card */}
-          <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
-            <div className="flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3">
-              <Tag className="size-4 text-slate-600" />
-              <h2 className="font-semibold text-slate-800">Détails du Rendez-vous</h2>
+          <section className="adm-card">
+            <div className="adm-card-header">
+              <Tag className="adm-card-icon" />
+              <h2 className="adm-card-title">Détails du Rendez-vous</h2>
             </div>
             <div className="p-4 md:p-6">
               <div className="grid gap-6 sm:grid-cols-2">
@@ -153,7 +154,7 @@ export default async function AppointmentDetailPage({
                 {category?.customFields && Object.keys(appointment.customFieldResponses || {}).length > 0 && (
                   <div className="sm:col-span-2">
                     <p className="text-xs text-slate-500 mb-2">Informations complémentaires (Champs personnalisés)</p>
-                    <div className="rounded-md border border-slate-200 bg-white">
+                    <div className="rounded-lg border border-slate-200 bg-white">
                       <dl className="divide-y divide-slate-200">
                         {category.customFields.map((field) => {
                           const response = appointment.customFieldResponses?.[field.id];
@@ -172,7 +173,7 @@ export default async function AppointmentDetailPage({
               </div>
 
               {appointment.rejectionReason && (
-                <div className="mt-6 rounded-md border border-rose-200 bg-rose-50 p-4">
+                <div className="mt-6 rounded-lg border border-rose-200 bg-rose-50 p-4">
                   <div className="flex items-center gap-2">
                     <AlertCircle className="size-4 text-rose-600" />
                     <p className="text-sm font-semibold text-rose-900">Motif de refus</p>
@@ -182,7 +183,7 @@ export default async function AppointmentDetailPage({
               )}
 
               {appointment.cancelReason && (
-                <div className="mt-6 rounded-md border border-amber-200 bg-amber-50 p-4">
+                <div className="mt-6 rounded-lg border border-amber-200 bg-amber-50 p-4">
                   <div className="flex items-center gap-2">
                     <AlertCircle className="size-4 text-amber-600" />
                     <p className="text-sm font-semibold text-amber-900">
@@ -199,10 +200,10 @@ export default async function AppointmentDetailPage({
         {/* Right Column: Actions & Notifications */}
         <div className="space-y-6">
           {appointment.origin === "utilisateur" && (
-            <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
-              <div className="flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3">
-                <CheckCircle2 className="size-4 text-slate-600" />
-                <h2 className="font-semibold text-slate-800">Décision</h2>
+            <section className="adm-card">
+              <div className="adm-card-header">
+                <CheckCircle2 className="adm-card-icon" />
+                <h2 className="adm-card-title">Décision</h2>
               </div>
               <div className="p-4">
                 <AppointmentDecisionPanel appointmentId={appointment.id} />
@@ -211,25 +212,25 @@ export default async function AppointmentDetailPage({
           )}
 
           {canReschedule && (
-            <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
-              <div className="flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3">
-                <CalendarClock className="size-4 text-slate-600" />
-                <h2 className="font-semibold text-slate-800">Déplacer le rendez-vous</h2>
+            <section className="adm-card">
+              <div className="adm-card-header">
+                <CalendarClock className="adm-card-icon" />
+                <h2 className="adm-card-title">Déplacer le rendez-vous</h2>
               </div>
               <form action={rescheduleAppointmentAction} className="space-y-4 p-4">
                 <input type="hidden" name="appointmentId" value={appointment.id} />
                 <div className="grid grid-cols-2 gap-3">
-                  <label className="block space-y-1.5 text-xs font-medium text-slate-700">
+                  <label className="block space-y-1.5 adm-label">
                     <span>Nouvelle date</span>
                     <input
                       type="date"
                       name="date"
                       required
                       defaultValue={currentSlot.date}
-                      className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      className="w-full adm-input px-2 py-1.5 text-sm"
                     />
                   </label>
-                  <label className="block space-y-1.5 text-xs font-medium text-slate-700">
+                  <label className="block space-y-1.5 adm-label">
                     <span>Nouvelle heure</span>
                     <input
                       type="time"
@@ -237,16 +238,16 @@ export default async function AppointmentDetailPage({
                       required
                       step={900}
                       defaultValue={currentSlot.time}
-                      className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      className="w-full adm-input px-2 py-1.5 text-sm"
                     />
                   </label>
                 </div>
-                <label className="block space-y-1.5 text-xs font-medium text-slate-700">
+                <label className="block space-y-1.5 adm-label">
                   <span>Motif (facultatif, visible par le client)</span>
                   <input
                     name="reason"
                     maxLength={200}
-                    className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    className="w-full adm-input px-2 py-1.5 text-sm"
                   />
                 </label>
                 <p className="text-xs text-slate-500">
@@ -264,10 +265,10 @@ export default async function AppointmentDetailPage({
             </section>
           )}
 
-          <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
-            <div className="flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3">
-              <Mail className="size-4 text-slate-600" />
-              <h2 className="font-semibold text-slate-800">Notifications</h2>
+          <section className="adm-card">
+            <div className="adm-card-header">
+              <Mail className="adm-card-icon" />
+              <h2 className="adm-card-title">Notifications</h2>
             </div>
             <div className="p-4">
               <ul className="space-y-3 text-sm text-slate-600">

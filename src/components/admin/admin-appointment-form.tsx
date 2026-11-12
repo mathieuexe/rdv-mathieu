@@ -196,10 +196,10 @@ export function AdminAppointmentForm({ categories, registeredClients, action, er
   }
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 pb-12">
-      <section className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="adm-page">
+      <section className="adm-page-header">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Créer un rendez-vous</h1>
+          <h1 className="adm-page-title">Créer un rendez-vous</h1>
           <p className="mt-1 text-sm text-slate-500">
             Réservez un créneau pour un client ou un prospect. Seuls le prénom et le nom sont obligatoires : aucun compte
             n&apos;est nécessaire.
@@ -208,7 +208,7 @@ export function AdminAppointmentForm({ categories, registeredClients, action, er
       </section>
 
       {submitError && (
-        <div ref={errorRef} role="alert" className="scroll-mt-24 rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+        <div ref={errorRef} role="alert" className="scroll-mt-24 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
           {submitError} Votre saisie a été conservée.
         </div>
       )}
@@ -219,25 +219,25 @@ export function AdminAppointmentForm({ categories, registeredClients, action, er
         <input type="hidden" name="companySiren" value={company.name.trim() ? company.siren : ""} />
         <div className="space-y-6 lg:col-span-2">
           {/* Client Info Card */}
-          <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
-            <div className="flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3">
-              <h2 className="font-semibold text-slate-800">Informations Client</h2>
+          <section className="adm-card">
+            <div className="adm-card-header">
+              <h2 className="adm-card-title">Informations Client</h2>
             </div>
             <div className="space-y-5 p-4 md:p-6">
-              <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+              <label className="block space-y-1.5 adm-label">
                 <span>Client déjà inscrit <span className="font-normal text-slate-400">(facultatif)</span></span>
                 <input
                   type="search"
                   value={clientSearch}
                   onChange={(event) => setClientSearch(event.target.value)}
                   placeholder="Rechercher par nom, prénom ou email"
-                  className="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  className="w-full adm-input px-3 py-2"
                 />
                 <select
                   name="linkedUserId"
                   value={linkedUserId}
                   onChange={(event) => handleClientChange(event.target.value)}
-                  className="mt-2 w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  className="mt-2 w-full adm-input px-3 py-2"
                 >
                   <option value="">Aucun : prospect sans compte</option>
                   {filteredClients.map((client) => (
@@ -255,7 +255,7 @@ export function AdminAppointmentForm({ categories, registeredClients, action, er
               </label>
 
               {selectedClient ? (
-                <label className="block rounded-md border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-slate-700">
+                <label className="block rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-slate-700">
                   <span className="flex items-start gap-3">
                     <input
                       name="updateLinkedUserProfile"
@@ -273,7 +273,7 @@ export function AdminAppointmentForm({ categories, registeredClients, action, er
                   </span>
                 </label>
               ) : (
-                <label className="block rounded-md border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-slate-700">
+                <label className="block rounded-lg border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-slate-700">
                   <span className="flex items-start gap-3">
                     <input
                       name="createClientAccount"
@@ -296,25 +296,25 @@ export function AdminAppointmentForm({ categories, registeredClients, action, er
               )}
 
               <div className="grid gap-4 sm:grid-cols-2">
-                <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+                <label className="block space-y-1.5 adm-label">
                   <span>Prénom</span>
                   <input
                     name="firstName"
                     required
                     value={firstName}
                     onChange={(event) => setFirstName(event.target.value)}
-                    className="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    className="w-full adm-input px-3 py-2"
                   />
                 </label>
 
-                <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+                <label className="block space-y-1.5 adm-label">
                   <span>Nom</span>
                   <input
                     name="lastName"
                     required
                     value={lastName}
                     onChange={(event) => setLastName(event.target.value)}
-                    className="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    className="w-full adm-input px-3 py-2"
                   />
                 </label>
               </div>
@@ -334,14 +334,14 @@ export function AdminAppointmentForm({ categories, registeredClients, action, er
                 </p>
               </div>
 
-              <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+              <label className="block space-y-1.5 adm-label">
                 <span>Email <span className="font-normal text-slate-400">(facultatif)</span></span>
                 <input
                   name="email"
                   type="email"
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
-                  className="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  className="w-full adm-input px-3 py-2"
                 />
                 <span className="block text-xs font-normal text-slate-500">
                   {hasEmail
@@ -350,7 +350,7 @@ export function AdminAppointmentForm({ categories, registeredClients, action, er
                 </span>
               </label>
 
-              <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+              <label className="block space-y-1.5 adm-label">
                 <span>Téléphone <span className="font-normal text-slate-400">(facultatif)</span></span>
                 <PhoneInput
                   name="phone"
@@ -359,35 +359,35 @@ export function AdminAppointmentForm({ categories, registeredClients, action, er
                 />
               </label>
 
-              <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+              <label className="block space-y-1.5 adm-label">
                 <span>Message <span className="font-normal text-slate-400">(facultatif)</span></span>
                 <textarea
                   name="message"
                   rows={4}
                   value={message}
                   onChange={(event) => setMessage(event.target.value)}
-                  className="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  className="w-full adm-input px-3 py-2"
                 />
               </label>
 
               {selectedCategory?.customFields && selectedCategory.customFields.length > 0 && (
                 <div className="space-y-4 pt-4 border-t border-slate-200">
-                  <h3 className="font-semibold text-slate-800">Champs personnalisés</h3>
+                  <h3 className="adm-card-title">Champs personnalisés</h3>
                   {selectedCategory.customFields.map((field) => (
-                    <label key={field.id} className="block space-y-1.5 text-sm font-medium text-slate-700">
+                    <label key={field.id} className="block space-y-1.5 adm-label">
                       <span>{field.label} {field.required && <span className="text-rose-600">*</span>}</span>
                       {field.type === "text" ? (
                         <input
                           value={customFieldResponses[field.id] || ""}
                           onChange={(e) => setCustomFieldResponses({ ...customFieldResponses, [field.id]: e.target.value })}
                           placeholder={field.placeholder || ""}
-                          className="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                          className="w-full adm-input px-3 py-2"
                         />
                       ) : (
                         <select
                           value={customFieldResponses[field.id] || ""}
                           onChange={(e) => setCustomFieldResponses({ ...customFieldResponses, [field.id]: e.target.value })}
-                          className="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                          className="w-full adm-input px-3 py-2"
                         >
                           <option value="" disabled>Sélectionnez une option...</option>
                           {field.options?.map((opt, i) => (
@@ -405,18 +405,18 @@ export function AdminAppointmentForm({ categories, registeredClients, action, er
 
         {/* Calendar and Slots Card */}
         <div className="space-y-6">
-          <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
-            <div className="flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3">
-              <h2 className="font-semibold text-slate-800">Planification</h2>
+          <section className="adm-card">
+            <div className="adm-card-header">
+              <h2 className="adm-card-title">Planification</h2>
             </div>
             <div className="space-y-5 p-4">
-              <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+              <label className="block space-y-1.5 adm-label">
                 <span>Catégorie</span>
                 <select
                   name="categorySlug"
                   value={categorySlug}
                   onChange={(event) => setCategorySlug(event.target.value)}
-                  className="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  className="w-full adm-input px-3 py-2"
                 >
                   {categories.map((category) => (
                     <option key={category.id} value={category.slug}>
@@ -429,7 +429,7 @@ export function AdminAppointmentForm({ categories, registeredClients, action, er
 
               <input type="hidden" name="startsAt" value={selectedSlot} />
 
-              <div className="rounded-md border border-slate-200 bg-slate-50 p-4">
+              <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
                 <div className="space-y-2">
                   {selectedCategory ? (
                     <>
@@ -560,7 +560,7 @@ export function AdminAppointmentForm({ categories, registeredClients, action, er
               <button
                 type="submit"
                 disabled={!selectedSlot || isSaving}
-                className="flex w-full items-center justify-center rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-all hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(48,128,238,0.25)]"
+                className="flex w-full items-center justify-center rounded-lg bg-blue-600 shadow-sm px-4 py-2.5 text-sm font-medium text-white transition-all hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isSaving ? "Création…" : "Créer le rendez-vous"}
               </button>

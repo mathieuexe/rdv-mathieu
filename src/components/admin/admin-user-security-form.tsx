@@ -21,7 +21,7 @@ export function AdminUserSecurityForm({ user, action }: AdminUserSecurityFormPro
     <form action={formAction} className="space-y-5">
       <input type="hidden" name="userId" value={user.userId} />
 
-      <label className="block rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-4 text-sm text-slate-700">
+      <label className="block rounded-xl border border-slate-200 bg-slate-50/60 px-4 py-4 text-sm text-slate-700">
         <span className="flex items-start gap-3">
           <input
             name="requiresPasswordChange"

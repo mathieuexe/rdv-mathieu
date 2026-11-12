@@ -43,7 +43,7 @@ export function AdminUserDangerForm({ user, banAction, deleteAction }: AdminUser
               <textarea 
                 name="banReason"
                 placeholder="Raison du bannissement (optionnel)"
-                className="w-full text-sm rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500"
+                className="w-full text-sm adm-input px-3 py-2"
                 rows={2}
               />
             )}
@@ -85,7 +85,7 @@ export function AdminUserDangerForm({ user, banAction, deleteAction }: AdminUser
       )}
 
       {/* Block Delete */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="adm-page-header">
         <div>
           <h3 className="font-semibold text-rose-700">Supprimer le compte</h3>
           <p className="text-sm text-rose-600/80 mt-1 max-w-md">

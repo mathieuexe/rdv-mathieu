@@ -33,7 +33,7 @@ export function CategoryActions({ categoryId, duplicateAction, deleteAction }: C
             type="submit"
             disabled={isDuplicatePending}
             title="Dupliquer la catégorie"
-            className="flex items-center justify-center rounded-md border border-slate-200 bg-white p-2 text-slate-500 shadow-sm transition-colors hover:bg-slate-50 hover:text-blue-600 disabled:opacity-50"
+            className="flex items-center justify-center adm-card p-2 text-slate-500 transition-colors hover:bg-slate-50 hover:text-blue-600 disabled:opacity-50"
           >
             {isDuplicatePending ? <LoaderCircle className="size-4 animate-spin" /> : <Copy className="size-4" />}
           </button>
@@ -46,7 +46,7 @@ export function CategoryActions({ categoryId, duplicateAction, deleteAction }: C
               type="button"
               onClick={() => setShowDeleteConfirm(false)}
               disabled={isDeletePending}
-              className="rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-600 shadow-sm hover:bg-slate-50 disabled:opacity-50"
+              className="adm-card px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50"
             >
               Annuler
             </button>
@@ -64,7 +64,7 @@ export function CategoryActions({ categoryId, duplicateAction, deleteAction }: C
             type="button"
             onClick={() => setShowDeleteConfirm(true)}
             title="Supprimer la catégorie"
-            className="flex items-center justify-center rounded-md border border-slate-200 bg-white p-2 text-slate-500 shadow-sm transition-colors hover:bg-slate-50 hover:text-rose-600"
+            className="flex items-center justify-center adm-card p-2 text-slate-500 transition-colors hover:bg-slate-50 hover:text-rose-600"
           >
             <Trash2 className="size-4" />
           </button>

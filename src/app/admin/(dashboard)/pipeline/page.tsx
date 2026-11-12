@@ -7,7 +7,7 @@ export default async function PipelinePage() {
   if (!isReady) {
     return (
       <div className="mx-auto max-w-3xl space-y-4 pb-12">
-        <h1 className="text-2xl font-bold text-slate-900">Pipeline</h1>
+        <h1 className="adm-page-title">Pipeline</h1>
         <div className="rounded-lg border border-amber-200 bg-amber-50 p-5 text-sm leading-relaxed text-amber-900">
           <p className="font-semibold">Une dernière étape est nécessaire.</p>
           <p className="mt-2">

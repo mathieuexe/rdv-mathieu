@@ -95,7 +95,7 @@ export function AdminUserProfileForm({ user, action }: AdminUserProfileFormProps
       <input type="hidden" name="avatarImageDataUrl" value={avatarPreview} />
 
       {imageError && (
-        <div className="rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+        <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
           {imageError}
         </div>
       )}
@@ -114,7 +114,7 @@ export function AdminUserProfileForm({ user, action }: AdminUserProfileFormProps
           <p className="text-sm font-medium text-slate-900">Photo de profil</p>
           <p className="text-xs text-slate-500">Format carré (recadrage automatique). JPEG recommandé.</p>
           <div className="flex items-center gap-3">
-            <label className="cursor-pointer rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm transition hover:bg-slate-50">
+            <label className="cursor-pointer adm-card px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50">
               Changer la photo
               <input 
                 ref={avatarInputRef}
@@ -144,7 +144,7 @@ export function AdminUserProfileForm({ user, action }: AdminUserProfileFormProps
             name="firstName"
             defaultValue={user.firstName}
             disabled={pending}
-            className="w-full rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3 outline-none transition focus:border-slate-950 focus:bg-white"
+            className="adm-input w-full"
           />
         </label>
 
@@ -154,7 +154,7 @@ export function AdminUserProfileForm({ user, action }: AdminUserProfileFormProps
             name="lastName"
             defaultValue={user.lastName}
             disabled={pending}
-            className="w-full rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3 outline-none transition focus:border-slate-950 focus:bg-white"
+            className="adm-input w-full"
           />
         </label>
       </div>
@@ -166,7 +166,7 @@ export function AdminUserProfileForm({ user, action }: AdminUserProfileFormProps
           type="email"
           defaultValue={user.email}
           disabled={pending}
-          className="w-full rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3 outline-none transition focus:border-slate-950 focus:bg-white"
+          className="adm-input w-full"
         />
       </label>
 

@@ -28,45 +28,45 @@ export default async function StatistiquesPage() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="adm-card p-6">
           <div className="flex items-center gap-3">
             <div className="flex size-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
               <Activity className="size-5" />
             </div>
             <div>
               <p className="text-sm font-medium text-slate-500">Vues totales</p>
-              <p className="text-2xl font-bold text-slate-900">{stats.totalViews}</p>
+              <p className="adm-page-title">{stats.totalViews}</p>
             </div>
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="adm-card p-6">
           <div className="flex items-center gap-3">
             <div className="flex size-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
               <Users className="size-5" />
             </div>
             <div>
               <p className="text-sm font-medium text-slate-500">Visiteurs uniques</p>
-              <p className="text-2xl font-bold text-slate-900">{stats.uniqueVisitors}</p>
+              <p className="adm-page-title">{stats.uniqueVisitors}</p>
             </div>
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="adm-card p-6">
           <div className="flex items-center gap-3">
             <div className="flex size-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
               <Clock className="size-5" />
             </div>
             <div>
               <p className="text-sm font-medium text-slate-500">Temps moyen / page</p>
-              <p className="text-2xl font-bold text-slate-900">{formatDuration(stats.averageDuration)}</p>
+              <p className="adm-page-title">{formatDuration(stats.averageDuration)}</p>
             </div>
           </div>
         </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div className="adm-card">
           <div className="border-b border-slate-200 px-6 py-4">
             <h2 className="font-semibold text-slate-900">Pages les plus consultées</h2>
           </div>
@@ -92,7 +92,7 @@ export default async function StatistiquesPage() {
         </div>
 
         <div className="space-y-6">
-          <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
+          <div className="adm-card">
             <div className="border-b border-slate-200 px-6 py-4">
               <h2 className="font-semibold text-slate-900">Appareils</h2>
             </div>
@@ -119,7 +119,7 @@ export default async function StatistiquesPage() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
+          <div className="adm-card">
             <div className="border-b border-slate-200 px-6 py-4">
               <h2 className="font-semibold text-slate-900">Pays</h2>
             </div>

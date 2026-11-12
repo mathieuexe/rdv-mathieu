@@ -14,7 +14,8 @@ import { AdminUserSecurityForm } from "@/components/admin/admin-user-security-fo
 import { AdminUserDangerForm } from "@/components/admin/admin-user-danger-form";
 import { AdminUserEmailDialog } from "@/components/admin/admin-user-email-dialog";
 import { getAdminUserDetail } from "@/lib/data-access";
-import { formatAppointmentStatus, formatDateTimeFr, formatPhone } from "@/lib/utils";
+import { StatusBadge } from "@/components/admin/status-badge";
+import { formatDateTimeFr, formatPhone } from "@/lib/utils";
 
 function safeDecode(value?: string | null) {
   if (!value) return "";
@@ -49,11 +50,11 @@ export default async function AdminUserDetailPage({
   const { profile, authProvider, appointments, logs } = detail;
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 pb-12">
+    <div className="adm-page">
       {/* Salesforce Highlights Panel */}
-      <section className="flex flex-col gap-6 rounded-lg border border-slate-200 bg-white p-4 shadow-sm md:flex-row md:items-center md:justify-between">
+      <section className="flex flex-col gap-6 adm-card p-4 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-4">
-          <div className="relative flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-md bg-blue-600 text-white shadow-sm">
+          <div className="relative flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-blue-50 text-blue-600 ring-1 ring-inset ring-blue-600/10">
             {profile.avatarUrl ? (
               <img src={profile.avatarUrl} alt="Avatar" className="size-full object-cover" />
             ) : (
@@ -75,7 +76,7 @@ export default async function AdminUserDetailPage({
                 </span>
               )}
             </div>
-            <h1 className="text-2xl font-bold text-slate-900">
+            <h1 className="adm-page-title">
               {profile.firstName} {profile.lastName}
             </h1>
           </div>
@@ -115,10 +116,10 @@ export default async function AdminUserDetailPage({
         <div className="space-y-6 lg:col-span-2">
           
           {/* Details Card */}
-          <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
-            <div className="flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3">
-              <Settings className="size-4 text-slate-600" />
-              <h2 className="font-semibold text-slate-800">Détails du Contact</h2>
+          <section className="adm-card">
+            <div className="adm-card-header">
+              <Settings className="adm-card-icon" />
+              <h2 className="adm-card-title">Détails du Contact</h2>
             </div>
             <div className="p-4 md:p-6">
               <AdminUserProfileForm user={profile} action={updateAdminUserProfileAction} />
@@ -126,10 +127,10 @@ export default async function AdminUserDetailPage({
           </section>
 
           {/* Security Card */}
-          <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
-            <div className="flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3">
-              <KeyRound className="size-4 text-slate-600" />
-              <h2 className="font-semibold text-slate-800">Sécurité & Accès</h2>
+          <section className="adm-card">
+            <div className="adm-card-header">
+              <KeyRound className="adm-card-icon" />
+              <h2 className="adm-card-title">Sécurité & Accès</h2>
             </div>
             <div className="p-4 md:p-6">
               <div className="mb-6 rounded-md bg-slate-50 p-3 text-sm text-slate-700">
@@ -156,10 +157,10 @@ export default async function AdminUserDetailPage({
           </section>
 
           {/* Activity Logs Card */}
-          <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
-            <div className="flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3">
-              <History className="size-4 text-slate-600" />
-              <h2 className="font-semibold text-slate-800">Historique d'Activité</h2>
+          <section className="adm-card">
+            <div className="adm-card-header">
+              <History className="adm-card-icon" />
+              <h2 className="adm-card-title">Historique d'Activité</h2>
             </div>
             <div className="p-4 md:p-6">
               {logs.length === 0 ? (
@@ -212,11 +213,11 @@ export default async function AdminUserDetailPage({
         {/* Right Column: Related Lists */}
         <div className="space-y-6">
           {/* Appointments Related List */}
-          <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
-            <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-3">
+          <section className="adm-card">
+            <div className="adm-card-header justify-between">
               <div className="flex items-center gap-2">
                 <Calendar className="size-4 text-slate-600" />
-                <h2 className="font-semibold text-slate-800">Rendez-vous</h2>
+                <h2 className="adm-card-title">Rendez-vous</h2>
                 <span className="rounded-full bg-slate-200 px-2 py-0.5 text-xs font-medium text-slate-700">
                   {appointments.length}
                 </span>
@@ -229,7 +230,7 @@ export default async function AdminUserDetailPage({
               ) : (
                 <div className="space-y-3">
                   {appointments.map((appointment) => (
-                    <div key={appointment.id} className="rounded-md border border-slate-100 p-3 hover:bg-slate-50">
+                    <div key={appointment.id} className="rounded-lg border border-slate-100 p-3 hover:bg-slate-50">
                       <div className="flex items-start justify-between gap-2">
                         <Link 
                           href={`/admin/rendez-vous/${appointment.id}`}
@@ -237,9 +238,7 @@ export default async function AdminUserDetailPage({
                         >
                           {appointment.category?.title ?? "Rendez-vous"}
                         </Link>
-                        <span className="shrink-0 text-xs font-medium text-slate-500">
-                          {formatAppointmentStatus(appointment.status)}
-                        </span>
+                        <StatusBadge status={appointment.status} className="shrink-0" />
                       </div>
                       <p className="mt-1 text-xs text-slate-600">
                         {formatDateTimeFr(appointment.startsAt, { dateStyle: "medium", timeStyle: "short" })}

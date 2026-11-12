@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 
-import { formatAppointmentStatus, formatDateTimeFr, formatPhone } from "@/lib/utils";
+import { StatusBadge } from "@/components/admin/status-badge";
+import { formatDateTimeFr, formatPhone } from "@/lib/utils";
 import type { AppointmentCategory, AppointmentRecord } from "@/types/domain";
 
 interface AppointmentWithCategory extends AppointmentRecord {
@@ -34,7 +35,7 @@ export function AppointmentsTable({ appointments }: AppointmentsTableProps) {
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full divide-y divide-slate-200 text-left text-sm">
-        <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wider text-slate-500">
+        <thead className="bg-slate-50/80 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
           <tr>
             <th className="px-5 py-3">Client</th>
             <th className="px-5 py-3">Catégorie</th>
@@ -64,14 +65,10 @@ export function AppointmentsTable({ appointments }: AppointmentsTableProps) {
                 {formatDateTimeFr(appointment.startsAt)}
               </td>
               <td className="px-5 py-3">
-                <span className="inline-flex rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
-                  {formatOriginLabel(appointment)}
-                </span>
+                <span className="adm-badge">{formatOriginLabel(appointment)}</span>
               </td>
               <td className="px-5 py-3">
-                <span className="inline-flex rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
-                  {formatAppointmentStatus(appointment.status)}
-                </span>
+                <StatusBadge status={appointment.status} />
               </td>
               <td className="px-5 py-3 text-right">
                 <Link

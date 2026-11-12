@@ -55,7 +55,7 @@ export function GoogleCalendarEventList({ events, saveAction, resetAction }: Goo
                     defaultValue={event.summary}
                     required
                     maxLength={200}
-                    className="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    className="w-full adm-input px-3 py-1.5 text-sm"
                   />
                 </label>
 
@@ -68,14 +68,14 @@ export function GoogleCalendarEventList({ events, saveAction, resetAction }: Goo
                         name="startDate"
                         defaultValue={event.startDate}
                         required
-                        className="min-w-0 flex-1 rounded-md border border-slate-300 px-2 py-1.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                        className="min-w-0 flex-1 adm-input px-2 py-1.5 text-sm"
                       />
                       <input
                         type="time"
                         name="startTime"
                         defaultValue={event.startTime}
                         required
-                        className="w-28 rounded-md border border-slate-300 px-2 py-1.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                        className="w-28 adm-input px-2 py-1.5 text-sm"
                       />
                     </span>
                   </label>
@@ -88,14 +88,14 @@ export function GoogleCalendarEventList({ events, saveAction, resetAction }: Goo
                         name="endDate"
                         defaultValue={event.endDate}
                         required
-                        className="min-w-0 flex-1 rounded-md border border-slate-300 px-2 py-1.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                        className="min-w-0 flex-1 adm-input px-2 py-1.5 text-sm"
                       />
                       <input
                         type="time"
                         name="endTime"
                         defaultValue={event.endTime}
                         required
-                        className="w-28 rounded-md border border-slate-300 px-2 py-1.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                        className="w-28 adm-input px-2 py-1.5 text-sm"
                       />
                     </span>
                   </label>

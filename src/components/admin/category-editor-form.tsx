@@ -98,10 +98,10 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
   }
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 pb-12">
-      <section className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="adm-page">
+      <section className="adm-page-header">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">{title}</h1>
+          <h1 className="adm-page-title">{title}</h1>
           <p className="mt-1 text-sm text-slate-500">
             Renseignez le titre, la description, la durée, le planning hebdomadaire et le type de rendez-vous.
           </p>
@@ -109,7 +109,7 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
       </section>
 
       {saved && (
-        <div className="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
           La catégorie a bien été enregistrée.
         </div>
       )}
@@ -118,14 +118,14 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
         <div
           ref={errorRef}
           role="alert"
-          className="scroll-mt-24 rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800"
+          className="scroll-mt-24 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800"
         >
           {submitError} Votre saisie a été conservée.
         </div>
       )}
 
       {imageError && (
-        <div className="rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+        <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
           {imageError}
         </div>
       )}
@@ -140,35 +140,35 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
         {/* Left Column */}
         <div className="space-y-6 lg:col-span-2">
           {/* General Info Card */}
-          <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
-            <div className="flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3">
-              <Info className="size-4 text-slate-600" />
-              <h2 className="font-semibold text-slate-800">Informations générales</h2>
+          <section className="adm-card">
+            <div className="adm-card-header">
+              <Info className="adm-card-icon" />
+              <h2 className="adm-card-title">Informations générales</h2>
             </div>
             <div className="space-y-5 p-4 md:p-6">
-              <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+              <label className="block space-y-1.5 adm-label">
                 <span>Titre</span>
                 <input
                   name="title"
                   defaultValue={category?.title}
                   required
-                  className="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  className="w-full adm-input px-3 py-2"
                 />
               </label>
 
-              <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+              <label className="block space-y-1.5 adm-label">
                 <span>Description</span>
                 <textarea
                   name="description"
                   rows={4}
                   defaultValue={category?.description}
                   required
-                  className="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  className="w-full adm-input px-3 py-2"
                 />
               </label>
 
               <div className="grid gap-4 sm:grid-cols-3">
-                <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+                <label className="block space-y-1.5 adm-label">
                   <span>Durée (minutes)</span>
                   <input
                     name="durationMinutes"
@@ -176,16 +176,16 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
                     min={15}
                     step={15}
                     defaultValue={category?.durationMinutes ?? 30}
-                    className="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    className="w-full adm-input px-3 py-2"
                   />
                 </label>
 
-                <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+                <label className="block space-y-1.5 adm-label">
                   <span>Type</span>
                   <select
                     name="appointmentMode"
                     defaultValue={category?.appointmentMode ?? "visioconference"}
-                    className="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    className="w-full adm-input px-3 py-2"
                   >
                     <option value="telephone">Téléphonique</option>
                     <option value="physique">Présentiel</option>
@@ -194,7 +194,7 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
                   </select>
                 </label>
 
-                <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+                <label className="block space-y-1.5 adm-label">
                   <span>
                     Slug{" "}
                     {category?.slug && (
@@ -216,7 +216,7 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
                     name="slug"
                     defaultValue={category?.slug}
                     placeholder="consultation-30min"
-                    className="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    className="w-full adm-input px-3 py-2"
                   />
                 </label>
               </div>
@@ -224,10 +224,10 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
           </section>
 
           {/* Schedule Card */}
-          <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
-            <div className="flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3">
-              <Calendar className="size-4 text-slate-600" />
-              <h2 className="font-semibold text-slate-800">Planning hebdomadaire</h2>
+          <section className="adm-card">
+            <div className="adm-card-header">
+              <Calendar className="adm-card-icon" />
+              <h2 className="adm-card-title">Planning hebdomadaire</h2>
             </div>
             <div className="p-4 md:p-6">
               <p className="text-sm text-slate-600 mb-6">
@@ -240,14 +240,14 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
                   const defaults = getDayDefaults(category, day.key);
 
                   return (
-                    <div key={day.key} className="rounded-md border border-slate-200 bg-slate-50 p-4">
+                    <div key={day.key} className="rounded-lg border border-slate-200 bg-slate-50 p-4">
                       <div className="grid gap-4 xl:grid-cols-[160px_repeat(4,minmax(0,1fr))] xl:items-end">
                         <label className="flex items-center gap-3 text-sm font-medium text-slate-900">
                           <input type="checkbox" name={`availabilityEnabled_${day.key}`} defaultChecked={defaults.enabled} className="size-4 rounded border-slate-300 text-blue-600" />
                           <span>{day.label}</span>
                         </label>
 
-                        <label className="space-y-1.5 text-xs font-medium text-slate-700">
+                        <label className="space-y-1.5 adm-label">
                           <span>Début</span>
                           <input
                             name={`availabilityStart_${day.key}`}
@@ -255,11 +255,11 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
                             lang="fr-FR"
                             step={900}
                             defaultValue={defaults.startTime}
-                            className="w-full rounded-md border border-slate-300 px-2 py-1.5 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                            className="w-full adm-input px-2 py-1.5"
                           />
                         </label>
 
-                        <label className="space-y-1.5 text-xs font-medium text-slate-700">
+                        <label className="space-y-1.5 adm-label">
                           <span>Fin</span>
                           <input
                             name={`availabilityEnd_${day.key}`}
@@ -267,11 +267,11 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
                             lang="fr-FR"
                             step={900}
                             defaultValue={defaults.endTime}
-                            className="w-full rounded-md border border-slate-300 px-2 py-1.5 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                            className="w-full adm-input px-2 py-1.5"
                           />
                         </label>
 
-                        <label className="space-y-1.5 text-xs font-medium text-slate-700">
+                        <label className="space-y-1.5 adm-label">
                           <span>Pause (début)</span>
                           <input
                             name={`breakStart_${day.key}`}
@@ -279,11 +279,11 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
                             lang="fr-FR"
                             step={900}
                             defaultValue={defaults.breakStart}
-                            className="w-full rounded-md border border-slate-300 px-2 py-1.5 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                            className="w-full adm-input px-2 py-1.5"
                           />
                         </label>
 
-                        <label className="space-y-1.5 text-xs font-medium text-slate-700">
+                        <label className="space-y-1.5 adm-label">
                           <span>Pause (fin)</span>
                           <input
                             name={`breakEnd_${day.key}`}
@@ -291,7 +291,7 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
                             lang="fr-FR"
                             step={900}
                             defaultValue={defaults.breakEnd}
-                            className="w-full rounded-md border border-slate-300 px-2 py-1.5 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                            className="w-full adm-input px-2 py-1.5"
                           />
                         </label>
                       </div>
@@ -307,11 +307,11 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
           </section>
 
           {/* Custom Fields Card */}
-          <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
-            <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-3">
+          <section className="adm-card">
+            <div className="adm-card-header justify-between">
               <div className="flex items-center gap-2">
                 <Settings className="size-4 text-slate-600" />
-                <h2 className="font-semibold text-slate-800">Champs personnalisés</h2>
+                <h2 className="adm-card-title">Champs personnalisés</h2>
               </div>
               <button
                 type="button"
@@ -337,7 +337,7 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
                         <Trash2 className="size-4" />
                       </button>
                       <div className="grid gap-4 sm:grid-cols-2 pr-6">
-                        <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+                        <label className="block space-y-1.5 adm-label">
                           <span>Label du champ</span>
                           <input
                             value={field.label}
@@ -347,10 +347,10 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
                               setCustomFields(newFields);
                             }}
                             placeholder="Ex: Motif de la consultation"
-                            className="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                            className="w-full adm-input px-3 py-2"
                           />
                         </label>
-                        <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+                        <label className="block space-y-1.5 adm-label">
                           <span>Type</span>
                           <select
                             value={field.type}
@@ -362,7 +362,7 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
                               }
                               setCustomFields(newFields);
                             }}
-                            className="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                            className="w-full adm-input px-3 py-2"
                           >
                             <option value="text">Texte court</option>
                             <option value="select">Menu déroulant (Choix)</option>
@@ -388,7 +388,7 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
 
                       {field.type === "text" && (
                         <div className="mt-4">
-                          <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+                          <label className="block space-y-1.5 adm-label">
                             <span>Texte indicatif (Placeholder)</span>
                             <input
                               value={field.placeholder || ""}
@@ -397,7 +397,7 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
                                 newFields[index].placeholder = e.target.value;
                                 setCustomFields(newFields);
                               }}
-                              className="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                              className="w-full adm-input px-3 py-2"
                             />
                           </label>
                         </div>
@@ -419,7 +419,7 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
                                   setCustomFields(newFields);
                                 }}
                                 placeholder={`Option ${optIndex + 1}`}
-                                className="flex-1 rounded-md border border-slate-300 px-3 py-1.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                                className="flex-1 adm-input px-3 py-1.5 text-sm"
                               />
                               <input
                                 value={opt.icon || ""}
@@ -431,7 +431,7 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
                                   setCustomFields(newFields);
                                 }}
                                 placeholder="Nom icône (ex: User)"
-                                className="w-40 rounded-md border border-slate-300 px-3 py-1.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                                className="w-40 adm-input px-3 py-1.5 text-sm"
                               />
                               <button
                                 type="button"
@@ -470,10 +470,10 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
           </section>
 
           {/* Visuals Card */}
-          <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
-            <div className="flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3">
-              <ImageIcon className="size-4 text-slate-600" />
-              <h2 className="font-semibold text-slate-800">Visuels</h2>
+          <section className="adm-card">
+            <div className="adm-card-header">
+              <ImageIcon className="adm-card-icon" />
+              <h2 className="adm-card-title">Visuels</h2>
             </div>
             <div className="p-4 md:p-6">
               <p className="mb-6 text-sm text-slate-600">
@@ -510,10 +510,10 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
 
         {/* Right Column */}
         <div className="space-y-6">
-          <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
-            <div className="flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3">
-              <Globe className="size-4 text-slate-600" />
-              <h2 className="font-semibold text-slate-800">Publication</h2>
+          <section className="adm-card">
+            <div className="adm-card-header">
+              <Globe className="adm-card-icon" />
+              <h2 className="adm-card-title">Publication</h2>
             </div>
             <div className="p-4 space-y-4">
               <label className="flex items-center gap-3 text-sm text-slate-700">
@@ -527,10 +527,10 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
             </div>
           </section>
 
-          <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
-            <div className="flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3">
-              <Lock className="size-4 text-slate-600" />
-              <h2 className="font-semibold text-slate-800">Bloquer les réservations</h2>
+          <section className="adm-card">
+            <div className="adm-card-header">
+              <Lock className="adm-card-icon" />
+              <h2 className="adm-card-title">Bloquer les réservations</h2>
             </div>
             <div className="p-4 space-y-4">
               <label className="flex items-center gap-3 text-sm text-slate-700">
@@ -538,23 +538,23 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
                 <span className="font-medium text-rose-600">Désactiver la prise de rendez-vous</span>
               </label>
               
-              <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+              <label className="block space-y-1.5 adm-label">
                 <span>Message d&apos;indisponibilité (affiché au client)</span>
                 <textarea
                   name="bookingBlockMessage"
                   rows={3}
                   defaultValue={category?.bookingBlockMessage}
                   placeholder="Les réservations pour cette catégorie sont temporairement suspendues..."
-                  className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  className="w-full adm-input px-3 py-2 text-sm"
                 />
               </label>
             </div>
           </section>
 
-          <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
-            <div className="flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3">
-              <MessageSquare className="size-4 text-slate-600" />
-              <h2 className="font-semibold text-slate-800">Message personnalisé</h2>
+          <section className="adm-card">
+            <div className="adm-card-header">
+              <MessageSquare className="adm-card-icon" />
+              <h2 className="adm-card-title">Message personnalisé</h2>
             </div>
             <div className="p-4">
               <textarea
@@ -562,7 +562,7 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
                 rows={5}
                 defaultValue={category?.customMessage}
                 placeholder="Instructions, congés, informations utiles..."
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                className="w-full adm-input px-3 py-2 text-sm"
               />
             </div>
           </section>
@@ -571,7 +571,7 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
             <button
               type="submit"
               disabled={isSaving}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-all hover:bg-blue-700 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(48,128,238,0.25)] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 shadow-sm px-4 py-2.5 text-sm font-medium text-white transition-all hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
             >
               <Save className="size-4" />
               {isSaving ? "Enregistrement…" : "Enregistrer la catégorie"}

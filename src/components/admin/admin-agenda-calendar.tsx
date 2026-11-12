@@ -149,7 +149,7 @@ export function AdminAgendaCalendar({ appointments, googleEvents = [] }: AdminAg
 
   if (appointments.length === 0 && googleEvents.length === 0) {
     return (
-      <div className="rounded-[24px] border border-dashed border-slate-300 px-6 py-14 text-center text-sm text-slate-500">
+      <div className="rounded-xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center text-sm text-slate-500">
         Aucun rendez-vous confirmé à afficher dans l&apos;agenda.
       </div>
     );
@@ -157,10 +157,10 @@ export function AdminAgendaCalendar({ appointments, googleEvents = [] }: AdminAg
 
   return (
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-      <div className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_16px_50px_rgba(15,23,42,0.04)]">
+      <div className="adm-card overflow-hidden">
         <div className="flex flex-col gap-4 border-b border-slate-200 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm uppercase tracking-[0.18em] text-slate-400">Vue mensuelle</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Vue mensuelle</p>
             <h2 className="mt-2 text-2xl font-semibold capitalize text-slate-950">{monthLabel}</h2>
             <p className="mt-2 text-sm text-slate-600">{totalThisMonth} rendez-vous confirmé(s) sur ce mois.</p>
             {googleEvents.length > 0 ? (
@@ -201,7 +201,7 @@ export function AdminAgendaCalendar({ appointments, googleEvents = [] }: AdminAg
 
         <div className="grid grid-cols-7 border-b border-slate-200 bg-slate-50/70">
           {weekdayLabels.map((label) => (
-            <div key={label} className="px-3 py-3 text-center text-xs font-medium uppercase tracking-[0.18em] text-slate-500">
+            <div key={label} className="px-3 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">
               {label}
             </div>
           ))}
@@ -288,9 +288,9 @@ export function AdminAgendaCalendar({ appointments, googleEvents = [] }: AdminAg
         </div>
       </div>
 
-      <aside className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_16px_50px_rgba(15,23,42,0.04)]">
+      <aside className="adm-card p-6">
         <div className="border-b border-slate-200 pb-5">
-          <p className="text-sm uppercase tracking-[0.18em] text-slate-400">Jour sélectionné</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Jour sélectionné</p>
           <h2 className="mt-2 text-2xl font-semibold text-slate-950">
             {formatDateTimeFr(`${selectedDateKey}T12:00:00`, { dateStyle: "full" })}
           </h2>
@@ -340,14 +340,14 @@ export function AdminAgendaCalendar({ appointments, googleEvents = [] }: AdminAg
 
         <div className="mt-5 space-y-4">
           {selectedDayAppointments.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-slate-300 px-4 py-10 text-center text-sm text-slate-500">
+            <div className="rounded-xl border border-dashed border-slate-300 px-4 py-10 text-center text-sm text-slate-500">
               {selectedDayGoogleEvents.length > 0
                 ? "Aucun rendez-vous du site sur cette journée."
                 : "Cette journée est libre."}
             </div>
           ) : (
             selectedDayAppointments.map((appointment) => (
-              <article key={appointment.id} className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+              <article key={appointment.id} className="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-sm font-semibold text-slate-950">

@@ -190,9 +190,9 @@ export function PipelineBoard({ initialCards }: PipelineBoardProps) {
 
   return (
     <div className="space-y-6 pb-12">
-      <section className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <section className="adm-page-header">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Pipeline</h1>
+          <h1 className="adm-page-title">Pipeline</h1>
           <p className="mt-1 text-sm text-slate-500">
             {cards.length === 0
               ? "Créez une fiche par prospect, puis faites-la avancer d'étape en étape."
@@ -211,7 +211,7 @@ export function PipelineBoard({ initialCards }: PipelineBoardProps) {
             setFormError("");
             setDraft(emptyDraft("nouveau"));
           }}
-          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-blue-600 shadow-sm px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
         >
           <Plus className="size-4" />
           Nouveau prospect
@@ -219,7 +219,7 @@ export function PipelineBoard({ initialCards }: PipelineBoardProps) {
       </section>
 
       {error ? (
-        <div role="alert" className="rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+        <div role="alert" className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
           {error}
         </div>
       ) : null}
@@ -395,13 +395,13 @@ export function PipelineBoard({ initialCards }: PipelineBoardProps) {
 
             <div className="space-y-4 overflow-y-auto px-5 py-4">
               {formError ? (
-                <p role="alert" className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
+                <p role="alert" className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
                   {formError}
                 </p>
               ) : null}
 
               <div className="grid gap-4 sm:grid-cols-2">
-                <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+                <label className="block space-y-1.5 adm-label">
                   <span>
                     Prénom <span className="font-normal text-slate-400">(facultatif)</span>
                   </span>
@@ -411,7 +411,7 @@ export function PipelineBoard({ initialCards }: PipelineBoardProps) {
                     className={inputClass}
                   />
                 </label>
-                <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+                <label className="block space-y-1.5 adm-label">
                   <span>Nom</span>
                   <input
                     required
@@ -436,7 +436,7 @@ export function PipelineBoard({ initialCards }: PipelineBoardProps) {
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
-                <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+                <label className="block space-y-1.5 adm-label">
                   <span>
                     Email <span className="font-normal text-slate-400">(facultatif)</span>
                   </span>
@@ -447,7 +447,7 @@ export function PipelineBoard({ initialCards }: PipelineBoardProps) {
                     className={inputClass}
                   />
                 </label>
-                <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+                <label className="block space-y-1.5 adm-label">
                   <span>
                     Téléphone <span className="font-normal text-slate-400">(facultatif)</span>
                   </span>
@@ -461,7 +461,7 @@ export function PipelineBoard({ initialCards }: PipelineBoardProps) {
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
-                <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+                <label className="block space-y-1.5 adm-label">
                   <span>Étape</span>
                   <select
                     value={draft.stage}
@@ -475,7 +475,7 @@ export function PipelineBoard({ initialCards }: PipelineBoardProps) {
                     ))}
                   </select>
                 </label>
-                <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+                <label className="block space-y-1.5 adm-label">
                   <span>
                     Montant estimé (€) <span className="font-normal text-slate-400">(facultatif)</span>
                   </span>
@@ -488,7 +488,7 @@ export function PipelineBoard({ initialCards }: PipelineBoardProps) {
                 </label>
               </div>
 
-              <label className="block space-y-1.5 text-sm font-medium text-slate-700">
+              <label className="block space-y-1.5 adm-label">
                 <span>
                   Notes <span className="font-normal text-slate-400">(facultatif)</span>
                 </span>
@@ -506,7 +506,7 @@ export function PipelineBoard({ initialCards }: PipelineBoardProps) {
                   {draft.phone ? (
                     <a
                       href={`tel:${draft.phone.replace(/\s/g, "")}`}
-                      className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
                     >
                       <Phone className="size-3.5" />
                       Appeler {formatPhone(draft.phone) || draft.phone}
@@ -515,7 +515,7 @@ export function PipelineBoard({ initialCards }: PipelineBoardProps) {
                   {draft.email ? (
                     <a
                       href={`mailto:${draft.email}`}
-                      className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
                     >
                       <Mail className="size-3.5" />
                       Écrire
