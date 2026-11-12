@@ -96,6 +96,29 @@ export function parisDayStartToIso(dateOnly: string) {
 
 type JsonRecord = Record<string, unknown>;
 
+/**
+ * Message enregistré quand Google refuse le jeton de rafraîchissement
+ * (`invalid_grant`) : l'autorisation a expiré ou a été retirée, et seule une
+ * reconnexion du compte peut relancer la synchronisation.
+ */
+export const GOOGLE_RECONNECT_REQUIRED_MESSAGE =
+  "Google a retiré l'accès à votre agenda (autorisation expirée ou révoquée). Reconnectez le compte Google pour relancer la synchronisation.";
+
+export function isGoogleReconnectRequired(error?: string | null) {
+  return error === GOOGLE_RECONNECT_REQUIRED_MESSAGE;
+}
+
+/** Erreur renvoyée par Google, avec son code (`invalid_grant`, `invalid_client`…). */
+export class GoogleApiError extends Error {
+  constructor(
+    message: string,
+    readonly code?: string,
+  ) {
+    super(message);
+    this.name = "GoogleApiError";
+  }
+}
+
 function readString(value: unknown) {
   return typeof value === "string" ? value : undefined;
 }
@@ -118,7 +141,7 @@ async function googleFetchJson(url: string, init: RequestInit, errorPrefix: stri
       (payload.error !== undefined ? JSON.stringify(payload.error) : undefined) ??
       `HTTP ${response.status}`;
 
-    throw new Error(`${errorPrefix} : ${description}`);
+    throw new GoogleApiError(`${errorPrefix} : ${description}`, readString(payload.error));
   }
 
   return payload;
@@ -182,20 +205,38 @@ export async function refreshGoogleAccessToken(refreshToken: string): Promise<Go
   }
 
   const { clientId, clientSecret } = getGoogleOAuthEnv();
-  const payload = await googleFetchJson(
-    GOOGLE_TOKEN_URL,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        refresh_token: refreshToken,
-        client_id: clientId,
-        client_secret: clientSecret,
-        grant_type: "refresh_token",
-      }),
-    },
-    "Impossible de rafraîchir le jeton Google",
-  );
+  let payload: JsonRecord;
+
+  try {
+    payload = await googleFetchJson(
+      GOOGLE_TOKEN_URL,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          refresh_token: refreshToken,
+          client_id: clientId,
+          client_secret: clientSecret,
+          grant_type: "refresh_token",
+        }),
+      },
+      "Impossible de rafraîchir le jeton Google",
+    );
+  } catch (error) {
+    // Google répond « Bad Request » sans plus de détail : on traduit le code.
+    if (error instanceof GoogleApiError && error.code === "invalid_grant") {
+      throw new GoogleApiError(GOOGLE_RECONNECT_REQUIRED_MESSAGE, error.code);
+    }
+
+    if (error instanceof GoogleApiError && error.code === "invalid_client") {
+      throw new GoogleApiError(
+        "Identifiants Google refusés (GOOGLE_CLIENT_ID ou GOOGLE_CLIENT_SECRET incorrect dans la configuration du site).",
+        error.code,
+      );
+    }
+
+    throw error;
+  }
 
   return { ...toTokenSet(payload), refreshToken };
 }

@@ -4,9 +4,11 @@ import {
   setGoogleCalendarSyncResult,
   updateGoogleCalendarAccessToken,
 } from "@/lib/data-access";
-import { isGoogleCalendarConfigured } from "@/lib/env";
+import { sendAdminCustomEmailToUser } from "@/lib/email";
+import { getAdminEmail, getAppUrl, isGoogleCalendarConfigured } from "@/lib/env";
 import {
   type GoogleBusyEvent,
+  isGoogleReconnectRequired,
   listGoogleBusyEvents,
   listGoogleCalendars,
   refreshGoogleAccessToken,
@@ -114,6 +116,18 @@ export async function syncGoogleCalendar(options?: { ignoreDisabled?: boolean })
   } catch (error) {
     const message = error instanceof Error ? error.message : "Erreur inconnue lors de la synchronisation Google.";
     await setGoogleCalendarSyncResult({ accountId: account.id, eventCount: 0, error: message });
+
+    // Une autorisation retirée ne se répare pas toute seule : on prévient
+    // l'administrateur une seule fois, au moment où la panne apparaît, pour
+    // qu'elle ne passe pas inaperçue pendant des semaines.
+    if (isGoogleReconnectRequired(message) && !isGoogleReconnectRequired(account.lastSyncError)) {
+      await sendAdminCustomEmailToUser({
+        to: getAdminEmail(),
+        firstName: "Mathieu",
+        subject: "Synchronisation Google Agenda interrompue",
+        message: `${message}\n\nTant que le compte n'est pas reconnecté, vos indisponibilités Google ne bloquent plus les créneaux du site.\n\nReconnecter le compte : ${getAppUrl()}/admin/google-calendar`,
+      }).catch(() => null);
+    }
 
     return { status: "error", message };
   }
