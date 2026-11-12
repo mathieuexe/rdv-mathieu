@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
-import { LoaderCircle, Unlink } from "lucide-react";
+import { LoaderCircle, Unlink } from "@/components/icons";
 
 import { cn } from "@/lib/utils";
 

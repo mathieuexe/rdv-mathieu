@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { LoaderCircle } from "lucide-react";
+import { LoaderCircle } from "@/components/icons";
 
 interface AppointmentDecisionPanelProps {
   appointmentId: string;

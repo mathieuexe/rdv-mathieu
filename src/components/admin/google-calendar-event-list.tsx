@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ExternalLink, PencilLine, RotateCcw, X } from "lucide-react";
+import { ExternalLink, PencilLine, RotateCcw, X } from "@/components/icons";
 
 import { PendingSubmitButton } from "@/components/admin/google-calendar-controls";
 import { GoogleCalendarBadge } from "@/components/shared/google-calendar-badge";

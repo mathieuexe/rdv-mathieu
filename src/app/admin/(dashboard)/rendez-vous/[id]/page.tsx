@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { Calendar, CalendarClock, Mail, FileText, User, Tag, Clock, CheckCircle2, AlertCircle } from "lucide-react";
+import { Calendar, CalendarClock, Mail, FileText, User, Tag, Clock, CheckCircle2, AlertCircle } from "@/components/icons";
 
 import { AppointmentDecisionPanel } from "@/components/admin/appointment-decision-panel";
 import { StatusBadge } from "@/components/admin/status-badge";

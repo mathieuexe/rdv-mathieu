@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { CalendarDays, ChevronRight } from "lucide-react";
+import { CalendarDays, ChevronRight } from "@/components/icons";
 
 import { PublicFooter } from "@/components/public/public-footer";
 import { PublicHeader } from "@/components/public/public-header";
@@ -106,7 +106,7 @@ export default async function Home() {
                           </span>
                         </span>
 
-                        <ChevronRight className="size-5 shrink-0 text-slate-300 transition-all group-hover:translate-x-0.5 group-hover:text-accent" />
+                        <ChevronRight className="size-5 shrink-0 text-slate-400 transition-all group-hover:translate-x-0.5 group-hover:text-accent" />
                       </Link>
                     </li>
                   ))}

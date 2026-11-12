@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { LaptopMinimal, MapPinned, MonitorSmartphone, ShieldCheck, Activity } from "lucide-react";
+import { LaptopMinimal, MapPinned, MonitorSmartphone, ShieldCheck, Activity } from "@/components/icons";
 
 import { AccountShell } from "@/components/account/account-shell";
 import { getPublicUserSession } from "@/lib/auth";

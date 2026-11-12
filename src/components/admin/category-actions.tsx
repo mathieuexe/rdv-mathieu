@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { Copy, LoaderCircle, Trash2 } from "lucide-react";
+import { Copy, LoaderCircle, Trash2 } from "@/components/icons";
 import { useRouter } from "next/navigation";
 
 import type { AdminUserActionState } from "@/app/admin/(dashboard)/actions";

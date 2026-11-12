@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Plus } from "@/components/icons";
 
 import { AppointmentsTable } from "@/components/admin/appointments-table";
 import { getAppointmentsView } from "@/lib/data-access";

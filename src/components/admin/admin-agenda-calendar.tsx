@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { addDays, addMonths, endOfMonth, endOfWeek, isSameMonth, startOfMonth, startOfWeek, subMonths } from "date-fns";
-import { ArrowUpRight, CalendarDays, ChevronLeft, ChevronRight, Clock3, UserRound } from "lucide-react";
+import { ArrowUpRight, CalendarDays, ChevronLeft, ChevronRight, Clock3, UserRound } from "@/components/icons";
 
 import { GoogleCalendarBadge } from "@/components/shared/google-calendar-badge";
 import { cn, formatAppointmentMode, formatDateTimeFr } from "@/lib/utils";

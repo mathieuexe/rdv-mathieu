@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { CalendarDays, CheckCircle2, Clock, MapPin, Phone, Video, XCircle, CalendarCheck, CalendarX, CalendarClock } from "lucide-react";
+import { CalendarDays, CheckCircle2, Clock, MapPin, Phone, Video, XCircle, CalendarCheck, CalendarX, CalendarClock } from "@/components/icons";
 
 import { AppointmentCancelForm } from "@/components/account/appointment-cancel-form";
 import { AccountShell } from "@/components/account/account-shell";

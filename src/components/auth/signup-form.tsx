@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useActionState, useMemo, useState } from "react";
-import { Eye, EyeOff, LoaderCircle, User, Mail, Lock, ShieldCheck } from "lucide-react";
+import { Eye, EyeOff, LoaderCircle, User, Mail, Lock, ShieldCheck } from "@/components/icons";
 
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import CustomGoogleIcon from "@/components/auth/login-form";

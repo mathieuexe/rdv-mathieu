@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, useTransition, type FormEvent } from "react";
-import { CalendarDays, Clock3, MapPinned } from "lucide-react";
+import { CalendarDays, Clock3, MapPinned } from "@/components/icons";
 
 import { CalendarLegend } from "@/components/shared/calendar-legend";
 import { CompanyField } from "@/components/shared/company-field";

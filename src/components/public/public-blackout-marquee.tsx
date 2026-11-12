@@ -1,4 +1,4 @@
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle } from "@/components/icons";
 import { format, parseISO, isAfter, isBefore } from "date-fns";
 import { fr } from "date-fns/locale";
 

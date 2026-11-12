@@ -7,9 +7,9 @@ import {
   Clock,
   Inbox,
   Shapes,
-  type LucideIcon,
+  type IconComponent,
   XCircle,
-} from "lucide-react";
+} from "@/components/icons";
 
 import { StatusBadge } from "@/components/admin/status-badge";
 import { getAppointmentsView, getCategories, getDashboardMetrics, getSiteSettings } from "@/lib/data-access";
@@ -24,7 +24,7 @@ function StatCard({
 }: {
   label: string;
   value: number;
-  icon: LucideIcon;
+  icon: IconComponent;
   tone: string;
   href?: string;
 }) {

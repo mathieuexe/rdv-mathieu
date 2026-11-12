@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, useTransition, type FormEvent } from "react";
-import { Building2, Mail, Phone, Plus, Trash2, X } from "lucide-react";
+import { Building2, Mail, Phone, Plus, Trash2, X } from "@/components/icons";
 
 import {
   deletePipelineCardAction,

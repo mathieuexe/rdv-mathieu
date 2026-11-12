@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useTransition, type FormEvent } from "react";
-import { Info, Calendar, Image as ImageIcon, Globe, MessageSquare, Save, Lock, Plus, Trash2, GripVertical, Settings } from "lucide-react";
+import { Info, Calendar, Image as ImageIcon, Globe, MessageSquare, Save, Lock, Plus, Trash2, GripVertical, Settings } from "@/components/icons";
 
 import { ImagePicker } from "@/components/admin/image-picker";
 import type { AppointmentCategory, CustomField } from "@/types/domain";

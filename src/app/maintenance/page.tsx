@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Wrench } from "lucide-react";
+import { Wrench } from "@/components/icons";
 
 import { getSiteSettings } from "@/lib/data-access";
 

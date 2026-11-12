@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { LoaderCircle, Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { LoaderCircle, Mail, Lock, Eye, EyeOff } from "@/components/icons";
 
 import type { LoginActionState } from "@/app/admin/login/actions";
 

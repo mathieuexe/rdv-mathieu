@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { Ban, LoaderCircle, Trash2 } from "lucide-react";
+import { Ban, LoaderCircle, Trash2 } from "@/components/icons";
 
 import type { AdminUserActionState } from "@/app/admin/(dashboard)/actions";
 import type { UserProfileRecord } from "@/types/domain";

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { AlertTriangle, LaptopMinimal, MapPinned, MonitorSmartphone, ShieldCheck, User, Calendar, History, Settings, KeyRound, Ban, Trash2 } from "lucide-react";
+import { AlertTriangle, LaptopMinimal, MapPinned, MonitorSmartphone, ShieldCheck, User, Calendar, History, Settings, KeyRound, Ban, Trash2 } from "@/components/icons";
 
 import { 
   updateAdminUserProfileAction, 

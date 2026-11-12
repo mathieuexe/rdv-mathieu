@@ -1,4 +1,4 @@
-import { TriangleAlert } from "lucide-react";
+import { TriangleAlert } from "@/components/icons";
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { after } from "next/server";

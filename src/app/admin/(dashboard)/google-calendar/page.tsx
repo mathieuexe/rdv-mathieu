@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AlertTriangle, CalendarSync, CheckCircle2, Link2, RefreshCw, Save, TriangleAlert } from "lucide-react";
+import { AlertTriangle, CalendarSync, CheckCircle2, Link2, RefreshCw, Save, TriangleAlert } from "@/components/icons";
 
 import { DisconnectGoogleCalendarForm, PendingSubmitButton } from "@/components/admin/google-calendar-controls";
 import {

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Plus, TimerReset, Settings, CalendarRange, MapPin } from "lucide-react";
+import { Plus, TimerReset, Settings, CalendarRange, MapPin } from "@/components/icons";
 
 import { getCategories } from "@/lib/data-access";
 import { formatAppointmentMode } from "@/lib/utils";

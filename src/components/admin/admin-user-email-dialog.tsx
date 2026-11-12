@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, X } from "lucide-react";
+import { Mail, X } from "@/components/icons";
 
 interface AdminUserEmailDialogProps {
   userEmail: string;

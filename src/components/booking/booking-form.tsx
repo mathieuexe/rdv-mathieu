@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CalendarDays, Check, ChevronLeft, ChevronRight, Clock, Info, LoaderCircle, MapPin, Zap } from "lucide-react";
+import { CalendarDays, Check, ChevronLeft, ChevronRight, Clock, Info, LoaderCircle, MapPin, Zap } from "@/components/icons";
 
 import { CompanyField } from "@/components/shared/company-field";
 import { groupSlotsByDay } from "@/lib/booking";

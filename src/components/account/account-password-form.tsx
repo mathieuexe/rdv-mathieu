@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useMemo, useState } from "react";
-import { LoaderCircle, Save, ShieldAlert } from "lucide-react";
+import { LoaderCircle, Save, ShieldAlert } from "@/components/icons";
 
 import type { AccountPasswordActionState } from "@/app/compte/actions";
 

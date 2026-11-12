@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronDown, LogOut } from "lucide-react";
+import { ChevronDown, LogOut } from "@/components/icons";
 
 import { logoutAccountAction } from "@/app/compte/actions";
 import { getPublicUserSession } from "@/lib/auth";

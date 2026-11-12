@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useActionState, useState } from "react";
-import { Eye, EyeOff, LoaderCircle, Mail } from "lucide-react";
+import { Eye, EyeOff, LoaderCircle, Mail } from "@/components/icons";
 
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import type { PublicLoginActionState } from "@/app/connexion/actions";

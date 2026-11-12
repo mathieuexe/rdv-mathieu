@@ -1,4 +1,4 @@
-import { Activity, Clock, Globe, Laptop, Smartphone, Tablet, Users } from "lucide-react";
+import { Activity, Clock, Globe, Laptop, Smartphone, Tablet, Users } from "@/components/icons";
 import { getTrackingStats } from "@/lib/tracking";
 
 function formatDuration(seconds: number) {

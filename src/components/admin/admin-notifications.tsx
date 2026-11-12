@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
-import { Bell, BellRing, Check, Info, AlertTriangle, UserPlus, CalendarPlus, CalendarMinus } from "lucide-react";
+import { Bell, BellRing, Check, Info, AlertTriangle, UserPlus, CalendarPlus, CalendarMinus } from "@/components/icons";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 

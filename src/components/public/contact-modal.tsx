@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, Send, Loader2 } from "lucide-react";
+import { X, Send, Loader2 } from "@/components/icons";
 import { PhoneInput } from "@/components/ui/phone-input";
 
 interface ContactModalProps {

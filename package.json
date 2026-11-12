@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "check": "npm run lint && npm run typecheck && npm run test"
+    "check": "npm run lint && npm run typecheck && npm run test",
+    "icons": "node scripts/generate-garden-icons.mjs"
   },
   "dependencies": {
     "@react-email/render": "^2.1.0",
@@ -18,7 +19,6 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "libphonenumber-js": "^1.13.10",
-    "lucide-react": "^0.542.0",
     "next": "16.2.12",
     "pdf-lib": "^1.17.1",
     "react": "19.2.4",
@@ -33,6 +33,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@zendeskgarden/svg-icons": "^8.4.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.12",
     "tailwindcss": "^4",

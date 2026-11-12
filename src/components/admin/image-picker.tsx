@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ImageUp, Link2, LoaderCircle, Search, Sparkles, Trash2 } from "lucide-react";
+import { ImageUp, Link2, LoaderCircle, Search, Sparkles, Trash2 } from "@/components/icons";
 
 import { resizeFileToJpeg, resizeRemoteUrlToJpeg } from "@/lib/image-processing";
 import { cn } from "@/lib/utils";

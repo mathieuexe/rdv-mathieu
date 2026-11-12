@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Search, Mail, History, Info } from "lucide-react";
+import { Search, Mail, History, Info } from "@/components/icons";
 
 import { getEmailLogByReference, getRecentEmailLogs } from "@/lib/data-access";
 import { formatDateTimeFr } from "@/lib/utils";

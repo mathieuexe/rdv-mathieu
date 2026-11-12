@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { Ban } from "lucide-react";
+import { Ban } from "@/components/icons";
 
 import type { AccountActionState } from "@/app/compte/actions";
 

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, CalendarCheck, Clock } from "lucide-react";
+import { ArrowRight, CalendarCheck, Clock } from "@/components/icons";
 
 import { PublicFooter } from "@/components/public/public-footer";
 import { PublicHeader } from "@/components/public/public-header";

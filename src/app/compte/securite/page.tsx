@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { KeyRound } from "lucide-react";
+import { KeyRound } from "@/components/icons";
 
 import { changeAccountPasswordAction } from "@/app/compte/actions";
 import { AccountPasswordForm } from "@/components/account/account-password-form";

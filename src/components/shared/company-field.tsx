@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import { Building2, Check, LoaderCircle } from "lucide-react";
+import { Building2, Check, LoaderCircle } from "@/components/icons";
 
 import { formatSiren, type CompanySuggestion } from "@/lib/company";
 import { cn } from "@/lib/utils";

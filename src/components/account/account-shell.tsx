@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LogOut, UserCircle } from "lucide-react";
+import { LogOut, UserCircle } from "@/components/icons";
 
 import { logoutAccountAction } from "@/app/compte/actions";
 import { PublicFooter } from "@/components/public/public-footer";

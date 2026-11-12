@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState } from "react";
-import { Save, LoaderCircle, CheckCircle2, AlertCircle } from "lucide-react";
+import { Save, LoaderCircle, CheckCircle2, AlertCircle } from "@/components/icons";
 import { PhoneInput } from "@/components/ui/phone-input";
 
 import type { AccountProfileActionState } from "@/app/compte/actions";

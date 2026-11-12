@@ -20,7 +20,7 @@ import {
   Shapes,
   Users,
   X,
-} from "lucide-react";
+} from "@/components/icons";
 
 import { logoutAction } from "@/app/admin/login/actions";
 import { AdminNotifications } from "@/components/admin/admin-notifications";

@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { UserCog } from "lucide-react";
+import { UserCog } from "@/components/icons";
 
 import { updateAccountProfileAction } from "@/app/compte/actions";
 import { AccountProfileForm } from "@/components/account/account-profile-form";

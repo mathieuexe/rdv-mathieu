@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { Search, ChevronRight } from "lucide-react";
+import { Search, ChevronRight } from "@/components/icons";
 
 import { formatPhone } from "@/lib/utils";
 import type { UserProfileRecord } from "@/types/domain";

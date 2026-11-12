@@ -1,5 +1,5 @@
 import { headers } from "next/headers";
-import { Settings, Save } from "lucide-react";
+import { Settings, Save } from "@/components/icons";
 
 import { GlobalBlackoutPeriodsEditor } from "@/components/admin/global-blackout-periods-editor";
 import { getSiteSettings } from "@/lib/data-access";

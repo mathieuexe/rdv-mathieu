@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CalendarRange, Plus, Trash2 } from "lucide-react";
+import { CalendarRange, Plus, Trash2 } from "@/components/icons";
 
 import type { BlackoutPeriod } from "@/types/domain";
 
