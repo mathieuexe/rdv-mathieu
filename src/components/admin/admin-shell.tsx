@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   ArrowUpRight,
   BarChart3,
+  KanbanSquare,
   CalendarPlus2,
   CalendarRange,
   CalendarSync,
@@ -35,6 +36,10 @@ const navigationSections = [
       { href: "/admin/rendez-vous/nouveau", label: "Nouveau rendez-vous", icon: CalendarPlus2 },
       { href: "/admin/google-calendar", label: "Google Agenda", icon: CalendarSync },
     ],
+  },
+  {
+    title: "Prospection",
+    items: [{ href: "/admin/pipeline", label: "Pipeline", icon: KanbanSquare }],
   },
   {
     title: "Configuration",
