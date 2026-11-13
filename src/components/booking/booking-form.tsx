@@ -326,7 +326,7 @@ export function BookingForm({
     <div ref={topRef} className="mx-auto w-full max-w-[920px] scroll-mt-24">
       {/* ----------------------------------------------------------- Bannière */}
       {category.bannerImageUrl ? (
-        <div className="relative mb-6 aspect-[8/3] w-full overflow-hidden rounded-2xl border border-slate-200 bg-slate-100">
+        <div className="relative mb-5 h-20 w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-100 sm:h-28">
           <Image
             src={category.bannerImageUrl}
             alt=""
