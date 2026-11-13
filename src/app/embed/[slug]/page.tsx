@@ -52,7 +52,7 @@ export default async function EmbedBookingPage({
   const bookingState = getBookingState(payload.category, payload.siteSettings);
 
   return (
-    <div className="rdv-embed bg-white px-4 py-5 text-slate-900 sm:px-6 sm:py-6">
+    <div className="rdv-embed bg-white px-3 py-4 text-slate-900 sm:px-4">
       <EmbedHeightReporter />
 
       {!bookingState.available ? (

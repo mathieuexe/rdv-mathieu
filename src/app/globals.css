@@ -677,3 +677,8 @@
 body:has(.rdv-embed) .da-scroll-progress {
   display: none;
 }
+
+/* Tunnel de réservation : champs plus compacts (16 px gardé contre le zoom iOS). */
+.booking-compact .da-field {
+  padding: 0.5rem 0.75rem;
+}

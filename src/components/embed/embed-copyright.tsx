@@ -7,7 +7,7 @@ export function EmbedCopyright() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="mt-6 border-t border-slate-100 pt-4 text-center text-[11px] leading-relaxed text-slate-400">
+    <footer className="mt-4 border-t border-slate-100 pt-3 text-center text-[11px] leading-relaxed text-slate-400">
       <p>
         © {year}{" "}
         <a

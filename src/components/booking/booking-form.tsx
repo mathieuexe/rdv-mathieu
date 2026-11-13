@@ -323,39 +323,39 @@ export function BookingForm({
   ];
 
   return (
-    <div ref={topRef} className="mx-auto w-full max-w-[920px] scroll-mt-24">
+    <div ref={topRef} className="booking-compact mx-auto w-full max-w-[760px] scroll-mt-24">
       {/* ----------------------------------------------------------- Bannière */}
       {category.bannerImageUrl ? (
-        <div className="relative mb-5 h-20 w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-100 sm:h-28">
+        <div className="relative mb-4 h-16 w-full overflow-hidden rounded-lg bg-slate-100 sm:h-20">
           <Image
             src={category.bannerImageUrl}
             alt=""
             fill
             priority
-            sizes="(max-width: 920px) 100vw, 920px"
+            sizes="(max-width: 760px) 100vw, 760px"
             className="object-cover"
           />
         </div>
       ) : null}
 
       {/* ------------------------------------------------------------ En-tête */}
-      <header className="flex items-center gap-4">
-        <span className="relative flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-accent-soft text-sm font-semibold text-accent">
+      <header className="flex items-center gap-3">
+        <span className="relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-accent-soft text-xs font-semibold text-accent">
           {category.thumbnailImageUrl ? (
-            <Image src={category.thumbnailImageUrl} alt="" fill priority sizes="56px" className="object-cover" />
+            <Image src={category.thumbnailImageUrl} alt="" fill priority sizes="40px" className="object-cover" />
           ) : (
             initials
           )}
         </span>
         <div className="min-w-0">
-          <h1 className="da-title text-[20px] sm:text-[24px]">{category.title}</h1>
-          <p className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-[14px] text-slate-500">
+          <h1 className="da-title text-[17px] sm:text-[19px]">{category.title}</h1>
+          <p className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[13px] text-slate-500">
             <span className="inline-flex items-center gap-1.5">
-              <Clock className="size-4 text-accent" />
+              <Clock className="size-3.5 text-accent" />
               {category.durationMinutes} min
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <MapPin className="size-4 text-accent" />
+              <MapPin className="size-3.5 text-accent" />
               {modeLabel}
             </span>
           </p>
@@ -363,27 +363,27 @@ export function BookingForm({
       </header>
 
       {category.description && activeStep === 1 ? (
-        <p className="mt-4 text-[15px] leading-relaxed text-slate-500">{category.description}</p>
+        <p className="mt-2 text-[14px] leading-relaxed text-slate-500">{category.description}</p>
       ) : null}
 
       {/* -------------------------------------------------------------- Étapes */}
-      <ol className="mt-6 flex items-center gap-3 text-[14px] font-medium">
+      <ol className="mt-4 flex items-center gap-2 text-[13px] font-medium">
         {steps.map((item, index) => {
           const isDone = activeStep > item.number;
           const isCurrent = activeStep === item.number;
 
           return (
-            <li key={item.number} className="flex items-center gap-3" aria-current={isCurrent ? "step" : undefined}>
-              {index > 0 ? <span className="h-px w-6 bg-slate-200 sm:w-10" aria-hidden="true" /> : null}
+            <li key={item.number} className="flex items-center gap-2" aria-current={isCurrent ? "step" : undefined}>
+              {index > 0 ? <span className="h-px w-4 bg-slate-200 sm:w-8" aria-hidden="true" /> : null}
               <span
                 className={cn(
-                  "flex size-7 shrink-0 items-center justify-center rounded-full border text-[13px] font-semibold",
+                  "flex size-6 shrink-0 items-center justify-center rounded-full border text-[12px] font-semibold",
                   isCurrent && "border-accent bg-accent text-white",
                   isDone && "border-accent bg-accent-soft text-accent",
                   !isCurrent && !isDone && "border-slate-200 text-slate-400",
                 )}
               >
-                {isDone ? <Check className="size-4" /> : item.number}
+                {isDone ? <Check className="size-3.5" /> : item.number}
               </span>
               <span className={cn(isCurrent ? "text-slate-900" : "text-slate-400")}>{item.label}</span>
             </li>
@@ -392,66 +392,66 @@ export function BookingForm({
       </ol>
 
       {error ? (
-        <p role="alert" className="mt-5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-[14px] font-medium text-rose-700">
+        <p role="alert" className="mt-4 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-[13px] font-medium text-rose-700">
           {error}
         </p>
       ) : null}
 
       {activeStep === 1 ? (
         /* ================================================= Étape 1 : créneau */
-        <section className="mt-5 rounded-2xl border border-slate-200 bg-white">
+        <section className="mt-4 rounded-xl border border-slate-200 bg-white">
           {dayEntries.length === 0 ? (
-            <div className="px-6 py-14 text-center">
-              <CalendarDays className="mx-auto size-9 text-slate-300" />
-              <p className="da-title mt-4 text-[18px]">Aucun créneau disponible pour le moment</p>
-              <p className="mt-2 text-[15px] text-slate-500">Revenez un peu plus tard, de nouvelles disponibilités sont ajoutées régulièrement.</p>
-              <Link href="/" target={embedded ? "_blank" : undefined} className="da-btn da-btn-secondary da-btn-sm mt-6">
+            <div className="px-5 py-10 text-center">
+              <CalendarDays className="mx-auto size-7 text-slate-300" />
+              <p className="da-title mt-3 text-[16px]">Aucun créneau disponible pour le moment</p>
+              <p className="mt-1.5 text-[14px] text-slate-500">Revenez un peu plus tard, de nouvelles disponibilités sont ajoutées régulièrement.</p>
+              <Link href="/" target={embedded ? "_blank" : undefined} className="da-btn da-btn-secondary da-btn-sm mt-5">
                 Voir les autres rendez-vous
               </Link>
             </div>
           ) : (
             <>
               {note ? (
-                <p className="flex items-start gap-2.5 border-b border-slate-200 px-4 py-3 text-[14px] leading-relaxed text-slate-600 sm:px-6">
-                  <Info className="mt-0.5 size-4 shrink-0 text-accent" />
+                <p className="flex items-start gap-2 border-b border-slate-200 px-4 py-2.5 text-[13px] leading-relaxed text-slate-600">
+                  <Info className="mt-0.5 size-3.5 shrink-0 text-accent" />
                   <span>{note}</span>
                 </p>
               ) : null}
 
               {earliestSlot ? (
-                <div className="border-b border-slate-200 p-4 sm:px-6">
+                <div className="border-b border-slate-200 px-4 py-3">
                   <button
                     type="button"
                     onClick={() => handleSelectSlot(earliestSlot)}
-                    className="group flex w-full items-center gap-3 rounded-xl border border-accent/30 bg-accent-soft px-4 py-3 text-left transition-colors hover:border-accent"
+                    className="group flex w-full items-center gap-2.5 rounded-lg border border-accent/30 bg-accent-soft px-3 py-2 text-left transition-colors hover:border-accent"
                   >
-                    <Zap className="size-5 shrink-0 text-accent" />
+                    <Zap className="size-4 shrink-0 text-accent" />
                     <span className="min-w-0 flex-1">
-                      <span className="block text-[13px] font-medium text-accent">Au plus tôt</span>
-                      <span className="block text-[15px] font-semibold text-slate-900 first-letter:uppercase">
+                      <span className="block text-[12px] font-medium text-accent">Au plus tôt</span>
+                      <span className="block text-[14px] font-semibold text-slate-900 first-letter:uppercase">
                         {formatDayLabel(earliestSlot.start.slice(0, 10), { weekday: "long", day: "numeric", month: "long" })} à{" "}
                         {earliestSlot.label}
                       </span>
                     </span>
-                    <ChevronRight className="size-5 shrink-0 text-accent transition-transform group-hover:translate-x-0.5" />
+                    <ChevronRight className="size-4 shrink-0 text-accent transition-transform group-hover:translate-x-0.5" />
                   </button>
                 </div>
               ) : null}
 
               <div className="grid md:grid-cols-2">
                 {/* ---------------------------------------------- Calendrier */}
-                <div className="border-b border-slate-200 p-4 sm:p-6 md:border-b-0 md:border-r">
+                <div className="border-b border-slate-200 p-4 md:border-b-0 md:border-r">
                   <div className="flex items-center justify-between">
-                    <h2 className="text-[16px] font-semibold capitalize text-slate-900">{formatMonthLabel(visibleMonth)}</h2>
-                    <div className="flex items-center gap-2">
+                    <h2 className="text-[14px] font-semibold capitalize text-slate-900">{formatMonthLabel(visibleMonth)}</h2>
+                    <div className="flex items-center gap-1">
                       <button
                         type="button"
                         aria-label="Mois précédent"
                         onClick={() => setVisibleMonthKey(monthKeys[Math.max(0, visibleMonthIndex - 1)] ?? visibleMonth)}
                         disabled={visibleMonthIndex === 0}
-                        className="flex size-10 items-center justify-center rounded-full border border-slate-200 text-slate-600 transition-colors hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-30"
+                        className="flex size-8 items-center justify-center rounded-full border border-slate-200 text-slate-600 transition-colors hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-30"
                       >
-                        <ChevronLeft className="size-5" />
+                        <ChevronLeft className="size-4" />
                       </button>
                       <button
                         type="button"
@@ -460,20 +460,20 @@ export function BookingForm({
                           setVisibleMonthKey(monthKeys[Math.min(monthKeys.length - 1, visibleMonthIndex + 1)] ?? visibleMonth)
                         }
                         disabled={visibleMonthIndex >= monthKeys.length - 1}
-                        className="flex size-10 items-center justify-center rounded-full border border-slate-200 text-slate-600 transition-colors hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-30"
+                        className="flex size-8 items-center justify-center rounded-full border border-slate-200 text-slate-600 transition-colors hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-30"
                       >
-                        <ChevronRight className="size-5" />
+                        <ChevronRight className="size-4" />
                       </button>
                     </div>
                   </div>
 
-                  <div className="mt-4 grid grid-cols-7 gap-1 text-center text-[12px] font-medium text-slate-400">
+                  <div className="mt-3 grid grid-cols-7 gap-1 text-center text-[11px] font-medium text-slate-400">
                     {weekdayHeaders.map((label) => (
                       <div key={label}>{label}</div>
                     ))}
                   </div>
 
-                  <div className="mt-2 grid grid-cols-7 gap-1">
+                  <div className="mt-1 grid grid-cols-7 gap-0.5">
                     {calendarCells.map((cell) => {
                       if (cell.dayNumber === null) {
                         return <div key={cell.key} />;
@@ -491,7 +491,7 @@ export function BookingForm({
                           aria-label={formatDayLabel(cell.key, { weekday: "long", day: "numeric", month: "long" })}
                           onClick={() => handleSelectDate(cell.key)}
                           className={cn(
-                            "mx-auto flex aspect-square w-full max-w-12 items-center justify-center rounded-full text-[15px] transition-colors",
+                            "mx-auto flex aspect-square w-full max-w-9 items-center justify-center rounded-full text-[13px] transition-colors",
                             !isAvailable && "cursor-not-allowed text-slate-300",
                             isAvailable && !isSelected && "bg-accent-soft font-semibold text-accent hover:bg-accent hover:text-white",
                             isSelected && "bg-accent font-semibold text-white",
@@ -502,30 +502,28 @@ export function BookingForm({
                       );
                     })}
                   </div>
-
-                  <p className="mt-4 text-[13px] text-slate-400">Les jours en bleu ont des créneaux libres.</p>
                 </div>
 
                 {/* ------------------------------------------------ Horaires */}
-                <div ref={slotsRef} className="scroll-mt-24 p-4 sm:p-6">
+                <div ref={slotsRef} className="scroll-mt-24 p-4">
                   {selectedDay ? (
                     <>
-                      <h2 className="text-[16px] font-semibold text-slate-900 first-letter:uppercase">
+                      <h2 className="text-[14px] font-semibold text-slate-900 first-letter:uppercase">
                         {formatDayLabel(selectedDay.dateKey, { weekday: "long", day: "numeric", month: "long" })}
                       </h2>
-                      <p className="mt-1 text-[13px] text-slate-400">Heure de Paris · choisissez un horaire</p>
+                      <p className="mt-0.5 text-[12px] text-slate-400">Heure de Paris · choisissez un horaire</p>
 
-                      <div className="mt-4 space-y-5">
+                      <div className="mt-3 space-y-3">
                         {periods.map((period) => (
                           <div key={period.label}>
-                            <p className="text-[13px] font-medium text-slate-500">{period.label}</p>
-                            <div className="mt-2 grid grid-cols-3 gap-2 min-[420px]:grid-cols-4 md:grid-cols-3 lg:grid-cols-4">
+                            <p className="text-[12px] font-medium text-slate-500">{period.label}</p>
+                            <div className="mt-1.5 grid grid-cols-3 gap-1.5 min-[420px]:grid-cols-4 md:grid-cols-3 lg:grid-cols-4">
                               {period.slots.map((slot) => (
                                 <button
                                   key={slot.start}
                                   type="button"
                                   onClick={() => handleSelectSlot(slot)}
-                                  className="flex h-12 items-center justify-center rounded-xl border border-slate-200 bg-white text-[15px] font-semibold text-slate-900 transition-colors hover:border-accent hover:bg-accent hover:text-white"
+                                  className="flex h-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-[14px] font-semibold text-slate-900 transition-colors hover:border-accent hover:bg-accent hover:text-white"
                                 >
                                   {slot.label}
                                 </button>
@@ -543,12 +541,12 @@ export function BookingForm({
         </section>
       ) : (
         /* ============================================= Étape 2 : coordonnées */
-        <form ref={formRef} onSubmit={handleSubmit} noValidate className="mt-5 space-y-5">
-          <div className="flex items-center gap-3 rounded-2xl border border-accent/30 bg-accent-soft p-4">
-            <CalendarDays className="size-5 shrink-0 text-accent" />
+        <form ref={formRef} onSubmit={handleSubmit} noValidate className="mt-4 space-y-3">
+          <div className="flex items-center gap-2.5 rounded-lg border border-accent/30 bg-accent-soft px-3 py-2">
+            <CalendarDays className="size-4 shrink-0 text-accent" />
             <div className="min-w-0 flex-1">
-              <p className="text-[13px] font-medium text-accent">Votre créneau</p>
-              <p className="text-[15px] font-semibold text-slate-900 first-letter:uppercase">
+              <p className="text-[12px] font-medium text-accent">Votre créneau</p>
+              <p className="text-[14px] font-semibold text-slate-900 first-letter:uppercase">
                 {activeSlot ? formatDateTimeFr(activeSlot.start, { dateStyle: "full", timeStyle: "short" }) : ""}
               </p>
             </div>
@@ -558,14 +556,14 @@ export function BookingForm({
                 setStep(1);
                 setError("");
               }}
-              className="shrink-0 rounded-lg px-3 py-2 text-[14px] font-semibold text-accent underline underline-offset-4 hover:text-accent-hover"
+              className="shrink-0 rounded-md px-2 py-1 text-[13px] font-semibold text-accent underline underline-offset-4 hover:text-accent-hover"
             >
               Modifier
             </button>
           </div>
 
-          <div className="space-y-4 rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
-            <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-4">
+            <div className="grid gap-3 sm:grid-cols-2">
               <Field name="firstName" label="Prénom" error={fieldErrors.firstName}>
                 <input
                   id="booking-firstName"
@@ -599,7 +597,7 @@ export function BookingForm({
               </Field>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-3 sm:grid-cols-2">
               <Field name="email" label="Email" hint="Pour recevoir la confirmation." error={fieldErrors.email}>
                 <input
                   id="booking-email"
@@ -677,7 +675,7 @@ export function BookingForm({
             <Field name="message" label="Message" optional>
               <textarea
                 id="booking-message"
-                rows={3}
+                rows={2}
                 value={message}
                 onChange={(event) => setMessage(event.target.value)}
                 placeholder="Précisez l'objet du rendez-vous si vous le souhaitez."
@@ -687,13 +685,13 @@ export function BookingForm({
           </div>
 
           <div className="sticky bottom-0 z-10 -mx-4 border-t border-slate-200 bg-white/95 px-4 py-3 backdrop-blur sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none">
-            <button type="submit" disabled={isSubmitting} className="da-btn da-btn-primary w-full">
-              {isSubmitting ? <LoaderCircle className="size-5 animate-spin" /> : null}
+            <button type="submit" disabled={isSubmitting} className="da-btn da-btn-primary w-full rounded-lg py-2.5 text-[15px]">
+              {isSubmitting ? <LoaderCircle className="size-4 animate-spin" /> : null}
               {isSubmitting ? "Envoi en cours…" : "Confirmer le rendez-vous"}
             </button>
           </div>
 
-          <p className="text-center text-[13px] leading-relaxed text-slate-500">
+          <p className="text-center text-[12px] leading-relaxed text-slate-400">
             Votre demande est transmise pour validation : vous recevez la réponse par email.
             {!isAuthenticated ? (
               <>
@@ -742,21 +740,21 @@ function Field({
   );
 
   return (
-    <div data-field={name} className="space-y-1.5">
+    <div data-field={name} className="space-y-1">
       {asGroup ? (
-        <p className="text-[14px] font-medium text-slate-900">{labelContent}</p>
+        <p className="text-[13px] font-medium text-slate-700">{labelContent}</p>
       ) : (
-        <label htmlFor={`booking-${name}`} className="block text-[14px] font-medium text-slate-900">
+        <label htmlFor={`booking-${name}`} className="block text-[13px] font-medium text-slate-700">
           {labelContent}
         </label>
       )}
       {children}
       {error ? (
-        <p role="alert" className="text-[13px] font-medium text-rose-600">
+        <p role="alert" className="text-[12px] font-medium text-rose-600">
           {error}
         </p>
       ) : hint ? (
-        <p className="text-[13px] text-slate-400">{hint}</p>
+        <p className="text-[12px] text-slate-400">{hint}</p>
       ) : null}
     </div>
   );
