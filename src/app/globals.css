@@ -672,3 +672,8 @@
     color: var(--color-slate-700);
   }
 }
+
+/* Widget intégré (iframe) : pas de barre de progression de lecture. */
+body:has(.rdv-embed) .da-scroll-progress {
+  display: none;
+}

@@ -2,6 +2,16 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   // L'ancienne page de présentation a été retirée : ses liens mènent à la réservation.
+  // Les pages /embed sont faites pour être affichées dans une iframe sur
+  // n'importe quel site : on l'autorise explicitement.
+  headers() {
+    return [
+      {
+        source: "/embed/:path*",
+        headers: [{ key: "Content-Security-Policy", value: "frame-ancestors *" }],
+      },
+    ];
+  },
   redirects() {
     return [{ source: "/qui-suis-je", destination: "/", permanent: true }];
   },

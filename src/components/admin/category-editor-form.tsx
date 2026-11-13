@@ -35,6 +35,8 @@ interface CategoryEditorFormProps {
   returnPath: string;
   saved?: boolean;
   error?: string;
+  /** Contenu ajouté en tête de la colonne de droite (ex. code d'intégration). */
+  aside?: React.ReactNode;
 }
 
 function getDayDefaults(category: AppointmentCategory | null | undefined, weekday: (typeof weekdayOptions)[number]["key"]) {
@@ -53,7 +55,7 @@ function getDayDefaults(category: AppointmentCategory | null | undefined, weekda
   };
 }
 
-export function CategoryEditorForm({ action, category, title, returnPath, saved, error }: CategoryEditorFormProps) {
+export function CategoryEditorForm({ action, category, title, returnPath, saved, error, aside }: CategoryEditorFormProps) {
   const [categoryTitle, setCategoryTitle] = useState(category?.title ?? "");
   const [slug, setSlug] = useState(category?.slug ?? "");
   const [description, setDescription] = useState(category?.description ?? "");
@@ -510,6 +512,7 @@ export function CategoryEditorForm({ action, category, title, returnPath, saved,
 
         {/* Right Column */}
         <div className="space-y-6">
+          {aside}
           <section className="adm-card">
             <div className="adm-card-header">
               <Globe className="adm-card-icon" />

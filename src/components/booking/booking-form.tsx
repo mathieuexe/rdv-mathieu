@@ -35,6 +35,13 @@ interface BookingFormProps {
     email?: string;
     phone?: string;
   };
+  /**
+   * Formulaire affiché dans un widget intégré sur un autre site (iframe) :
+   * les liens s'ouvrent dans un nouvel onglet. En mode « inline », le widget
+   * prend toute sa hauteur dans la page hôte : c'est elle qui doit défiler.
+   * En mode « popup », il défile dans sa propre fenêtre.
+   */
+  embedded?: false | "inline" | "popup";
 }
 
 type FieldErrors = Record<string, string>;
@@ -82,7 +89,38 @@ function groupSlotsByPeriod(daySlots: BookingSlot[]) {
   return periods.filter((period) => period.slots.length > 0);
 }
 
-export function BookingForm({ category, categorySlug, slots, helperMessage, isAuthenticated, initialUser }: BookingFormProps) {
+/**
+ * Amène un élément à l'écran. Dans un widget intégré, c'est la page hôte qui
+ * défile : on lui transmet la position de l'élément dans le widget.
+ */
+function bringIntoView(
+  element: HTMLElement | null,
+  embedded: BookingFormProps["embedded"],
+  block: ScrollLogicalPosition = "start",
+) {
+  if (!element) return;
+
+  if (embedded === "inline") {
+    const rect = element.getBoundingClientRect();
+    window.parent.postMessage(
+      { type: "rdv-embed:scroll", top: rect.top + window.scrollY, height: rect.height, block },
+      "*",
+    );
+    return;
+  }
+
+  element.scrollIntoView({ behavior: "smooth", block });
+}
+
+export function BookingForm({
+  category,
+  categorySlug,
+  slots,
+  helperMessage,
+  isAuthenticated,
+  initialUser,
+  embedded = false,
+}: BookingFormProps) {
   const router = useRouter();
   const topRef = useRef<HTMLDivElement>(null);
   const slotsRef = useRef<HTMLDivElement>(null);
@@ -140,8 +178,8 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
       return;
     }
 
-    topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, [activeStep]);
+    bringIntoView(topRef.current, embedded);
+  }, [activeStep, embedded]);
 
   function handleSelectDate(dateKey: string) {
     setSelectedDateKey(dateKey);
@@ -152,8 +190,11 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
     requestAnimationFrame(() => {
       const element = slotsRef.current;
 
-      if (element && element.getBoundingClientRect().top > window.innerHeight * 0.6) {
-        element.scrollIntoView({ behavior: "smooth", block: "start" });
+      if (!element) return;
+
+      // Dans un widget, la hauteur visible est celle de la page hôte : on lui laisse juger.
+      if (embedded === "inline" || element.getBoundingClientRect().top > window.innerHeight * 0.6) {
+        bringIntoView(element, embedded);
       }
     });
   }
@@ -197,7 +238,7 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
     if (firstInvalid) {
       setError("");
       const target = formRef.current?.querySelector<HTMLElement>(`[data-field="${firstInvalid}"]`);
-      target?.scrollIntoView({ behavior: "smooth", block: "center" });
+      bringIntoView(target ?? null, embedded, "center");
       target?.querySelector<HTMLElement>("input, select, textarea")?.focus({ preventScroll: true });
       return;
     }
@@ -258,7 +299,12 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
     }
 
     const params = new URLSearchParams({ slot: payload.startsAt, firstName: payload.firstName });
-    router.push(`/rdv/${categorySlug}/confirmation?${params.toString()}`);
+    if (embedded) {
+      // La page hôte peut réagir à une réservation (message, suivi de conversion…).
+      window.parent.postMessage({ type: "rdv-embed:booked", slug: categorySlug, startsAt: payload.startsAt }, "*");
+    }
+
+    router.push(`${embedded ? "/embed" : "/rdv"}/${categorySlug}/confirmation?${params.toString()}`);
   }
 
   function clearFieldError(name: string) {
@@ -345,7 +391,7 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
               <CalendarDays className="mx-auto size-9 text-slate-300" />
               <p className="da-title mt-4 text-[18px]">Aucun créneau disponible pour le moment</p>
               <p className="mt-2 text-[15px] text-slate-500">Revenez un peu plus tard, de nouvelles disponibilités sont ajoutées régulièrement.</p>
-              <Link href="/" className="da-btn da-btn-secondary da-btn-sm mt-6">
+              <Link href="/" target={embedded ? "_blank" : undefined} className="da-btn da-btn-secondary da-btn-sm mt-6">
                 Voir les autres rendez-vous
               </Link>
             </div>
@@ -639,7 +685,11 @@ export function BookingForm({ category, categorySlug, slots, helperMessage, isAu
               <>
                 {" "}
                 Un compte n&apos;est pas nécessaire, mais vous pouvez{" "}
-                <Link href="/connexion" className="font-semibold text-accent underline underline-offset-4">
+                <Link
+                  href="/connexion"
+                  target={embedded ? "_blank" : undefined}
+                  className="font-semibold text-accent underline underline-offset-4"
+                >
                   vous connecter
                 </Link>{" "}
                 pour retrouver vos rendez-vous.
