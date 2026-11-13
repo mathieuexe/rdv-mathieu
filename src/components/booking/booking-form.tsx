@@ -324,6 +324,20 @@ export function BookingForm({
 
   return (
     <div ref={topRef} className="mx-auto w-full max-w-[920px] scroll-mt-24">
+      {/* ----------------------------------------------------------- Bannière */}
+      {category.bannerImageUrl ? (
+        <div className="relative mb-6 aspect-[8/3] w-full overflow-hidden rounded-2xl border border-slate-200 bg-slate-100">
+          <Image
+            src={category.bannerImageUrl}
+            alt=""
+            fill
+            priority
+            sizes="(max-width: 920px) 100vw, 920px"
+            className="object-cover"
+          />
+        </div>
+      ) : null}
+
       {/* ------------------------------------------------------------ En-tête */}
       <header className="flex items-center gap-4">
         <span className="relative flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-accent-soft text-sm font-semibold text-accent">
